@@ -1,33 +1,20 @@
 package com.example.seerbitsdk
 
-import android.graphics.fonts.FontStyle
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.annotation.StringRes
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.Arrangement.Absolute.SpaceEvenly
-import androidx.compose.foundation.layout.Arrangement.SpaceAround
-import androidx.compose.foundation.layout.Arrangement.SpaceEvenly
 
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.modifier.modifierLocalConsumer
-import androidx.compose.ui.res.fontResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.font.FontFamily
@@ -38,8 +25,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.seerbitsdk.ui.theme.LighterGray
 import com.example.seerbitsdk.ui.theme.SeerBitTheme
-import com.example.seerbitsdk.ui.theme.Teal200
-import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 
 class SeerBitActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -163,11 +148,45 @@ fun HeaderScreen(
             )
             Spacer(modifier = Modifier.height(8.dp))
             CardDetailsScreen()
+            Spacer(modifier = modifier.height(13.dp))
 
+            Row(
+                modifier = modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                var value by remember {
+                    mutableStateOf(false)
+                }
+                Checkbox(
+                    checked = value,
+                    onCheckedChange = { newValue -> value = newValue },
+                    colors = CheckboxDefaults.colors(
+                        uncheckedColor = LighterGray,
+                        checkedColor = Color.LightGray
+                    )
+                )
+                Text(text = "Remember my information on this device")
+            }
 
+            Spacer(modifier = Modifier.height(8.dp))
+            PayButton(amount = "NGN 60,000")
+            Spacer(modifier = Modifier.height(16.dp))
+            PayViaComponent()
+            Spacer(modifier = Modifier.height(8.dp))
+
+            LazyColumn(modifier = Modifier.padding(0.dp)) {
+                items(paymentTypeData.paymentData) { item ->
+                    PaymentOptionButtons(
+                        paymentName = item.name,
+                        paymentDescription = item.Desc
+                    )
+                }
+            }
         }
 
 
+        //** this is the bottom watter mark
         Row(
             modifier
                 .align(alignment = Alignment.CenterHorizontally)
@@ -179,7 +198,7 @@ fun HeaderScreen(
     }
 }
 
-@Preview(showBackground = true, widthDp = 320, heightDp = 700)
+@Preview(showBackground = true, widthDp = 400, heightDp = 700)
 @Composable
 fun HeaderScreenPreview() {
     SeerBitTheme {
@@ -232,6 +251,7 @@ fun CardDetailsScreen(modifier: Modifier = Modifier) {
         }
         Spacer(modifier = modifier.height(16.dp))
         MMM_CVVScreen(modifier = modifier)
+
     }
 }
 
@@ -334,6 +354,7 @@ fun CardDetailsPreview() {
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun PaymentOptionButtons(
     paymentName: String,
@@ -341,14 +362,17 @@ fun PaymentOptionButtons(
     modifier: Modifier = Modifier
 ) {
     Surface(
+        onClick = {/*TODO*/},
         shape = RoundedCornerShape(8.dp),
 
         modifier = modifier
             .fillMaxWidth()
-            .height(56.dp)
-            .padding(8.dp),
-        color = LighterGray
+            .height(60.dp)
+            .padding(4.dp),
+        color = LighterGray,
+
     ) {
+
         Row(
             modifier = modifier
                 .padding(8.dp)
@@ -367,7 +391,7 @@ fun PaymentOptionButtons(
 @Composable
 fun paymentOptionsButtonPreview() {
     SeerBitTheme {
-        LazyColumn(modifier = Modifier.padding(8.dp)) {
+        LazyColumn(modifier = Modifier.padding(0.dp)) {
             items(paymentTypeData.paymentData) { item ->
                 PaymentOptionButtons(
                     paymentName = item.name,
@@ -375,5 +399,45 @@ fun paymentOptionsButtonPreview() {
                 )
             }
         }
+    }
+}
+
+@Composable
+fun PayButton(amount: String) {
+    Button(
+        onClick = { /*TODO*/ },
+        colors = ButtonDefaults.buttonColors(backgroundColor = Color.Gray),
+        shape = RoundedCornerShape(8.dp),
+        modifier = Modifier
+            .height(56.dp)
+            .fillMaxWidth()
+
+    ) {
+        Text(text = "Pay $amount")
+    }
+
+}
+
+@Composable
+fun PayViaComponent() {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
+    ) {
+        Image(painter = painterResource(id = R.drawable.horizontal_line), modifier = Modifier.weight(1f), contentDescription = null)
+        Spacer(modifier = Modifier.width(4.dp))
+        Text(text = "or pay via")
+        Spacer(modifier = Modifier.width(4.dp))
+        Image(painter = painterResource(id = R.drawable.horizontal_line),  modifier = Modifier.weight(1f), contentDescription = null)
+
+    }
+}
+
+@Preview(showBackground = true, widthDp = 320)
+@Composable
+fun payViaComponentPreview() {
+    SeerBitTheme {
+        PayViaComponent()
     }
 }
