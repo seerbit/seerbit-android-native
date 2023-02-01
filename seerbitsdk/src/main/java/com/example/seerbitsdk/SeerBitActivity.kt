@@ -397,21 +397,6 @@ fun PaymentOptionButtons(
 
 }
 
-@Preview(showBackground = true, widthDp = 320)
-@Composable
-fun paymentOptionsButtonPreview() {
-    SeerBitTheme {
-        LazyColumn(modifier = Modifier.padding(0.dp)) {
-            items(PaymentTypeData.paymentData) { item ->
-                PaymentOptionButtons(
-                    paymentName = item.name,
-                    paymentDescription = item.Desc,
-                    onCardClick = { item.name }
-                )
-            }
-        }
-    }
-}
 
 @Composable
 fun PayButton(

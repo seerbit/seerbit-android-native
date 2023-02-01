@@ -66,7 +66,10 @@ fun SeerBitNavButtonsColumn(
     currentButtonSelected: SeerBitDestination
 ) {
 
-    Surface(Modifier.fillMaxWidth().padding(8.dp)) {
+    Surface(
+        Modifier
+            .fillMaxWidth()
+            .padding(8.dp)) {
 
         Column(Modifier.selectableGroup()) {
             
@@ -98,14 +101,11 @@ fun SeerBitNavButtonsColumn(
 @Composable
 fun paymentOptionsButtonPreview() {
     SeerBitTheme {
-        LazyColumn(modifier = Modifier.padding(0.dp)) {
-            items(PaymentTypeData.paymentData) { item ->
-                com.example.seerbitsdk.PaymentOptionButtons(
-                    paymentName = item.name,
-                    paymentDescription = item.Desc,
-                    onCardClick = { item.name }
-                )
-            }
-        }
+        SeerBitNavButtons(
+            text = "Bank",
+            attachedDescription = "",
+            onSelected = { /*TODO*/ },
+            selected = true
+        )
     }
 }
