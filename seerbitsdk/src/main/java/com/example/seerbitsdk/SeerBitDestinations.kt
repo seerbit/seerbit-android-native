@@ -7,12 +7,6 @@ interface SeerBitDestination {
     val route: String
 }
 
-data class PaymentGatewayOptions(
-    val name: String,
-    val Desc: String
-)
-
-
 /**
  * SeerBit app navigation destinations
  */
@@ -33,6 +27,7 @@ object BankAccount : SeerBitDestination {
 
 
 }
+
 object Ussd : SeerBitDestination {
     override val name = "USSD"
     override val attachedDescription = "*bank ussd code#"
@@ -55,32 +50,6 @@ object Cash : SeerBitDestination {
     override val name = "Cash"
     override val attachedDescription = "Nearest Mobile Agent"
     override val route: String = "Cash"
-}
-
-object PaymentTypeData {
-
-    val paymentData: List<PaymentGatewayOptions> = listOf(
-        PaymentGatewayOptions(
-            "Bank Account",
-            ""
-        ),
-        PaymentGatewayOptions(
-            "USSD",
-            "*bank ussd code#"
-        ),
-        PaymentGatewayOptions(
-            "Transfer",
-            ""
-        ),
-        PaymentGatewayOptions(
-            "Phone Number",
-            ""
-        ),
-        PaymentGatewayOptions(
-            "Cash",
-            "Nearest Mobile Agent"
-        )
-    )
 }
 
 // Screens to be displayed in the top RallyTabRow
