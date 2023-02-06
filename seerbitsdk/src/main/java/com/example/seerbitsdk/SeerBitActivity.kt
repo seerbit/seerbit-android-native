@@ -84,7 +84,6 @@ fun SeerBitApp() {
             val currentScreen =
                 rallyTabRowScreens.find { it.route == currentDestination?.route } ?: BankAccount
             Scaffold(
-
                 bottomBar =
                 {
                     if (bottomBarState.value) {
