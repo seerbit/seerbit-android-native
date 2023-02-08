@@ -22,7 +22,6 @@ fun BankAccountNumberScreen(
     var showPinScreen by remember { mutableStateOf(false) }
     Column(modifier = modifier) {
 
-
         Column(
             modifier = modifier
                 .padding(

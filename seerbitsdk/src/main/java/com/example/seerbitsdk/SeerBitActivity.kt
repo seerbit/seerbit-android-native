@@ -15,6 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
@@ -233,12 +234,16 @@ fun CardHomeScreen(
 @Preview(showBackground = true, widthDp = 400, heightDp = 700)
 @Composable
 fun HeaderScreenPreview() {
-    SeerBitApp()
+    CardHomeScreen(
+        onNavigateToPinScreen = { /*TODO*/ },
+        currentDestination = null,
+        navController = rememberNavController()
+    )
 }
 
 @Composable
 fun CardDetailsScreen(modifier: Modifier = Modifier) {
-    Column {
+    Column(modifier = modifier) {
 
 
         Card(modifier = modifier, elevation = 4.dp) {
