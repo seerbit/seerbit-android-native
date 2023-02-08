@@ -1,8 +1,7 @@
 package com.example.seerbitsdk.component
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -13,9 +12,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.seerbitsdk.PaymentTypeData
-import com.example.seerbitsdk.SeerBitDestination
 import com.example.seerbitsdk.BottomSeerBitWaterMark
+import com.example.seerbitsdk.SeerBitDestination
 import com.example.seerbitsdk.ui.theme.LighterGray
 import com.example.seerbitsdk.ui.theme.SeerBitTheme
 
@@ -34,7 +32,6 @@ fun SeerBitNavButtons(
 
         modifier = modifier
             .fillMaxWidth()
-            .height(60.dp)
             .selectable(
                 selected = selected,
                 onClick = onSelected,
@@ -44,10 +41,10 @@ fun SeerBitNavButtons(
         color = LighterGray,
 
         ) {
-
         Row(
             modifier = modifier
                 .padding(8.dp)
+                .height(40.dp)
                 .fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically

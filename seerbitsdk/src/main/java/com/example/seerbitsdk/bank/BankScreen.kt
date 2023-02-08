@@ -21,6 +21,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
+import androidx.navigation.NavDestination
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.example.seerbitsdk.PayViaComponent
 import com.example.seerbitsdk.R
 import com.example.seerbitsdk.BottomSeerBitWaterMark
@@ -31,7 +34,9 @@ import com.example.seerbitsdk.ui.theme.SeerBitTheme
 @Composable
 fun BankScreen(
     modifier: Modifier = Modifier,
-    onNavigateToBankAccountNumberScreen : () -> Unit
+    onNavigateToBankAccountNumberScreen: () -> Unit,
+    currentDestination: NavDestination?,
+    navController: NavHostController
 ) {
     var showPinScreen by remember { mutableStateOf(false) }
     Column(modifier = modifier) {
@@ -62,8 +67,9 @@ fun BankScreen(
             Spacer(modifier = modifier.height(20.dp))
 
             Spacer(modifier = modifier.height(10.dp))
-            AuthorizeButton(buttonText = "Pay $50",
-                onClick =  onNavigateToBankAccountNumberScreen
+            AuthorizeButton(
+                buttonText = "Pay $50",
+                onClick = onNavigateToBankAccountNumberScreen
             )
             Spacer(modifier = Modifier.height(16.dp))
             PayViaComponent()
@@ -171,7 +177,11 @@ fun SelectBankButton(modifier: Modifier = Modifier) {
 @Composable
 fun SelectBankButtonPreview() {
     SeerBitTheme {
-        BankScreen(onNavigateToBankAccountNumberScreen = {})
+        BankScreen(
+            onNavigateToBankAccountNumberScreen = {},
+            currentDestination = null,
+            navController = rememberNavController()
+        )
     }
 }
 

@@ -6,14 +6,14 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -23,6 +23,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavDestination
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -35,8 +36,10 @@ import com.example.seerbitsdk.card.CardEnterPinScreen
 import com.example.seerbitsdk.card.OTPScreen
 import com.example.seerbitsdk.component.SeerBitNavButtonsColumn
 import com.example.seerbitsdk.component.SeerbitPaymentDetailScreen
+import com.example.seerbitsdk.transfer.TransferHomeScreen
 import com.example.seerbitsdk.ui.theme.LighterGray
 import com.example.seerbitsdk.ui.theme.SeerBitTheme
+import com.example.seerbitsdk.ussd.USSDHomeScreen
 
 class SeerBitActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -61,6 +64,7 @@ fun DefaultPreview() {
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun SeerBitApp() {
     SeerBitTheme {
@@ -71,33 +75,35 @@ fun SeerBitApp() {
         ) {
             val navController = rememberNavController()
             val currentBackStack by navController.currentBackStackEntryAsState()
+            val bottomBarState = remember { (mutableStateOf(true)) }
 
             //Fetch your currentDestination
             val currentDestination = currentBackStack?.destination
+
+            when (currentDestination?.route) {
+                BankAccount.route -> bottomBarState.value = false
+                "otpscreen" -> bottomBarState.value = false
+                else -> bottomBarState.value = true
+            }
             val currentScreen =
                 rallyTabRowScreens.find { it.route == currentDestination?.route } ?: BankAccount
 
-            Scaffold(
-                bottomBar =
-                {
-                    SeerBitNavButtonsColumn(
-                        allButtons = rallyTabRowScreens,
-                        onButtonSelected = { newScreen ->
-                            navController.navigateSingleTopTo(newScreen.route)
-                        },
-                        currentButtonSelected = currentScreen
-                    )
-                }
-            ) { innerPadding ->
-                MyAppNavHost(
-                    navController = navController,
-                    modifier = Modifier.padding(innerPadding)
-                )
-            }
+
+            MyAppNavHost(
+                navController = navController,
+                modifier = Modifier.padding(8.dp),
+                currentDestination = currentBackStack?.destination
+
+            )
+
 
         }
+
+
     }
+
 }
+
 
 fun NavHostController.navigateSingleTopTo(route: String) =
     this.navigate(route) {
@@ -152,10 +158,16 @@ fun SeerBitWaterMarkPreview() {
 @Composable
 fun CardHomeScreen(
     modifier: Modifier = Modifier,
-    onNavigateToPinScreen: () -> Unit
+    onNavigateToPinScreen: () -> Unit,
+    currentDestination: NavDestination?,
+    navController: NavHostController
 ) {
 
-    Column(modifier = modifier) {
+    Column(
+        modifier = modifier
+            .fillMaxHeight()
+            .verticalScroll(rememberScrollState())
+    ) {
 
         Column(
             modifier = modifier
@@ -164,8 +176,8 @@ fun CardHomeScreen(
                     end = 21.dp
                 )
                 .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
-                .weight(1f)
+
+
         ) {
             Spacer(modifier = Modifier.height(25.dp))
             SeerbitPaymentDetailScreen(
@@ -209,6 +221,14 @@ fun CardHomeScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
         }
+        Spacer(modifier = Modifier.height(8.dp))
+        SeerBitNavButtonsColumn(
+            allButtons = rallyTabRowScreens.filterNot { it.route == currentDestination?.route },
+            onButtonSelected = { newScreen ->
+                navController.navigateSingleTopTo(newScreen.route)
+            },
+            currentButtonSelected = Transfer
+        )
     }
 }
 
@@ -453,7 +473,8 @@ fun payViaComponentPreview() {
 fun MyAppNavHost(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
-    startDestination: String = Debit_CreditCard.route
+    startDestination: String = Debit_CreditCard.route,
+    currentDestination: NavDestination?
 ) {
     NavHost(
         modifier = modifier,
@@ -463,18 +484,24 @@ fun MyAppNavHost(
         composable(route = Debit_CreditCard.route) {
             CardHomeScreen(
                 onNavigateToPinScreen = { navController.navigateSingleTopTo("pinscreen") },
+                currentDestination = currentDestination,
+                navController = navController
             )
         }
         composable(route = Ussd.route) {
-            CardHomeScreen(
-                onNavigateToPinScreen = { navController.navigateSingleTopTo("pinscreen") },
+            USSDHomeScreen(
+                navigateToLoadingScreen = { navController.navigateSingleTopTo("pinscreen") },
+                currentDestination = currentDestination,
+                navController = navController
             )
         }
 
         composable(route = BankAccount.route) {
             BankScreen(
                 onNavigateToBankAccountNumberScreen = { navController.navigateSingleTopTo("pinscreen") },
-            )
+                currentDestination = currentDestination,
+                navController = navController
+                )
         }
         composable(route = "bank_account_number_screen") {
             BankAccountNumberScreen(
@@ -484,19 +511,21 @@ fun MyAppNavHost(
 
 
         composable(route = Transfer.route) {
-            BankScreen(
-                onNavigateToBankAccountNumberScreen = { navController.navigateSingleTopTo("pinscreen") },
+            TransferHomeScreen(
+                navigateToLoadingScreen = { navController.navigateSingleTopTo("pinscreen") },
+                currentDestination = currentDestination,
+                navController = navController
             )
         }
 
-        composable(route = Cash.route) {
-            BankScreen(
-                onNavigateToBankAccountNumberScreen = { navController.navigateSingleTopTo("bank_account_number_screen") },
-            )
+        composable(route = PhoneNumber.route) {
+
         }
-        composable(route = Ussd.route) {
-            CardHomeScreen(
-                onNavigateToPinScreen = { navController.navigateSingleTopTo("pinscreen") },
+        composable(route = Cash.route) {
+            USSDHomeScreen(
+                navigateToLoadingScreen = {},
+                currentDestination = currentDestination,
+                navController = navController
             )
         }
 
