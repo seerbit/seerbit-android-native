@@ -1,5 +1,9 @@
 package com.example.seerbitsdk.authentication
 
+import android.content.Intent
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.relocation.BringIntoViewRequester
@@ -18,145 +22,201 @@ import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
 import androidx.constraintlayout.compose.ChainStyle
-
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import com.example.seerbitsdk.CardDetailsScreen
-import com.example.seerbitsdk.MMM_CVVScreen
+import androidx.navigation.NavDestination
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.example.seerbitsdk.R
-import com.example.seerbitsdk.bank.BankAccountNumberScreen
+import com.example.seerbitsdk.SeerBitActivity
 import com.example.seerbitsdk.ui.theme.LighterGray
 import com.example.seerbitsdk.ui.theme.SeerBitTheme
 import kotlinx.coroutines.launch
 
 
+
+
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun OnBoardingScreen() {
+fun OnBoardingScreen(
+    modifier: Modifier = Modifier,
+    onNavigateToCardHomeScreen: () -> Unit,
+) {
+    val bringIntoViewRequester = remember { BringIntoViewRequester() }
 
-    ConstraintLayout(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(8.dp)
-            .verticalScroll(rememberScrollState()),
+    Column(
+        modifier = modifier
+            .fillMaxHeight()
+            .verticalScroll(rememberScrollState())
+            .bringIntoViewRequester(bringIntoViewRequester)
     ) {
-        val rightGuideline = createGuidelineFromStart(0.05f)
-        val leftGuideline = createGuidelineFromEnd(0.05f)
-        val (seerbitIcon, seerbitDescriptionText, firstName, lastName, firstNameTextField, lastNameTextField, email, emailTextField, phoneNumber, phoneNumberTextField,
-            amountToCharge, amountToChargeTextField, currencyDropDown, continueToPaymentButton) = createRefs()
 
-        Image(
-            painter = painterResource(id = R.drawable.seerbit_logo),
-            contentDescription = null,
-            modifier = Modifier
-                .size(48.dp)
+        ConstraintLayout(
+            modifier = modifier
+                .fillMaxSize()
                 .padding(8.dp)
-                .constrainAs(seerbitIcon) {
+                .fillMaxHeight()
+                .bringIntoViewRequester(bringIntoViewRequester)
+        ) {
+            val rightGuideline = createGuidelineFromStart(0.05f)
+            val leftGuideline = createGuidelineFromEnd(0.05f)
+            val (seerbitIcon, seerbitDescriptionText, firstName, lastName, firstNameTextField, lastNameTextField, email, emailTextField, phoneNumber, phoneNumberTextField,
+                amountToCharge, amountToChargeTextField, currencyDropDown, continueToPaymentButton) = createRefs()
+
+            Image(
+                painter = painterResource(id = R.drawable.seerbit_logo),
+                contentDescription = null,
+                modifier = modifier
+                    .size(48.dp)
+                    .padding(8.dp)
+                    .constrainAs(seerbitIcon) {
+                        start.linkTo(parent.start, 16.dp)
+                        end.linkTo(parent.end, 16.dp)
+                        top.linkTo(parent.top, 60.dp)
+                    }
+            )
+
+            Text(
+                text = "Centric Gateway ltd Payment Page",
+                modifier = modifier.constrainAs(seerbitDescriptionText) {
                     start.linkTo(parent.start, 16.dp)
                     end.linkTo(parent.end, 16.dp)
-                    top.linkTo(parent.top, 60.dp)
-                }
-        )
+                    top.linkTo(seerbitIcon.bottom, 16.dp)
+                },
+                style = TextStyle(
+                    fontSize = 14.sp,
+                    fontFamily = FontFamily.SansSerif,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.LightGray
+                ),
+            )
 
-        Text(
-            text = "Centric Gateway ltd Payment Page",
-            modifier = Modifier.constrainAs(seerbitDescriptionText) {
-                start.linkTo(parent.start, 16.dp)
-                end.linkTo(parent.end, 16.dp)
-                top.linkTo(seerbitIcon.bottom, 16.dp)
-            },
-            style = TextStyle(
-                fontSize = 14.sp,
-                fontFamily = FontFamily.SansSerif,
-                fontWeight = FontWeight.Bold,
-                color = Color.LightGray
-            ),
-        )
+            createHorizontalChain(
+                firstNameTextField,
+                lastNameTextField,
+                chainStyle = ChainStyle.SpreadInside
+            )
+            OutlinedTextField(
+                modifier =
+                modifier
+                    .padding(start = 4.dp, end = 4.dp)
+                    .constrainAs(
+                        firstNameTextField
+                    ) {
+                        start.linkTo(rightGuideline, 16.dp)
+                        end.linkTo(leftGuideline, 16.dp)
+                        top.linkTo(seerbitDescriptionText.bottom, 32.dp)
+                        width = Dimension.fillToConstraints
+                    }, "First Name", KeyboardType.Text, true
+            )
 
-        createHorizontalChain(
-            firstNameTextField,
-            lastNameTextField,
-            chainStyle = ChainStyle.SpreadInside
-        )
-        OutlinedTextField(
-            modifier =
-            Modifier
-                .padding(start = 4.dp, end = 4.dp)
-                .constrainAs(
-                    firstNameTextField
-                ) {
+            OutlinedTextField(
+                modifier =
+                modifier
+                    .padding(end = 4.dp)
+                    .constrainAs(
+                        lastNameTextField
+                    ) {
+                        start.linkTo(parent.start, 8.dp)
+                        end.linkTo(parent.end, 8.dp)
+                        top.linkTo(seerbitDescriptionText.bottom, 32.dp)
+                        width = Dimension.fillToConstraints
+                    }, "Last Name", KeyboardType.Text, true
+            )
+
+            OutlinedTextField(
+                modifier =
+                modifier
+                    .fillMaxWidth()
+                    .padding(end = 0.dp)
+                    .constrainAs(
+                        emailTextField
+                    ) {
+                        start.linkTo(parent.start, 8.dp)
+                        end.linkTo(parent.end, 8.dp)
+                        top.linkTo(firstNameTextField.bottom, 16.dp)
+                        width = Dimension.matchParent
+                    }, "Email", KeyboardType.Email, true
+            )
+
+            OutlinedTextField(
+                modifier =
+                modifier
+                    .fillMaxWidth()
+                    .padding(0.dp)
+                    .constrainAs(
+                        phoneNumberTextField
+                    ) {
+                        start.linkTo(parent.start, 8.dp)
+                        end.linkTo(parent.end, 8.dp)
+                        top.linkTo(emailTextField.bottom, 16.dp)
+                        width = Dimension.matchParent
+                    }, "Phone Number", KeyboardType.Phone, true
+            )
+
+            createHorizontalChain(
+                currencyDropDown, amountToChargeTextField,
+                chainStyle = ChainStyle.SpreadInside
+            )
+
+            SelectCurrencyButton(modifier =
+            modifier
+                .width(120.dp)
+                .padding(start = 8.dp, end = 4.dp)
+                .constrainAs(currencyDropDown) {
                     start.linkTo(rightGuideline, 16.dp)
-                    end.linkTo(leftGuideline, 16.dp)
-                    top.linkTo(seerbitDescriptionText.bottom, 32.dp)
-                    width = Dimension.fillToConstraints
-                }, "First Name", KeyboardType.Text
-        )
+                    end.linkTo(amountToChargeTextField.start)
+                    top.linkTo(phoneNumberTextField.bottom, 32.dp)
+                })
 
-        OutlinedTextField(
-            modifier =
-            Modifier
-                .padding(end = 4.dp)
-                .constrainAs(
-                    lastNameTextField
-                ) {
-                    start.linkTo(parent.start, 8.dp)
-                    end.linkTo(parent.end, 8.dp)
-                    top.linkTo(seerbitDescriptionText.bottom, 32.dp)
-                    width = Dimension.fillToConstraints
-                }, "Last Name", KeyboardType.Text
-        )
+            OutlinedTextField(
+                modifier =
+                modifier
+                    .padding(end = 4.dp)
+                    .constrainAs(
+                        amountToChargeTextField
+                    ) {
+                        start.linkTo(currencyDropDown.end, 8.dp)
+                        end.linkTo(parent.end, 0.dp)
+                        top.linkTo(currencyDropDown.top)
+                        bottom.linkTo(currencyDropDown.bottom)
+                        width = Dimension.fillToConstraints
+                    }, "Phone Number", KeyboardType.Phone, false
+            )
 
-        OutlinedTextField(
-            modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(end = 0.dp)
-                .constrainAs(
-                    emailTextField
-                ) {
-                    start.linkTo(parent.start, 8.dp)
-                    end.linkTo(parent.end, 8.dp)
-                    top.linkTo(firstNameTextField.bottom, 16.dp)
-                    width = Dimension.matchParent
-                }, "Email", KeyboardType.Email
-        )
+            Button(
+                onClick = onNavigateToCardHomeScreen,
+                colors = ButtonDefaults.buttonColors(backgroundColor = Color.Black),
+                shape = RoundedCornerShape(8.dp),
+                modifier = modifier
+                    .width(200.dp)
+                    .height(56.dp)
+                    .constrainAs(continueToPaymentButton) {
+                        start.linkTo(parent.start, 16.dp)
+                        end.linkTo(parent.end, 16.dp)
+                        top.linkTo(currencyDropDown.bottom, 32.dp)
+                    }
+            )
+            {
+                Text(text = "Continue to Payment", color = Color.White)
 
-        OutlinedTextField(
-            modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(0.dp)
-                .constrainAs(
-                    phoneNumberTextField
-                ) {
-                    start.linkTo(parent.start, 8.dp)
-                    end.linkTo(parent.end, 8.dp)
-                    top.linkTo(emailTextField.bottom, 16.dp)
-                    width = Dimension.matchParent
-                }, "Phone Number", KeyboardType.Phone
-        )
+            }
 
-        SelectCurrencyButton(modifier =
-        Modifier.width(100.dp).constrainAs(currencyDropDown){
-            start.linkTo(parent.start, 8.dp)
-            top.linkTo(phoneNumberTextField.bottom, 16.dp)
-            width = Dimension.wrapContent
-        })
+        }
     }
-
 }
 
 
@@ -164,23 +224,26 @@ fun OnBoardingScreen() {
 @Composable
 fun OutlinedTextField(
     modifier: Modifier = Modifier, headerText: String,
-    keyboardType: KeyboardType
+    keyboardType: KeyboardType, showHeaderText: Boolean
 ) {
     Column(modifier = modifier) {
         val keyboardController = LocalSoftwareKeyboardController.current
         val bringIntoViewRequester = remember { BringIntoViewRequester() }
         val coroutineScope = rememberCoroutineScope()
 
-        Text(
-            text = headerText,
-            style = TextStyle(
-                fontSize = 14.sp,
-                fontFamily = FontFamily.SansSerif,
-                fontWeight = FontWeight.Normal
+        if (showHeaderText) {
+            Text(
+                text = headerText,
+                style = TextStyle(
+                    fontSize = 14.sp,
+                    fontFamily = FontFamily.SansSerif,
+                    fontWeight = FontWeight.Normal
+                )
             )
-        )
+            Spacer(modifier = Modifier.height(8.dp))
+        }
 
-        Spacer(modifier = Modifier.height(8.dp))
+
 
         Card(
             modifier = modifier
@@ -250,7 +313,6 @@ fun SelectCurrencyButton(modifier: Modifier = Modifier) {
 
     Column(modifier = modifier) {
         Card(
-            modifier = modifier,
             elevation = 4.dp,
             backgroundColor = LighterGray,
             shape = RoundedCornerShape(8.dp)
@@ -261,6 +323,7 @@ fun SelectCurrencyButton(modifier: Modifier = Modifier) {
                 onValueChange = { selectedText = it },
 
                 colors = TextFieldDefaults.textFieldColors(
+                    backgroundColor = LighterGray,
                     disabledIndicatorColor = Color.Transparent,
                     disabledLabelColor = Color.Transparent,
                     focusedIndicatorColor = Color.Transparent,
@@ -276,7 +339,7 @@ fun SelectCurrencyButton(modifier: Modifier = Modifier) {
                         color = Color.Black
                     )
                 },
-                modifier = modifier
+                modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp)
                     .onGloballyPositioned { layoutCoordinates ->
@@ -320,7 +383,13 @@ fun SelectCurrencyButton(modifier: Modifier = Modifier) {
 @Composable
 fun OnBoardingScreenPreview() {
     SeerBitTheme {
-        OnBoardingScreen()
+        OnBoardingScreen(
+            Modifier,
+            onNavigateToCardHomeScreen = {
+
+            }
+
+        )
     }
 }
 
@@ -328,6 +397,6 @@ fun OnBoardingScreenPreview() {
 @Composable
 fun OutlinedTextfieldPreview() {
     SeerBitTheme {
-        OutlinedTextField(Modifier, "First Name", KeyboardType.Text)
+        OutlinedTextField(Modifier, "First Name", KeyboardType.Text, true)
     }
 }

@@ -3,6 +3,7 @@ package com.example.seerbitsdk
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -29,6 +30,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.seerbitsdk.authentication.OnBoardingScreen
 import com.example.seerbitsdk.bank.BankAccountNumberScreen
 import com.example.seerbitsdk.bank.BankScreen
 import com.example.seerbitsdk.card.CardEnterPinScreen
@@ -87,15 +89,11 @@ fun SeerBitApp() {
             val currentScreen =
                 rallyTabRowScreens.find { it.route == currentDestination?.route } ?: BankAccount
 
-
             MyAppNavHost(
                 navController = navController,
                 modifier = Modifier.padding(8.dp),
                 currentDestination = currentBackStack?.destination
-
             )
-
-
         }
 
 
@@ -234,11 +232,7 @@ fun CardHomeScreen(
 @Preview(showBackground = true, widthDp = 400, heightDp = 700)
 @Composable
 fun HeaderScreenPreview() {
-    CardHomeScreen(
-        onNavigateToPinScreen = { /*TODO*/ },
-        currentDestination = null,
-        navController = rememberNavController()
-    )
+    SeerBitApp()
 }
 
 @Composable
@@ -476,7 +470,7 @@ fun payViaComponentPreview() {
 fun MyAppNavHost(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
-    startDestination: String = Debit_CreditCard.route,
+    startDestination: String = "OnBoardingScreen",
     currentDestination: NavDestination?
 ) {
     NavHost(
@@ -484,6 +478,13 @@ fun MyAppNavHost(
         navController = navController,
         startDestination = startDestination
     ) {
+
+        composable("OnBoardingScreen") {
+            OnBoardingScreen(
+                onNavigateToCardHomeScreen = { navController.navigateSingleTopTo(Debit_CreditCard.route) }
+            )
+        }
+
         composable(route = Debit_CreditCard.route) {
             CardHomeScreen(
                 onNavigateToPinScreen = { navController.navigateSingleTopTo("pinscreen") },
@@ -504,7 +505,7 @@ fun MyAppNavHost(
                 onNavigateToBankAccountNumberScreen = { navController.navigateSingleTopTo("pinscreen") },
                 currentDestination = currentDestination,
                 navController = navController
-                )
+            )
         }
         composable(route = "bank_account_number_screen") {
             BankAccountNumberScreen(
