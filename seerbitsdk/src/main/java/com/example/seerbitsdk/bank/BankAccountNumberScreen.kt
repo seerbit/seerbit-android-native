@@ -6,10 +6,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.seerbitsdk.PayViaComponent
-import com.example.seerbitsdk.BottomSeerBitWaterMark
+
 import com.example.seerbitsdk.card.AuthorizeButton
 import com.example.seerbitsdk.card.OTPInputField
+import com.example.seerbitsdk.component.OtherPaymentButtonComponent
+import com.example.seerbitsdk.component.PayViaComponent
 import com.example.seerbitsdk.component.SeerbitPaymentDetailScreen
 import com.example.seerbitsdk.ui.theme.SeerBitTheme
 
@@ -42,7 +43,7 @@ fun BankAccountNumberScreen(
 
             Spacer(modifier = Modifier.height(21.dp))
 
-            OTPInputField(Modifier,"10 Digit Bank Account Number")
+            OTPInputField(Modifier, "10 Digit Bank Account Number")
             Spacer(modifier = modifier.height(20.dp))
 
             Spacer(modifier = modifier.height(10.dp))
@@ -50,8 +51,11 @@ fun BankAccountNumberScreen(
                 onClick = { showPinScreen = true }
             )
             Spacer(modifier = Modifier.height(16.dp))
-            PayViaComponent()
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(60.dp))
+
+            OtherPaymentButtonComponent(
+                onOtherPaymentButtonClicked = { /*TODO*/ },
+                onCancelButtonClicked = {})
 
         }
 

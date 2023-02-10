@@ -9,7 +9,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -24,10 +23,10 @@ import androidx.compose.ui.unit.toSize
 import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.seerbitsdk.PayViaComponent
+import com.example.seerbitsdk.component.PayViaComponent
 import com.example.seerbitsdk.R
-import com.example.seerbitsdk.BottomSeerBitWaterMark
 import com.example.seerbitsdk.card.AuthorizeButton
+import com.example.seerbitsdk.component.OtherPaymentButtonComponent
 import com.example.seerbitsdk.component.SeerbitPaymentDetailScreen
 import com.example.seerbitsdk.ui.theme.SeerBitTheme
 
@@ -72,8 +71,12 @@ fun BankScreen(
                 onClick = onNavigateToBankAccountNumberScreen
             )
             Spacer(modifier = Modifier.height(16.dp))
-            PayViaComponent()
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(60.dp))
+
+            OtherPaymentButtonComponent(
+                onOtherPaymentButtonClicked = { /*TODO*/ },
+                onCancelButtonClicked = {})
+
         }
     }
 }

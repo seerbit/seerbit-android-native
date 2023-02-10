@@ -21,6 +21,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.seerbitsdk.*
+import com.example.seerbitsdk.component.OtherPaymentButtonComponent
+import com.example.seerbitsdk.component.PayViaComponent
 import com.example.seerbitsdk.component.SeerbitPaymentDetailScreen
 import com.example.seerbitsdk.ui.theme.SeerBitTheme
 
@@ -30,7 +32,7 @@ fun CardEnterPinScreen(
     modifier: Modifier = Modifier,
     onNavigateToOtpScreen: () -> Unit
 
-    ) {
+) {
     var showPinScreen by remember { mutableStateOf(false) }
     Column(modifier = modifier) {
 
@@ -66,12 +68,16 @@ fun CardEnterPinScreen(
             Spacer(modifier = Modifier.height(20.dp))
             PinInputField(onNavigateToOtpScreen = onNavigateToOtpScreen)
             Spacer(modifier = modifier.height(20.dp))
-            PayButton(amount = "NGN 60,000",
-                onClick =   onNavigateToOtpScreen
+            PayButton(
+                amount = "NGN 60,000",
+                onClick = onNavigateToOtpScreen
             )
             Spacer(modifier = Modifier.height(16.dp))
-            PayViaComponent()
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(60.dp))
+
+            OtherPaymentButtonComponent(
+                onOtherPaymentButtonClicked = { /*TODO*/ },
+                onCancelButtonClicked = {})
 
         }
 
@@ -98,21 +104,25 @@ fun PinFieldComponentPreview() {
 }
 
 @Composable
-fun PinInputField(modifier: Modifier = Modifier,
-                onNavigateToOtpScreen: () -> Unit
-                  ) {
+fun PinInputField(
+    modifier: Modifier = Modifier,
+    onNavigateToOtpScreen: () -> Unit
+) {
     var pinText by remember { mutableStateOf("") }
 
 
     Column {
-        Surface(modifier = modifier.background(Color.Transparent).fillMaxWidth().padding(0.dp)) {
+        Surface(modifier = modifier
+            .background(Color.Transparent)
+            .fillMaxWidth()
+            .padding(0.dp)) {
 
             BasicTextField(
                 value = pinText,
                 onValueChange = {
                     if (it.length <= 4)
                         pinText = it
-                    if(it.length == 4){
+                    if (it.length == 4) {
                         run { onNavigateToOtpScreen }
                     }
 
@@ -126,7 +136,8 @@ fun PinInputField(modifier: Modifier = Modifier,
                     Row(
                         horizontalArrangement = Arrangement.SpaceEvenly,
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth()) {
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
                         repeat(4) { index ->
                             val char = when {
                                 index >= pinText.length -> ""

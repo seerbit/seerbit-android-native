@@ -24,6 +24,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.seerbitsdk.*
 import com.example.seerbitsdk.R
+import com.example.seerbitsdk.component.OtherPaymentButtonComponent
+import com.example.seerbitsdk.component.PayViaComponent
 import com.example.seerbitsdk.component.SeerbitPaymentDetailScreen
 import com.example.seerbitsdk.ui.theme.SeerBitTheme
 
@@ -83,8 +85,11 @@ fun OTPScreen(
                 onClick = { showPinScreen = true }
             )
             Spacer(modifier = Modifier.height(16.dp))
-            PayViaComponent()
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(60.dp))
+
+            OtherPaymentButtonComponent(
+                onOtherPaymentButtonClicked = { /*TODO*/ },
+                onCancelButtonClicked = {})
 
         }
 

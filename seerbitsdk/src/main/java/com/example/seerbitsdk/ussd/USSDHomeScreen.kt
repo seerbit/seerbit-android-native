@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.seerbitsdk.PayViaComponent
+import com.example.seerbitsdk.component.PayViaComponent
 import com.example.seerbitsdk.Transfer
 import com.example.seerbitsdk.card.AuthorizeButton
 import com.example.seerbitsdk.component.CustomLinearProgressBar

@@ -1,5 +1,6 @@
 package com.example.seerbitsdk.transfer
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -9,22 +10,17 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavDestination
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
-import com.example.seerbitsdk.PayViaComponent
-import com.example.seerbitsdk.Transfer
+import com.example.seerbitsdk.R
 import com.example.seerbitsdk.card.AuthorizeButton
-import com.example.seerbitsdk.component.SeerBitNavButtonsColumn
-import com.example.seerbitsdk.component.SeerbitPaymentDetailScreen
-import com.example.seerbitsdk.navigateSingleTopTo
-import com.example.seerbitsdk.rallyTabRowScreens
+import com.example.seerbitsdk.component.OtherPaymentButtonComponent
+import com.example.seerbitsdk.ui.theme.DeepRed
+import com.example.seerbitsdk.ui.theme.Faktpro
 import com.example.seerbitsdk.ui.theme.LighterGray
 import com.example.seerbitsdk.ui.theme.SeerBitTheme
 import com.example.seerbitsdk.ussd.USSDCodeSurfaceView
@@ -34,8 +30,8 @@ import com.example.seerbitsdk.ussd.USSDCodeSurfaceView
 fun TransferHomeScreen(
     modifier: Modifier = Modifier,
     navigateToLoadingScreen: () -> Unit,
-    currentDestination: NavDestination?,
-    navController: NavHostController
+    onOtherPaymentButtonClicked: () -> Unit,
+    onCancelPaymentButtonClicked: () -> Unit
 
 ) {
     var showLoadingScreen by remember { mutableStateOf(false) }
@@ -55,20 +51,22 @@ fun TransferHomeScreen(
                 .fillMaxWidth()
         ) {
             Spacer(modifier = Modifier.height(21.dp))
-            SeerbitPaymentDetailScreen(
-                charges = 0.0,
-                amount = "",
-                currencyText = "",
-                ""
+
+            Image(
+                painter = painterResource(id = R.drawable.seerbit_logo),
+                contentDescription = null,
+                modifier = Modifier.size(40.dp)
             )
+            Spacer(modifier = Modifier.height(25.dp))
 
             Text(
-                text = "Transfer",
+                text = "Transfer the exact amount including decimals",
                 style = TextStyle(
-                    fontSize = 14.sp,
-                    fontFamily = FontFamily.SansSerif,
+                    fontSize = 16.sp,
+                    fontFamily = Faktpro,
                     fontWeight = FontWeight.Normal,
-                    lineHeight = 10.sp
+                    lineHeight = 10.sp,
+                    color = DeepRed
                 ),
                 modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
             )
@@ -77,10 +75,10 @@ fun TransferHomeScreen(
             USSDCodeSurfaceView(ussdCodeText = "NGN 789,899.34")
             Spacer(modifier = modifier.height(20.dp))
             Text(
-                text = "To the account details below",
+                text = "To",
                 style = TextStyle(
                     fontSize = 14.sp,
-                    fontFamily = FontFamily.SansSerif,
+                    fontFamily = Faktpro,
                     fontWeight = FontWeight.Normal,
                     lineHeight = 10.sp
                 ),
@@ -91,26 +89,32 @@ fun TransferHomeScreen(
                 AccountDetailsSurfaceView()
             }
 
-
-            Spacer(modifier = modifier.height(20.dp))
-            AuthorizeButton(
-                buttonText = "Confirm Payment",
-                onClick = { showLoadingScreen = true }
+            Text(
+                text = "Account number can only be used once",
+                style = TextStyle(
+                    fontSize = 16.sp,
+                    fontFamily = Faktpro,
+                    fontWeight = FontWeight.Normal,
+                    lineHeight = 10.sp,
+                    color = DeepRed
+                ),
+                modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
             )
-            Spacer(modifier = Modifier.height(16.dp))
+
+
+            Spacer(modifier = modifier.height(25.dp))
+            AuthorizeButton(
+                buttonText = "I have completed this bank transfer",
+                onClick = navigateToLoadingScreen
+            )
+            Spacer(modifier = Modifier.height(72.dp))
+
+            OtherPaymentButtonComponent(
+                onOtherPaymentButtonClicked = onOtherPaymentButtonClicked,
+                onCancelButtonClicked = onCancelPaymentButtonClicked
+            )
         }
 
-
-        PayViaComponent()
-        Spacer(modifier = Modifier.height(8.dp))
-        Spacer(modifier = Modifier.height(8.dp))
-        SeerBitNavButtonsColumn(
-            allButtons = rallyTabRowScreens.filterNot { it.route == currentDestination?.route },
-            onButtonSelected = { newScreen ->
-                navController.navigateSingleTopTo(newScreen.route)
-            },
-            currentButtonSelected = Transfer
-        )
 
     }
 
@@ -121,10 +125,10 @@ fun TransferHomeScreen(
 fun TransferHomeScreenPreview() {
     SeerBitTheme {
         TransferHomeScreen(
-            navigateToLoadingScreen = {},
-            currentDestination = null,
-            navController = rememberNavController()
-        )
+            navigateToLoadingScreen = { /*TODO*/ },
+            onOtherPaymentButtonClicked = { /*TODO*/ }) {
+
+        }
     }
 }
 
@@ -147,7 +151,7 @@ fun AccountDetailsSurfaceView() {
             CustomAccountDetailsRow(
                 leftHandText = "Account Number",
                 rightHandText = "0228290130",
-                icon = null
+                icon = R.drawable.ic_copy
             )
             CustomAccountDetailsRow(
                 leftHandText = "Bank",
@@ -157,6 +161,11 @@ fun AccountDetailsSurfaceView() {
             CustomAccountDetailsRow(
                 leftHandText = "Beneficiary Name",
                 rightHandText = "Seerbit(Empire)",
+                icon = null
+            )
+            CustomAccountDetailsRow(
+                leftHandText = "Validity",
+                rightHandText = "30 Minutes",
                 icon = null
             )
 
@@ -175,10 +184,16 @@ fun CustomAccountDetailsRow(leftHandText: String, rightHandText: String, icon: I
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(text = leftHandText)
-        Row() {
-
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(text = rightHandText)
+            Spacer(modifier = Modifier.width(4.dp))
+            if (icon != null) {
+                Image(
+                    painter = painterResource(id = icon),
+                    contentDescription = null
+                )
+            }
         }
-        Text(text = rightHandText)
     }
 
 }

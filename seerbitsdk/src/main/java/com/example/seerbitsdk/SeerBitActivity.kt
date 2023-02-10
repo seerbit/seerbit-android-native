@@ -4,22 +4,22 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.*
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.OffsetMapping
+import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -30,16 +30,14 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.seerbitsdk.authentication.OnBoardingScreen
 import com.example.seerbitsdk.bank.BankAccountNumberScreen
 import com.example.seerbitsdk.bank.BankScreen
 import com.example.seerbitsdk.card.CardEnterPinScreen
 import com.example.seerbitsdk.card.OTPScreen
-import com.example.seerbitsdk.component.SeerBitNavButtonsColumn
-import com.example.seerbitsdk.component.SeerbitPaymentDetailScreen
+import com.example.seerbitsdk.component.*
+import com.example.seerbitsdk.navigationpage.OtherPaymentScreen
 import com.example.seerbitsdk.transfer.TransferHomeScreen
-import com.example.seerbitsdk.ui.theme.LighterGray
-import com.example.seerbitsdk.ui.theme.SeerBitTheme
+import com.example.seerbitsdk.ui.theme.*
 import com.example.seerbitsdk.ussd.USSDHomeScreen
 
 class SeerBitActivity : ComponentActivity() {
@@ -71,7 +69,9 @@ fun SeerBitApp() {
     SeerBitTheme {
         // A surface container using the 'background' color from the theme
         Surface(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(end = 8.dp),
             color = MaterialTheme.colors.background
         ) {
             val navController = rememberNavController()
@@ -121,29 +121,6 @@ fun NavHostController.navigateSingleTopNoPopUpToHome(route: String) =
     }
 
 
-@Composable
-fun BottomSeerBitWaterMark(modifier: Modifier = Modifier) {
-    Row(
-        modifier = modifier
-            .width(114.dp)
-            .padding(4.dp),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
-
-    ) {
-        Image(
-            painter = painterResource(id = R.drawable.ic_lock),
-            contentDescription = "lock icon"
-        )
-        Spacer(modifier = Modifier.width(4.dp))
-        Image(
-            painter = painterResource(id = R.drawable.secured_by_seerbit),
-            contentDescription = "secured by seerbit"
-        )
-
-    }
-}
-
 @Preview(showBackground = true)
 @Composable
 fun SeerBitWaterMarkPreview() {
@@ -156,6 +133,7 @@ fun SeerBitWaterMarkPreview() {
 fun CardHomeScreen(
     modifier: Modifier = Modifier,
     onNavigateToPinScreen: () -> Unit,
+    onOtherPaymentButtonClicked: () -> Unit,
     currentDestination: NavDestination?,
     navController: NavHostController
 ) {
@@ -186,46 +164,66 @@ fun CardHomeScreen(
             Spacer(modifier = Modifier.height(8.dp))
             CardDetailsScreen()
 
-            Spacer(modifier = modifier.height(13.dp))
-
-            Row(
-                modifier = modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                var value by remember {
-                    mutableStateOf(false)
-                }
-                Checkbox(
-                    checked = value,
-                    onCheckedChange = { newValue -> value = newValue },
-                    colors = CheckboxDefaults.colors(
-                        uncheckedColor = LighterGray,
-                        checkedColor = Color.LightGray
-                    )
-                )
-                Text(text = "Remember my information on this device")
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             PayButton(
                 amount = "NGN 60,000",
                 onClick = onNavigateToPinScreen
             )
-            Spacer(modifier = Modifier.height(16.dp))
-            PayViaComponent()
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(100.dp))
+
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Button(
+                    onClick = onOtherPaymentButtonClicked,
+                    colors = ButtonDefaults.buttonColors(backgroundColor = LighterGray),
+                    shape = RoundedCornerShape(4.dp),
+
+                    modifier = Modifier
+                        .height(50.dp)
+                        .weight(1f)
+                        .padding(end = 8.dp)
+
+                ) {
+                    Text(
+                        text = "Change Payment Method",
+                        style = TextStyle(
+                            fontSize = 14.sp,
+                            fontFamily = Faktpro,
+                            fontWeight = FontWeight.Normal,
+                            lineHeight = 10.sp
+                        )
+                    )
+                }
+
+                Button(
+                    onClick = {},
+                    colors = ButtonDefaults.buttonColors(backgroundColor = SignalRed),
+                    shape = RoundedCornerShape(4.dp),
+                    modifier = Modifier
+                        .height(50.dp)
+                        .weight(1f)
+
+                ) {
+                    Text(
+                        text = "Cancel Payment",
+
+                        style = TextStyle(
+                            fontSize = 14.sp,
+                            fontFamily = Faktpro,
+                            fontWeight = FontWeight.Normal,
+                            lineHeight = 10.sp,
+                            color = DeepRed,
+                        ),
+                        modifier = Modifier.align(alignment = Alignment.CenterVertically)
+                    )
+                }
+
+            }
+
 
         }
         Spacer(modifier = Modifier.height(8.dp))
-        SeerBitNavButtonsColumn(
-            allButtons = rallyTabRowScreens.filterNot { it.route == currentDestination?.route },
-            onButtonSelected = { newScreen ->
-                navController.navigateSingleTopTo(newScreen.route)
-            },
-            currentButtonSelected = Transfer
-        )
+
     }
 }
 
@@ -248,7 +246,8 @@ fun CardDetailsScreen(modifier: Modifier = Modifier) {
             )
             OutlinedTextField(
                 value = value,
-                onValueChange = { newText -> value = newText },
+                visualTransformation = { cardNumberFormatting(it) },
+                onValueChange = { newText -> if (newText.length <= 16) value = newText },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
 
                 colors = TextFieldDefaults.textFieldColors(
@@ -265,7 +264,7 @@ fun CardDetailsScreen(modifier: Modifier = Modifier) {
                     Text(
                         text = "Card Number",
                         style = TextStyle(fontSize = 14.sp),
-                        color = Color.LightGray
+                        color = Color.Black
                     )
                 },
                 modifier = modifier
@@ -292,7 +291,10 @@ fun MMM_CVVScreen(modifier: Modifier) {
             )
             OutlinedTextField(
                 value = value,
-                onValueChange = { newText -> value = newText },
+                visualTransformation = { cardExpiryDateFilter(it) },
+                onValueChange = { newText ->
+                    if (newText.length <= 4) value = newText
+                },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 colors = TextFieldDefaults.textFieldColors(
                     backgroundColor = MaterialTheme.colors.surface,
@@ -308,7 +310,7 @@ fun MMM_CVVScreen(modifier: Modifier) {
                     Text(
                         text = "MM/YY",
                         style = TextStyle(fontSize = 14.sp),
-                        color = Color.LightGray
+                        color = Color.Black
                     )
                 },
                 modifier = modifier
@@ -329,13 +331,7 @@ fun MMM_CVVScreen(modifier: Modifier) {
             )
             OutlinedTextField(
                 value = value,
-                onValueChange = { newText -> value = newText },
-                trailingIcon = {
-                    Image(
-                        painter = painterResource(id = R.drawable.cvv_card),
-                        contentDescription = null
-                    )
-                },
+                onValueChange = { newText -> if (newText.length <= 4) value = newText },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 colors = TextFieldDefaults.textFieldColors(
                     backgroundColor = MaterialTheme.colors.surface,
@@ -351,7 +347,7 @@ fun MMM_CVVScreen(modifier: Modifier) {
                     Text(
                         text = "CVV",
                         style = TextStyle(fontSize = 14.sp),
-                        color = Color.LightGray
+                        color = Color.Black
                     )
                 },
                 modifier = modifier
@@ -362,6 +358,72 @@ fun MMM_CVVScreen(modifier: Modifier) {
 
     }
 }
+
+fun cardExpiryDateFilter(text: AnnotatedString): TransformedText {
+
+    // change the length
+    val annotatedString = AnnotatedString.Builder().run {
+        for (i in text.indices) {
+            append(text[i])
+            if (i == 1) {
+                append("/")
+            }
+        }
+        toAnnotatedString()
+    }
+
+
+    val phoneNumberOffsetTranslator = object : OffsetMapping {
+        override fun originalToTransformed(offset: Int): Int {
+            if (offset <= 1) return offset
+            if (offset <= 3) return offset + 1
+            return 5
+        }
+
+        override fun transformedToOriginal(offset: Int): Int {
+            if (offset <= 1) return offset
+            if (offset <= 3) return offset - 1
+            return 5
+        }
+    }
+    return TransformedText(annotatedString, phoneNumberOffsetTranslator)
+}
+
+
+fun cardNumberFormatting(text: AnnotatedString): TransformedText {
+
+    // change the length
+    val annotatedString = AnnotatedString.Builder().run {
+        for (i in text.indices) {
+            append(text[i])
+            if (i == 3 || i == 7 || i == 11) {
+                append(" ")
+            }
+        }
+        toAnnotatedString()
+    }
+
+
+    val phoneNumberOffsetTranslator = object : OffsetMapping {
+        override fun originalToTransformed(offset: Int): Int {
+            if (offset <= 3) return offset
+            if (offset <= 7) return offset + 1
+            if (offset <= 11) return offset + 2
+            if (offset <= 15) return offset + 3
+            return 19
+        }
+
+        override fun transformedToOriginal(offset: Int): Int {
+            if (offset <= 3) return offset
+            if (offset <= 7) return offset - 1
+            if (offset <= 11) return offset - 2
+            if (offset <= 15) return offset - 3
+            return 19
+        }
+    }
+    return TransformedText(annotatedString, phoneNumberOffsetTranslator)
+}
+
 
 @Preview(showBackground = true, widthDp = 518)
 @Composable
@@ -429,34 +491,19 @@ fun PayButton(
             .fillMaxWidth()
 
     ) {
-        Text(text = "Pay $amount")
+        Text(
+            text = "Pay $amount",
+            style = TextStyle(
+                fontSize = 14.sp,
+                fontFamily = Faktpro,
+                fontWeight = FontWeight.Normal,
+                lineHeight = 10.sp
+            )
+        )
     }
 
 }
 
-@Composable
-fun PayViaComponent() {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center
-    ) {
-        Image(
-            painter = painterResource(id = R.drawable.horizontal_line),
-            modifier = Modifier.weight(1f),
-            contentDescription = null
-        )
-        Spacer(modifier = Modifier.width(4.dp))
-        Text(text = "or pay via")
-        Spacer(modifier = Modifier.width(4.dp))
-        Image(
-            painter = painterResource(id = R.drawable.horizontal_line),
-            modifier = Modifier.weight(1f),
-            contentDescription = null
-        )
-
-    }
-}
 
 @Preview(showBackground = true, widthDp = 320)
 @Composable
@@ -470,7 +517,7 @@ fun payViaComponentPreview() {
 fun MyAppNavHost(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
-    startDestination: String = "OnBoardingScreen",
+    startDestination: String = Debit_CreditCard.route,
     currentDestination: NavDestination?
 ) {
     NavHost(
@@ -479,22 +526,25 @@ fun MyAppNavHost(
         startDestination = startDestination
     ) {
 
-        composable("OnBoardingScreen") {
-            OnBoardingScreen(
-                onNavigateToCardHomeScreen = { navController.navigateSingleTopTo(Debit_CreditCard.route) }
+        composable(Route.OTHER_PAYMENT_SCREEN) {
+            OtherPaymentScreen(
+                onCancelButtonClicked = { navController.navigateSingleTopTo(Debit_CreditCard.route) },
+                currentDestination = currentDestination,
+                navController = navController
             )
         }
 
         composable(route = Debit_CreditCard.route) {
             CardHomeScreen(
-                onNavigateToPinScreen = { navController.navigateSingleTopTo("pinscreen") },
+                onNavigateToPinScreen = { navController.navigateSingleTopTo(Route.PIN_SCREEN) },
+                onOtherPaymentButtonClicked = { navController.navigateSingleTopTo(Route.OTHER_PAYMENT_SCREEN) },
                 currentDestination = currentDestination,
                 navController = navController
             )
         }
         composable(route = Ussd.route) {
             USSDHomeScreen(
-                navigateToLoadingScreen = { navController.navigateSingleTopTo("pinscreen") },
+                navigateToLoadingScreen = { navController.navigateSingleTopTo(Route.PIN_SCREEN) },
                 currentDestination = currentDestination,
                 navController = navController
             )
@@ -502,12 +552,16 @@ fun MyAppNavHost(
 
         composable(route = BankAccount.route) {
             BankScreen(
-                onNavigateToBankAccountNumberScreen = { navController.navigateSingleTopTo("pinscreen") },
+                onNavigateToBankAccountNumberScreen = {
+                    navController.navigateSingleTopNoPopUpToHome(
+                        Route.BANK_ACCOUNT_NUMBER_SCREEN
+                    )
+                },
                 currentDestination = currentDestination,
                 navController = navController
             )
         }
-        composable(route = "bank_account_number_screen") {
+        composable(route = Route.BANK_ACCOUNT_NUMBER_SCREEN) {
             BankAccountNumberScreen(
                 onPaymentMethodClick = {}
             )
@@ -516,9 +570,9 @@ fun MyAppNavHost(
 
         composable(route = Transfer.route) {
             TransferHomeScreen(
-                navigateToLoadingScreen = { navController.navigateSingleTopTo("pinscreen") },
-                currentDestination = currentDestination,
-                navController = navController
+                navigateToLoadingScreen = { },
+                onOtherPaymentButtonClicked = { navController.navigateSingleTopTo(Route.OTHER_PAYMENT_SCREEN) },
+                onCancelPaymentButtonClicked = { navController.navigateSingleTopTo(Debit_CreditCard.route) }
             )
         }
 
@@ -533,7 +587,7 @@ fun MyAppNavHost(
             )
         }
 
-        composable("pinscreen") {
+        composable(Route.PIN_SCREEN) {
             CardEnterPinScreen(
                 onNavigateToOtpScreen = { navController.navigateSingleTopNoPopUpToHome("otpscreen") }
             )
@@ -549,4 +603,7 @@ fun MyAppNavHost(
         }
     }
 }
+
+
+
 

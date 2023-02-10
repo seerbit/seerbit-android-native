@@ -53,4 +53,4 @@ object Cash : SeerBitDestination {
 }
 
 // Screens to be displayed in the top RallyTabRow
-val rallyTabRowScreens = listOf(Debit_CreditCard, BankAccount, Ussd, Transfer, PhoneNumber, Cash)
+val rallyTabRowScreens = listOf(Debit_CreditCard, BankAccount, Ussd, Transfer)

@@ -16,6 +16,7 @@ import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.seerbitsdk.R
+import com.example.seerbitsdk.ui.theme.Faktpro
 
 
 @Composable
@@ -36,7 +37,7 @@ fun SeerbitPaymentDetailScreen(
         text = "$currencyText$amount".capitalize(Locale.current),
         style = TextStyle(
             fontSize = 24.sp,
-            fontFamily = FontFamily.SansSerif,
+            fontFamily = Faktpro,
             fontWeight = FontWeight.Bold,
         ),
     )
@@ -44,10 +45,10 @@ fun SeerbitPaymentDetailScreen(
     Spacer(modifier = Modifier.height(4.dp))
 
     Text(
-        text = "subcharge $currencyText$charges",
+        text = "Subcharge $currencyText$charges",
         style = TextStyle(
             fontSize = 14.sp,
-            fontFamily = FontFamily.SansSerif,
+            fontFamily = Faktpro,
             fontWeight = FontWeight.Light
         )
     )
@@ -57,7 +58,7 @@ fun SeerbitPaymentDetailScreen(
         text = actionDescription,
         style = TextStyle(
             fontSize = 14.sp,
-            fontFamily = FontFamily.SansSerif,
+            fontFamily = Faktpro,
             fontWeight = FontWeight.Normal,
             lineHeight = 10.sp
         ),
