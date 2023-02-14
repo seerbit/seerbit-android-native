@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.seerbitsdk.ui.theme.DeepRed
@@ -40,6 +41,7 @@ Row(modifier = Modifier.fillMaxWidth()) {
     ) {
         Text(
             text = "Change Payment Method",
+            textAlign = TextAlign.Center,
             style = TextStyle(
                 fontSize = 14.sp,
                 fontFamily = Faktpro,
@@ -67,6 +69,7 @@ Row(modifier = Modifier.fillMaxWidth()) {
                 fontWeight = FontWeight.Normal,
                 lineHeight = 10.sp,
                 color = DeepRed,
+                textAlign = TextAlign.Center
             ),
             modifier = Modifier.align(alignment = Alignment.CenterVertically)
         )

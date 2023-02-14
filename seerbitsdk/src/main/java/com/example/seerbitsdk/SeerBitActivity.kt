@@ -71,7 +71,7 @@ fun SeerBitApp() {
         Surface(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(end = 8.dp),
+                .padding(end = 0.dp),
             color = MaterialTheme.colors.background
         ) {
             val navController = rememberNavController()
@@ -138,93 +138,84 @@ fun CardHomeScreen(
     navController: NavHostController
 ) {
 
+
     Column(
         modifier = modifier
-            .fillMaxHeight()
-            .verticalScroll(rememberScrollState())
-    ) {
-
-        Column(
-            modifier = modifier
-                .padding(
-                    start = 21.dp,
-                    end = 21.dp
-                )
-                .fillMaxWidth()
-
+            .padding(
+                start = 8.dp,
+                end = 8.dp
+            )
+            .fillMaxWidth(),
 
         ) {
-            Spacer(modifier = Modifier.height(25.dp))
-            SeerbitPaymentDetailScreen(
-                charges = 0.45,
-                amount = "60,000.00",
-                currencyText = "NGN",
-                "Debit/Credit Card Details"
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            CardDetailsScreen()
+        Spacer(modifier = Modifier.height(25.dp))
+        SeerbitPaymentDetailScreen(
+            charges = 0.45,
+            amount = "60,000.00",
+            currencyText = "NGN",
+            "Debit/Credit Card Details"
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        CardDetailsScreen()
 
-            Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-            PayButton(
-                amount = "NGN 60,000",
-                onClick = onNavigateToPinScreen
-            )
-            Spacer(modifier = Modifier.height(100.dp))
+        PayButton(
+            amount = "NGN 60,000",
+            onClick = onNavigateToPinScreen
+        )
+        Spacer(modifier = Modifier.height(100.dp))
 
-            Row(modifier = Modifier.fillMaxWidth()) {
-                Button(
-                    onClick = onOtherPaymentButtonClicked,
-                    colors = ButtonDefaults.buttonColors(backgroundColor = LighterGray),
-                    shape = RoundedCornerShape(4.dp),
+        Row(modifier = Modifier.fillMaxWidth()) {
+            Button(
+                onClick = onOtherPaymentButtonClicked,
+                colors = ButtonDefaults.buttonColors(backgroundColor = LighterGray),
+                shape = RoundedCornerShape(4.dp),
 
-                    modifier = Modifier
-                        .height(50.dp)
-                        .weight(1f)
-                        .padding(end = 8.dp)
+                modifier = Modifier
+                    .height(50.dp)
+                    .weight(1f)
+                    .padding(end = 8.dp)
 
-                ) {
-                    Text(
-                        text = "Change Payment Method",
-                        style = TextStyle(
-                            fontSize = 14.sp,
-                            fontFamily = Faktpro,
-                            fontWeight = FontWeight.Normal,
-                            lineHeight = 10.sp
-                        )
+            ) {
+                Text(
+                    text = "Change Payment Method",
+                    style = TextStyle(
+                        fontSize = 14.sp,
+                        fontFamily = Faktpro,
+                        fontWeight = FontWeight.Normal,
+                        lineHeight = 10.sp
                     )
-                }
-
-                Button(
-                    onClick = {},
-                    colors = ButtonDefaults.buttonColors(backgroundColor = SignalRed),
-                    shape = RoundedCornerShape(4.dp),
-                    modifier = Modifier
-                        .height(50.dp)
-                        .weight(1f)
-
-                ) {
-                    Text(
-                        text = "Cancel Payment",
-
-                        style = TextStyle(
-                            fontSize = 14.sp,
-                            fontFamily = Faktpro,
-                            fontWeight = FontWeight.Normal,
-                            lineHeight = 10.sp,
-                            color = DeepRed,
-                        ),
-                        modifier = Modifier.align(alignment = Alignment.CenterVertically)
-                    )
-                }
-
+                )
             }
 
+            Button(
+                onClick = {},
+                colors = ButtonDefaults.buttonColors(backgroundColor = SignalRed),
+                shape = RoundedCornerShape(4.dp),
+                modifier = Modifier
+                    .height(50.dp)
+                    .weight(1f)
+
+            ) {
+                Text(
+                    text = "Cancel Payment",
+
+                    style = TextStyle(
+                        fontSize = 14.sp,
+                        fontFamily = Faktpro,
+                        fontWeight = FontWeight.Normal,
+                        lineHeight = 10.sp,
+                        color = DeepRed,
+                    ),
+                    modifier = Modifier.align(alignment = Alignment.CenterVertically)
+                )
+            }
 
         }
-        Spacer(modifier = Modifier.height(8.dp))
 
     }
+    Spacer(modifier = Modifier.height(8.dp))
 }
 
 @Preview(showBackground = true, widthDp = 400, heightDp = 700)
@@ -235,7 +226,8 @@ fun HeaderScreenPreview() {
 
 @Composable
 fun CardDetailsScreen(modifier: Modifier = Modifier) {
-    Column(modifier = modifier) {
+    Column(modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally) {
 
 
         Card(modifier = modifier, elevation = 4.dp) {
@@ -323,6 +315,7 @@ fun MMM_CVVScreen(modifier: Modifier) {
             painter = painterResource(id = R.drawable.vertical_divider_line),
             contentDescription = "dividing line"
         )
+        //CVV Card
         Card(modifier = modifier.weight(1f), elevation = 4.dp) {
             var value by remember { mutableStateOf("") }
             Image(
@@ -331,7 +324,7 @@ fun MMM_CVVScreen(modifier: Modifier) {
             )
             OutlinedTextField(
                 value = value,
-                onValueChange = { newText -> if (newText.length <= 4) value = newText },
+                onValueChange = { newText -> if (newText.length <= 3) value = newText },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 colors = TextFieldDefaults.textFieldColors(
                     backgroundColor = MaterialTheme.colors.surface,
