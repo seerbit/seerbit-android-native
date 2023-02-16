@@ -1,4 +1,4 @@
-package com.example.seerbitsdk.repository.use_cases
+package com.example.seerbitsdk.use_cases
 
 import android.widget.Toast
 import com.example.seerbitsdk.models.Resource

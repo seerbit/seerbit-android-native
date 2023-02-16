@@ -4,11 +4,8 @@ import com.example.seerbitsdk.api.InitiateApiService
 import com.example.seerbitsdk.api.SeerBitApi
 import com.example.seerbitsdk.models.card.CardDTO
 import com.example.seerbitsdk.models.card.CardResponse
-import com.example.seerbitsdk.models.home.MerchantDetailsResponse
 import com.example.seerbitsdk.models.query.QueryTransactionResponse
 import com.example.seerbitsdk.models.transfer.TransferDTO
-import com.example.seerbitsdk.repository.use_cases.InitiateUseCase
-import retrofit2.Call
 import retrofit2.Response
 
 class InitiateTransactionRepository {

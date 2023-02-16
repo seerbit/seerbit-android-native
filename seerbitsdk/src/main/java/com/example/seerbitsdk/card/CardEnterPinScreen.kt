@@ -38,6 +38,20 @@ import kotlinx.coroutines.launch
 
 
 @Composable
+fun showCircularProgress(showProgress: Boolean) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+
+        CircularProgressIndicator(
+            color = Color.DarkGray,
+        )
+    }
+}
+
+@Composable
 fun CardEnterPinScreen(
     modifier: Modifier = Modifier,
     onPayButtonClicked: (CardDTO) -> Unit,
@@ -63,16 +77,7 @@ fun CardEnterPinScreen(
         }
 
         if (merchantDetailsState.isLoading) {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-
-                CircularProgressIndicator(
-                    color = Color.DarkGray,
-                )
-            }
+            showCircularProgress(showProgress = true)
         }
 
 
@@ -80,13 +85,15 @@ fun CardEnterPinScreen(
 
             Column(
                 modifier = modifier
-                    .padding(
-                        start = 21.dp,
-                        end = 21.dp
-                    )
+                    .padding(start = 21.dp, end = 21.dp)
                     .fillMaxWidth()
                     .weight(1f)
             ) {
+
+                var pin by rememberSaveable { mutableStateOf("") }
+                var showErrorDialog by rememberSaveable { mutableStateOf(false) }
+                var showCircularProgressBar by rememberSaveable { mutableStateOf(false) }
+
                 Spacer(modifier = Modifier.height(21.dp))
                 SeerbitPaymentDetailScreen(
                     charges = 0.45,
@@ -108,13 +115,9 @@ fun CardEnterPinScreen(
                     ),
                     modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
                 )
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(40.dp))
 
-                Spacer(modifier = modifier.height(20.dp))
 
-                var pin by rememberSaveable { mutableStateOf("") }
-
-                var showErrorDialog by rememberSaveable { mutableStateOf(false) }
                 if (showErrorDialog) {
                     ErrorDialog(message = "invalid pin")
                 }
@@ -152,8 +155,6 @@ fun CardEnterPinScreen(
                 })
 
 
-
-
                 //HANDLE INITIATE TRANSACTION RESPONSE
                 val transactionState: InitiateTransactionState =
                     initiateTransactionViewModel.initiateTransactionState.value
@@ -168,41 +169,21 @@ fun CardEnterPinScreen(
                 }
 
                 if (transactionState.isLoading) {
-                    Column(
-                        modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-
-                        CircularProgressIndicator(
-                            color = Color.DarkGray,
-                        )
-                    }
+                    showCircularProgress(showProgress = true)
                 }
 
-                var showCircularProgressBar by rememberSaveable { mutableStateOf(false) }
-
                 if (showCircularProgressBar) {
-                    Column(
-                        modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-
-                        CircularProgressIndicator(
-                            color = Color.DarkGray,
-                        )
-                    }
+                    showCircularProgress(showProgress = true)
                 }
 
 
                 transactionState.data?.let {
                     val paymentReference2 = it.data?.payments?.paymentReference
 
-                    if(paymentReference2!=null)
-                    initiateTransactionViewModel.queryTransaction(paymentReference2)
+                    if (paymentReference2 != null)
+                        initiateTransactionViewModel.queryTransaction(paymentReference2)
                     else {
-                        ErrorDialog(message =it.message?: "An Error Occurred")
+                        ErrorDialog(message = it.message ?: "An Error Occurred")
                     }
 
                 }
@@ -226,135 +207,132 @@ fun CardEnterPinScreen(
                         showCircularProgressBar = true
                     }
                 }
-                    Spacer(modifier = Modifier.height(16.dp))
-                    //payment button
-                    PayButton(
-                        amount = "NGN 60,000",
-                        onClick = {
+                Spacer(modifier = Modifier.height(16.dp))
+                //payment button
+                PayButton(
+                    amount = "NGN 60,000",
+                    onClick = {
 
-                            showErrorDialog = if (pin.length < 4) {
-                                true
-                            } else {
-                                onPayButtonClicked(cardDTO)
-                                false
-                            }
-                        }
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Spacer(modifier = Modifier.height(60.dp))
-
-                    OtherPaymentButtonComponent(
-                        onOtherPaymentButtonClicked = onOtherPaymentButtonClicked,
-                        onCancelButtonClicked = {})
-
-                }
-
-            }
-        }
-    }
-
-
-    @Preview(showBackground = true, widthDp = 400, heightDp = 700)
-    @Composable
-    fun HeaderScreenPreview() {
-
-        SeerBitTheme {
-            val viewModel: MerchantDetailsViewModel = viewModel()
-            val viewModel2: InitiateTransactionViewModel = viewModel()
-            CardEnterPinScreen(
-                onPayButtonClicked = {},
-                currentDestination = null,
-                navController = rememberNavController(),
-                merchantDetailsState = viewModel.merchantState.value,
-                onOtherPaymentButtonClicked = { /*TODO*/ },
-                initiateTransactionViewModel = viewModel2,
-                paymentReference = "",
-                cvv = "",
-                cardNumber = "",
-                cardExpiryMonth = "",
-                cardExpiryYear = ""
-            )
-        }
-    }
-
-
-
-    @Preview(showBackground = true, widthDp = 320)
-    @Composable
-    fun PinFieldComponentPreview() {
-        SeerBitTheme {
-            PinInputField(onEnterPin = {})
-        }
-    }
-
-    @Composable
-    fun PinInputField(
-        modifier: Modifier = Modifier,
-        onEnterPin: (String) -> Unit
-    ) {
-        var pinText by remember { mutableStateOf("") }
-
-
-        Column {
-            Surface(
-                modifier = modifier
-                    .background(Color.Transparent)
-                    .fillMaxWidth()
-                    .padding(0.dp)
-            ) {
-
-                BasicTextField(
-                    value = pinText,
-                    onValueChange = {
-                        if (it.length <= 4)
-                            pinText = it
-                        onEnterPin(pinText)
-
-                    },
-
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.NumberPassword,
-                        imeAction = ImeAction.Send
-                    ),
-                    modifier = Modifier.fillMaxWidth(),
-                    decorationBox = { deco ->
-                        Row(
-                            horizontalArrangement = Arrangement.SpaceEvenly,
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            repeat(4) { index ->
-                                val char = when {
-                                    index >= pinText.length -> ""
-                                    else -> {
-                                        "*"
-                                    }
-                                }
-                                Text(
-                                    text = char,
-                                    modifier = Modifier
-                                        .width(50.dp)
-                                        .height(60.dp)
-                                        .align(alignment = Alignment.CenterVertically)
-                                        .border(
-                                            1.dp,
-                                            Color.LightGray,
-                                            RoundedCornerShape(8.dp)
-                                        )
-                                        .padding(2.dp),
-                                    style = MaterialTheme.typography.h4,
-                                    color = Color.Black,
-                                    textAlign = TextAlign.Center
-
-                                )
-                            }
+                        showErrorDialog = if (pin.length < 4) {
+                            true
+                        } else {
+                            onPayButtonClicked(cardDTO)
+                            false
                         }
                     }
                 )
+
+                Spacer(modifier = Modifier.height(76.dp))
+                OtherPaymentButtonComponent(
+                    onOtherPaymentButtonClicked = onOtherPaymentButtonClicked,
+                    onCancelButtonClicked = {})
+
             }
+
         }
     }
+}
+
+
+@Preview(showBackground = true, widthDp = 400, heightDp = 700)
+@Composable
+fun HeaderScreenPreview() {
+
+    SeerBitTheme {
+        val viewModel: MerchantDetailsViewModel = viewModel()
+        val viewModel2: InitiateTransactionViewModel = viewModel()
+        CardEnterPinScreen(
+            onPayButtonClicked = {},
+            currentDestination = null,
+            navController = rememberNavController(),
+            merchantDetailsState = viewModel.merchantState.value,
+            onOtherPaymentButtonClicked = { /*TODO*/ },
+            initiateTransactionViewModel = viewModel2,
+            paymentReference = "",
+            cvv = "",
+            cardNumber = "",
+            cardExpiryMonth = "",
+            cardExpiryYear = ""
+        )
+    }
+}
+
+
+@Preview(showBackground = true, widthDp = 320)
+@Composable
+fun PinFieldComponentPreview() {
+    SeerBitTheme {
+        PinInputField(onEnterPin = {})
+    }
+}
+
+@Composable
+fun PinInputField(
+    modifier: Modifier = Modifier,
+    onEnterPin: (String) -> Unit
+) {
+    var pinText by remember { mutableStateOf("") }
+
+
+    Column {
+        Surface(
+            modifier = modifier
+                .background(Color.Transparent)
+                .fillMaxWidth()
+                .padding(0.dp)
+        ) {
+
+            BasicTextField(
+                value = pinText,
+                onValueChange = {
+                    if (it.length <= 4)
+                        pinText = it
+                    onEnterPin(pinText)
+
+                },
+
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.NumberPassword,
+                    imeAction = ImeAction.Send
+                ),
+                modifier = Modifier.fillMaxWidth(),
+                decorationBox = { deco ->
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        repeat(4) { index ->
+                            val char = when {
+                                index >= pinText.length -> ""
+                                else -> {
+                                    "*"
+                                }
+                            }
+                            Text(
+                                text = char,
+                                modifier = Modifier
+                                    .width(50.dp)
+                                    .height(60.dp)
+                                    .align(alignment = Alignment.CenterVertically)
+                                    .border(
+                                        1.dp,
+                                        Color.LightGray,
+                                        RoundedCornerShape(8.dp)
+                                    )
+                                    .padding(2.dp),
+                                style = MaterialTheme.typography.h4,
+                                color = Color.Black,
+                                textAlign = TextAlign.Center
+
+                            )
+                        }
+                    }
+                }
+            )
+        }
+    }
+}
 
 
 

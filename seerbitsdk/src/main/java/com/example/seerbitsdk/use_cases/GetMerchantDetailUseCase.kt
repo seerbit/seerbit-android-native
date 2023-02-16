@@ -1,4 +1,4 @@
-package com.example.seerbitsdk.repository.use_cases
+package com.example.seerbitsdk.use_cases
 
 import com.example.seerbitsdk.models.Resource
 import com.example.seerbitsdk.api.SeerBitService

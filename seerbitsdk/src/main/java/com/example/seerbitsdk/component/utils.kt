@@ -1,5 +1,7 @@
 package com.example.seerbitsdk.component
 
+import java.time.Month
+
 fun String.isValidCardNumber() : Boolean{
     return this.length == 16
 }
@@ -18,6 +20,9 @@ fun String.isValidCardExpiryYear() : Boolean{
         false
     else
         this.length ==4
+}
+fun validateCardDetails(isValidCvv : Boolean, isValidCardNumber : Boolean, isValidCardExpiryMonth: Boolean) : Boolean{
+    return isValidCvv && isValidCardNumber && isValidCardExpiryMonth
 }
 
 fun generateRandomReference() : String {

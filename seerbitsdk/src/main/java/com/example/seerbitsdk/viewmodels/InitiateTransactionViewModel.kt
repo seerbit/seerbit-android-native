@@ -6,14 +6,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.seerbitsdk.models.Resource
 import com.example.seerbitsdk.models.TransactionDTO
-import com.example.seerbitsdk.repository.use_cases.GetMerchantDetailUseCase
-import com.example.seerbitsdk.repository.use_cases.InitiateUseCase
+import com.example.seerbitsdk.use_cases.InitiateUseCase
 import com.example.seerbitsdk.screenstate.InitiateTransactionState
-import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.screenstate.QueryTransactionState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class InitiateTransactionViewModel : ViewModel() {
 

@@ -65,10 +65,7 @@ class SeerBitActivity : ComponentActivity() {
             val transactionViewModel: InitiateTransactionViewModel by viewModels()
             transactionViewModel.resetTransactionState()
             SeerBitApp(viewModel, transactionViewModel)
-            LocalContext.current;
-            val activity = LocalContext.current as Activity
 
-            this.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         }
     }
 }
@@ -115,7 +112,6 @@ fun SeerBitApp(
             }
             val currentScreen =
                 rallyTabRowScreens.find { it.route == currentDestination?.route } ?: BankAccount
-
             val activity = LocalContext.current as Activity
 
             activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
@@ -163,6 +159,20 @@ fun SeerBitWaterMarkPreview() {
 }
 
 @Composable
+fun showCircularProgress(showProgress: Boolean) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+
+        CircularProgressIndicator(
+            color = Color.DarkGray,
+        )
+    }
+}
+
+@Composable
 fun CardHomeScreen(
     modifier: Modifier = Modifier,
     onNavigateToPinScreen: (CardDTO) -> Unit,
@@ -173,23 +183,25 @@ fun CardHomeScreen(
     initiateTransactionViewModel: InitiateTransactionViewModel
 ) {
 
-    // if there is an error loading the report
-    if (merchantDetailsState.hasError) {
+    var cardDetailsData: CardDetails by remember { mutableStateOf(CardDetails("", "", "", "")) }
 
+    //card details
+    var cvv by rememberSaveable { mutableStateOf("") }
+    var cardNumber by rememberSaveable { mutableStateOf("") }
+    var cardExpiryMonth by rememberSaveable { mutableStateOf("") }
+    var cardExpiryYear by rememberSaveable { mutableStateOf("") }
+
+    var showErrorDialog by remember { mutableStateOf(false) }
+
+    //determines if to show progress bar when loading
+    var showCircularProgressBar by rememberSaveable { mutableStateOf(false) }
+
+    if (merchantDetailsState.hasError) {
         ErrorDialog(message = merchantDetailsState.errorMessage ?: "Something went wrong")
     }
 
     if (merchantDetailsState.isLoading) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-
-            CircularProgressIndicator(
-                color = Color.DarkGray,
-            )
-        }
+        showCircularProgress(showProgress = true)
     }
 
 
@@ -205,6 +217,7 @@ fun CardHomeScreen(
             ) {
             Spacer(modifier = Modifier.height(25.dp))
 
+            //SeerBit Header
             SeerbitPaymentDetailScreen(
                 charges = merchantDetailsData.payload?.cardFee?.visa!!.toDouble(),
                 amount = "60,000.00",
@@ -216,38 +229,19 @@ fun CardHomeScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            //get card number mmm cvv data
-
-            var cardDetailsData: CardDetails by remember {
-                mutableStateOf(
-                    CardDetails(
-                        "",
-                        "",
-                        "",
-                        ""
-                    )
-                )
-            }
-            var cvv by rememberSaveable { mutableStateOf("") }
-            var cardNumber by rememberSaveable { mutableStateOf("") }
-            var cardExpiryMonth by rememberSaveable { mutableStateOf("") }
-            var cardExpiryYear by rememberSaveable { mutableStateOf("") }
-
-            var showErrorDialog by remember {
-                mutableStateOf(false)
-            }
 
             if (showErrorDialog) {
                 ErrorDialog(message = "Please input a valid card details")
             }
 
+            //Card Details Screen
             CardDetailsScreen(
                 cardNumber = cardDetailsData.cardNumber,
                 onChangeCardCvv = {
-                    cvv = it
-                }, onChangeCardExpiryMonth = {
-                    cardExpiryMonth = it
-                },
+                cvv = it
+            }, onChangeCardExpiryMonth = {
+                cardExpiryMonth = it
+            },
                 onChangeCardExpiryYear = {
                     cardExpiryYear = it
                 },
@@ -288,20 +282,11 @@ fun CardHomeScreen(
 
             cardDTO.paymentReference = initiateTransactionViewModel.generateRandomReference()
 
-            var showCircularProgressBar by rememberSaveable { mutableStateOf(false) }
-
             if (showCircularProgressBar) {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    CircularProgressIndicator(
-                        color = Color.DarkGray,
-                    )
-                }
+                showCircularProgress(showProgress = true)
             }
 
+            //Payment Button Login
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -311,7 +296,7 @@ fun CardHomeScreen(
                     amount = "NGN 60,000",
                     onClick = {
                         showErrorDialog =
-                            if (cvv.isValidCvv() && cardNumber.isValidCardNumber() && cardExpiryMonth.isValidCardExpiryMonth()) {
+                            if (validateCardDetails( cvv.isValidCvv(), cardNumber.isValidCardNumber() , cardExpiryMonth.isValidCardExpiryMonth())) {
                                 onNavigateToPinScreen(cardDTO)
                                 false
                             } else {
@@ -327,26 +312,20 @@ fun CardHomeScreen(
 
             if (transactionState.hasError) {
                 ErrorDialog(message = transactionState.errorMessage ?: "Something went wrong")
-
             }
 
             showCircularProgressBar = transactionState.isLoading
 
             if (transactionState.data != null) {
-                val paymentRef =
-                    transactionState.data.data?.payments?.paymentReference ?: "DFJLAJLD"
+                val paymentRef = transactionState.data.data?.payments?.paymentReference ?: "DFJLAJLD"
                 navController.navigateSingleTopTo(
                     "${Route.PIN_SCREEN}/$paymentRef/$cvv/$cardNumber/$cardExpiryMonth/$cardExpiryYear"
-
                 )
             }
 
 
-
-
             Spacer(modifier = Modifier.height(100.dp))
             Row(modifier = Modifier.fillMaxWidth()) {
-
 
                 Button(
                     onClick = onOtherPaymentButtonClicked,
@@ -397,7 +376,6 @@ fun CardHomeScreen(
             Spacer(modifier = Modifier.height(100.dp))
             BottomSeerBitWaterMark(modifier = Modifier.align(alignment = Alignment.CenterHorizontally))
         }
-        Spacer(modifier = Modifier.height(100.dp))
 
     }
 }
