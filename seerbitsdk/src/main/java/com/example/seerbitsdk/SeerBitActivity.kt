@@ -265,7 +265,7 @@ fun CardHomeScreen(
                 redirectUrl = "http://localhost:3002/#/",
                 productId = "",
                 mobileNumber = merchantDetailsData.payload.number,
-                paymentReference = initiateTransactionViewModel.generateRandomReference(),
+                paymentReference = generateRandomReference(),
                 fee = merchantDetailsData.payload.cardFee.mc,
                 expiryMonth = cardExpiryMonth,
                 fullName = "Amos Aorme",
@@ -586,7 +586,7 @@ fun cardExpiryDateFilter(text: AnnotatedString): TransformedText {
         override fun transformedToOriginal(offset: Int): Int {
             if (offset <= 1) return offset
             if (offset <= 3) return offset - 1
-            return 5
+            return 4
         }
     }
     return TransformedText(annotatedString, phoneNumberOffsetTranslator)
@@ -621,7 +621,7 @@ fun cardNumberFormatting(text: AnnotatedString): TransformedText {
             if (offset <= 7) return offset - 1
             if (offset <= 11) return offset - 2
             if (offset <= 15) return offset - 3
-            return 19
+            return 16
         }
     }
     return TransformedText(annotatedString, phoneNumberOffsetTranslator)
@@ -778,7 +778,7 @@ fun MyAppNavHost(
                 navController = navController,
                 merchantDetailsState = merchantDetailsState,
                 initiateTransactionViewModel = viewModel,
-                onOtherPaymentButtonClicked = {},
+                onOtherPaymentButtonClicked = {navController.navigateSingleTopTo(Route.OTHER_PAYMENT_SCREEN)},
                 paymentReference = paymentReference!!,
                 cvv = cvv!!,
                 cardNumber = cardNumber!!,

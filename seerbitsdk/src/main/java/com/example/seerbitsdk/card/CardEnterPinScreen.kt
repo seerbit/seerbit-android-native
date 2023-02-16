@@ -198,7 +198,12 @@ fun CardEnterPinScreen(
 
                 transactionState.data?.let {
                     val paymentReference2 = it.data?.payments?.paymentReference
-                    initiateTransactionViewModel.queryTransaction(paymentReference2!!)
+
+                    if(paymentReference2!=null)
+                    initiateTransactionViewModel.queryTransaction(paymentReference2)
+                    else {
+                        ErrorDialog(message =it.message?: "An Error Occurred")
+                    }
 
                 }
 
@@ -240,7 +245,7 @@ fun CardEnterPinScreen(
                     Spacer(modifier = Modifier.height(60.dp))
 
                     OtherPaymentButtonComponent(
-                        onOtherPaymentButtonClicked = { /*TODO*/ },
+                        onOtherPaymentButtonClicked = onOtherPaymentButtonClicked,
                         onCancelButtonClicked = {})
 
                 }

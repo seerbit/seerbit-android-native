@@ -9,6 +9,9 @@ data class CardResponse(
 
     @SerializedName("status")
     val status: String? = null,
+
+    @SerializedName("message")
+    val message: String? = null
 )
 
 data class Payments(
