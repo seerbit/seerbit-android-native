@@ -9,6 +9,8 @@ import androidx.activity.viewModels
 import androidx.compose.animation.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+
+
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
@@ -229,7 +231,7 @@ fun CardHomeScreen(
             var cvv by rememberSaveable { mutableStateOf("") }
             var cardNumber by rememberSaveable { mutableStateOf("") }
             var cardExpiryMonth by rememberSaveable { mutableStateOf("") }
-            var cardExpiryYear by rememberSaveable{ mutableStateOf("") }
+            var cardExpiryYear by rememberSaveable { mutableStateOf("") }
 
             var showErrorDialog by remember {
                 mutableStateOf(false)
@@ -392,9 +394,11 @@ fun CardHomeScreen(
                 }
 
             }
-
+            Spacer(modifier = Modifier.height(100.dp))
+            BottomSeerBitWaterMark(modifier = Modifier.align(alignment = Alignment.CenterHorizontally))
         }
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(100.dp))
+
     }
 }
 
@@ -467,7 +471,7 @@ fun CardDetailsScreen(
         Row(modifier = Modifier) {
 
             Card(modifier = modifier.weight(1f), elevation = 4.dp) {
-                var value by rememberSaveable{ mutableStateOf("") }
+                var value by rememberSaveable { mutableStateOf("") }
                 Image(
                     painter = painterResource(id = R.drawable.filled_bg_white),
                     contentDescription = null
@@ -778,7 +782,7 @@ fun MyAppNavHost(
                 navController = navController,
                 merchantDetailsState = merchantDetailsState,
                 initiateTransactionViewModel = viewModel,
-                onOtherPaymentButtonClicked = {navController.navigateSingleTopTo(Route.OTHER_PAYMENT_SCREEN)},
+                onOtherPaymentButtonClicked = { navController.navigateSingleTopTo(Route.OTHER_PAYMENT_SCREEN) },
                 paymentReference = paymentReference!!,
                 cvv = cvv!!,
                 cardNumber = cardNumber!!,
