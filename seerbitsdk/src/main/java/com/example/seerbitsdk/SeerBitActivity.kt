@@ -1,8 +1,11 @@
 package com.example.seerbitsdk
 
+import android.app.Activity
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.animation.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -10,10 +13,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -23,28 +29,44 @@ import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.seerbitsdk.bank.BankAccountNumberScreen
 import com.example.seerbitsdk.bank.BankScreen
 import com.example.seerbitsdk.card.CardEnterPinScreen
 import com.example.seerbitsdk.card.OTPScreen
 import com.example.seerbitsdk.component.*
+import com.example.seerbitsdk.models.card.CardDTO
+import com.example.seerbitsdk.models.card.CardDetails
 import com.example.seerbitsdk.navigationpage.OtherPaymentScreen
+import com.example.seerbitsdk.screenstate.InitiateTransactionState
+import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.transfer.TransferHomeScreen
 import com.example.seerbitsdk.ui.theme.*
 import com.example.seerbitsdk.ussd.USSDHomeScreen
+import com.example.seerbitsdk.viewmodels.InitiateTransactionViewModel
+import com.example.seerbitsdk.viewmodels.MerchantDetailsViewModel
 
 class SeerBitActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            SeerBitApp()
+            val viewModel: MerchantDetailsViewModel by viewModels()
+            val transactionViewModel: InitiateTransactionViewModel by viewModels()
+            transactionViewModel.resetTransactionState()
+            SeerBitApp(viewModel, transactionViewModel)
+            LocalContext.current;
+            val activity = LocalContext.current as Activity
+
+            this.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         }
     }
 }
@@ -65,7 +87,10 @@ fun DefaultPreview() {
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun SeerBitApp() {
+fun SeerBitApp(
+    viewModel: MerchantDetailsViewModel,
+    transactionViewModel: InitiateTransactionViewModel
+) {
     SeerBitTheme {
         // A surface container using the 'background' color from the theme
         Surface(
@@ -89,15 +114,21 @@ fun SeerBitApp() {
             val currentScreen =
                 rallyTabRowScreens.find { it.route == currentDestination?.route } ?: BankAccount
 
+            val activity = LocalContext.current as Activity
+
+            activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+
             MyAppNavHost(
                 navController = navController,
                 modifier = Modifier.padding(8.dp),
-                currentDestination = currentBackStack?.destination
+                currentDestination = currentBackStack?.destination,
+                merchantDetailsState = viewModel.merchantState.value,
+                viewModel = transactionViewModel,
             )
+
         }
-
-
     }
+
 
 }
 
@@ -132,106 +163,266 @@ fun SeerBitWaterMarkPreview() {
 @Composable
 fun CardHomeScreen(
     modifier: Modifier = Modifier,
-    onNavigateToPinScreen: () -> Unit,
-    onOtherPaymentButtonClicked: () -> Unit,
+    onNavigateToPinScreen: (CardDTO) -> Unit,
     currentDestination: NavDestination?,
-    navController: NavHostController
+    navController: NavHostController,
+    merchantDetailsState: MerchantDetailsState,
+    onOtherPaymentButtonClicked: () -> Unit,
+    initiateTransactionViewModel: InitiateTransactionViewModel
 ) {
 
+    // if there is an error loading the report
+    if (merchantDetailsState.hasError) {
 
-    Column(
-        modifier = modifier
-            .padding(
-                start = 8.dp,
-                end = 8.dp
-            )
-            .fillMaxWidth(),
+        ErrorDialog(message = merchantDetailsState.errorMessage ?: "Something went wrong")
+    }
 
+    if (merchantDetailsState.isLoading) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-        Spacer(modifier = Modifier.height(25.dp))
-        SeerbitPaymentDetailScreen(
-            charges = 0.45,
-            amount = "60,000.00",
-            currencyText = "NGN",
-            "Debit/Credit Card Details"
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        CardDetailsScreen()
 
-        Spacer(modifier = Modifier.height(16.dp))
+            CircularProgressIndicator(
+                color = Color.DarkGray,
+            )
+        }
+    }
 
-        PayButton(
-            amount = "NGN 60,000",
-            onClick = onNavigateToPinScreen
-        )
-        Spacer(modifier = Modifier.height(100.dp))
 
-        Row(modifier = Modifier.fillMaxWidth()) {
-            Button(
-                onClick = onOtherPaymentButtonClicked,
-                colors = ButtonDefaults.buttonColors(backgroundColor = LighterGray),
-                shape = RoundedCornerShape(4.dp),
-
-                modifier = Modifier
-                    .height(50.dp)
-                    .weight(1f)
-                    .padding(end = 8.dp)
+    merchantDetailsState.data?.let { merchantDetailsData ->
+        Column(
+            modifier = modifier
+                .padding(
+                    start = 8.dp,
+                    end = 8.dp
+                )
+                .fillMaxWidth(),
 
             ) {
-                Text(
-                    text = "Change Payment Method",
-                    style = TextStyle(
-                        fontSize = 14.sp,
-                        fontFamily = Faktpro,
-                        fontWeight = FontWeight.Normal,
-                        lineHeight = 10.sp
+            Spacer(modifier = Modifier.height(25.dp))
+
+            SeerbitPaymentDetailScreen(
+                charges = merchantDetailsData.payload?.cardFee?.visa!!.toDouble(),
+                amount = "60,000.00",
+                currencyText = merchantDetailsData.payload.defaultCurrency!!,
+                "Debit/Credit Card Details",
+                merchantDetailsData.payload.businessName!!,
+                merchantDetailsData.payload.supportEmail!!
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            //get card number mmm cvv data
+
+            var cardDetailsData: CardDetails by remember {
+                mutableStateOf(
+                    CardDetails(
+                        "",
+                        "",
+                        "",
+                        ""
                     )
                 )
             }
+            var cvv by rememberSaveable { mutableStateOf("") }
+            var cardNumber by rememberSaveable { mutableStateOf("") }
+            var cardExpiryMonth by rememberSaveable { mutableStateOf("") }
+            var cardExpiryYear by rememberSaveable{ mutableStateOf("") }
 
-            Button(
-                onClick = {},
-                colors = ButtonDefaults.buttonColors(backgroundColor = SignalRed),
-                shape = RoundedCornerShape(4.dp),
-                modifier = Modifier
-                    .height(50.dp)
-                    .weight(1f)
+            var showErrorDialog by remember {
+                mutableStateOf(false)
+            }
 
+            if (showErrorDialog) {
+                ErrorDialog(message = "Please input a valid card details")
+            }
+
+            CardDetailsScreen(
+                cardNumber = cardDetailsData.cardNumber,
+                onChangeCardCvv = {
+                    cvv = it
+                }, onChangeCardExpiryMonth = {
+                    cardExpiryMonth = it
+                },
+                onChangeCardExpiryYear = {
+                    cardExpiryYear = it
+                },
+                onChangeCardNumber = {
+                    cardNumber = it
+                }
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+
+            val cardDTO = CardDTO(
+                deviceType = "Desktop",
+                country = merchantDetailsData.payload.address?.country!!,
+                60000.0,
+                cvv = cvv,
+                redirectUrl = "http://localhost:3002/#/",
+                productId = "",
+                mobileNumber = merchantDetailsData.payload.number,
+                paymentReference = initiateTransactionViewModel.generateRandomReference(),
+                fee = merchantDetailsData.payload.cardFee.mc,
+                expiryMonth = cardExpiryMonth,
+                fullName = "Amos Aorme",
+                "MASTERCARD",
+                publicKey = merchantDetailsData.payload.testPublicKey,
+                expiryYear = cardExpiryYear,
+                source = "",
+                paymentType = "CARD",
+                sourceIP = "0.0.0.1",
+                pin = "",
+                currency = merchantDetailsData.payload.defaultCurrency,
+                "LOCAL",
+                false,
+                email = "inspiron.amos@gmail.com",
+                cardNumber = cardNumber,
+                retry = false
+            )
+
+            cardDTO.paymentReference = initiateTransactionViewModel.generateRandomReference()
+
+            var showCircularProgressBar by rememberSaveable { mutableStateOf(false) }
+
+            if (showCircularProgressBar) {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    CircularProgressIndicator(
+                        color = Color.DarkGray,
+                    )
+                }
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
             ) {
-                Text(
-                    text = "Cancel Payment",
-
-                    style = TextStyle(
-                        fontSize = 14.sp,
-                        fontFamily = Faktpro,
-                        fontWeight = FontWeight.Normal,
-                        lineHeight = 10.sp,
-                        color = DeepRed,
-                    ),
-                    modifier = Modifier.align(alignment = Alignment.CenterVertically)
+                PayButton(
+                    amount = "NGN 60,000",
+                    onClick = {
+                        showErrorDialog =
+                            if (cvv.isValidCvv() && cardNumber.isValidCardNumber() && cardExpiryMonth.isValidCardExpiryMonth()) {
+                                onNavigateToPinScreen(cardDTO)
+                                false
+                            } else {
+                                true
+                            }
+                    }
                 )
             }
 
-        }
 
+            val transactionState: InitiateTransactionState =
+                initiateTransactionViewModel.initiateTransactionState.value
+
+            if (transactionState.hasError) {
+                ErrorDialog(message = transactionState.errorMessage ?: "Something went wrong")
+
+            }
+
+            showCircularProgressBar = transactionState.isLoading
+
+            if (transactionState.data != null) {
+                val paymentRef =
+                    transactionState.data.data?.payments?.paymentReference ?: "DFJLAJLD"
+                navController.navigateSingleTopTo(
+                    "${Route.PIN_SCREEN}/$paymentRef/$cvv/$cardNumber/$cardExpiryMonth/$cardExpiryYear"
+
+                )
+            }
+
+
+
+
+            Spacer(modifier = Modifier.height(100.dp))
+            Row(modifier = Modifier.fillMaxWidth()) {
+
+
+                Button(
+                    onClick = onOtherPaymentButtonClicked,
+                    colors = ButtonDefaults.buttonColors(backgroundColor = LighterGray),
+                    shape = RoundedCornerShape(4.dp),
+
+                    modifier = Modifier
+                        .height(50.dp)
+                        .weight(1.5f)
+                        .padding(end = 8.dp)
+
+                ) {
+                    Text(
+                        text = "Change Payment Method",
+                        style = TextStyle(
+                            fontSize = 14.sp,
+                            fontFamily = Faktpro,
+                            fontWeight = FontWeight.Normal,
+                            lineHeight = 10.sp
+                        )
+                    )
+                }
+
+                Button(
+                    onClick = {},
+                    colors = ButtonDefaults.buttonColors(backgroundColor = SignalRed),
+                    shape = RoundedCornerShape(4.dp),
+                    modifier = Modifier
+                        .height(50.dp)
+                        .weight(1f)
+
+                ) {
+                    Text(
+                        text = "Cancel Payment",
+
+                        style = TextStyle(
+                            fontSize = 14.sp,
+                            fontFamily = Faktpro,
+                            fontWeight = FontWeight.Normal,
+                            lineHeight = 10.sp,
+                            color = DeepRed,
+                        ),
+                        modifier = Modifier.align(alignment = Alignment.CenterVertically)
+                    )
+                }
+
+            }
+
+        }
+        Spacer(modifier = Modifier.height(8.dp))
     }
-    Spacer(modifier = Modifier.height(8.dp))
 }
 
 @Preview(showBackground = true, widthDp = 400, heightDp = 700)
 @Composable
 fun HeaderScreenPreview() {
-    SeerBitApp()
+    val viewModel: MerchantDetailsViewModel = viewModel()
+    val initiateTransactionViewModel: InitiateTransactionViewModel = viewModel()
+    SeerBitApp(viewModel, initiateTransactionViewModel)
 }
 
 @Composable
-fun CardDetailsScreen(modifier: Modifier = Modifier) {
-    Column(modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally) {
+fun CardDetailsScreen(
+    modifier: Modifier = Modifier,
+    cardNumber: String,
+    onChangeCardNumber: (String) -> Unit,
+    onChangeCardExpiryMonth: (String) -> Unit,
+    onChangeCardExpiryYear: (String) -> Unit,
+    onChangeCardCvv: (String) -> Unit,
+) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
 
 
         Card(modifier = modifier, elevation = 4.dp) {
-            var value by remember { mutableStateOf("") }
+            var value by rememberSaveable { mutableStateOf(cardNumber) }
             Image(
                 painter = painterResource(id = R.drawable.filled_bg_white),
                 contentDescription = null
@@ -239,7 +430,12 @@ fun CardDetailsScreen(modifier: Modifier = Modifier) {
             OutlinedTextField(
                 value = value,
                 visualTransformation = { cardNumberFormatting(it) },
-                onValueChange = { newText -> if (newText.length <= 16) value = newText },
+                onValueChange = { newText ->
+                    if (newText.length <= 16) {
+                        value = newText
+                        onChangeCardNumber(newText)
+                    }
+                },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
 
                 colors = TextFieldDefaults.textFieldColors(
@@ -266,91 +462,105 @@ fun CardDetailsScreen(modifier: Modifier = Modifier) {
         }
 
         Spacer(modifier = modifier.height(16.dp))
-        MMM_CVVScreen(modifier = modifier)
 
-    }
-}
+        //MMM_CVVScreen(modifier = , cardDetails = )
+        Row(modifier = Modifier) {
 
-@Composable
-fun MMM_CVVScreen(modifier: Modifier) {
-    Row(modifier = Modifier) {
+            Card(modifier = modifier.weight(1f), elevation = 4.dp) {
+                var value by rememberSaveable{ mutableStateOf("") }
+                Image(
+                    painter = painterResource(id = R.drawable.filled_bg_white),
+                    contentDescription = null
+                )
+                OutlinedTextField(
+                    value = value,
+                    visualTransformation = { cardExpiryDateFilter(it) },
+                    onValueChange = { newText ->
+                        if (newText.length <= 4) {
+                            value = newText
+                            if (newText.length <= 2) {
+                                onChangeCardExpiryMonth(newText)
+                            }
+                            if (newText.length >= 2) {
+                                onChangeCardExpiryYear(newText.substring(2))
+                            }
+                        }
 
-        Card(modifier = modifier.weight(1f), elevation = 4.dp) {
-            var value by remember { mutableStateOf("") }
+                    },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    colors = TextFieldDefaults.textFieldColors(
+                        backgroundColor = MaterialTheme.colors.surface,
+                        disabledIndicatorColor = Color.Transparent,
+                        disabledLabelColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        cursorColor = Color.Gray
+
+                    ),
+                    shape = RoundedCornerShape(topStart = 8.dp, bottomStart = 8.dp),
+                    placeholder = {
+                        Text(
+                            text = "MM/YY",
+                            style = TextStyle(fontSize = 14.sp),
+                            color = Color.Black
+                        )
+                    },
+                    modifier = modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                )
+            }
+
             Image(
-                painter = painterResource(id = R.drawable.filled_bg_white),
-                contentDescription = null
+                painter = painterResource(id = R.drawable.vertical_divider_line),
+                contentDescription = "dividing line"
             )
-            OutlinedTextField(
-                value = value,
-                visualTransformation = { cardExpiryDateFilter(it) },
-                onValueChange = { newText ->
-                    if (newText.length <= 4) value = newText
-                },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                colors = TextFieldDefaults.textFieldColors(
-                    backgroundColor = MaterialTheme.colors.surface,
-                    disabledIndicatorColor = Color.Transparent,
-                    disabledLabelColor = Color.Transparent,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    cursorColor = Color.Gray
+            //CVV Card
+            Card(modifier = modifier.weight(1f), elevation = 4.dp) {
+                var value by rememberSaveable { mutableStateOf("") }
+                Image(
+                    painter = painterResource(id = R.drawable.filled_bg_white),
+                    contentDescription = null
+                )
+                OutlinedTextField(
+                    value = value,
+                    onValueChange = { newText ->
+                        if (newText.length <= 3) {
+                            value = newText
+                            onChangeCardCvv(newText)
+                        }
+                    },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    colors = TextFieldDefaults.textFieldColors(
+                        backgroundColor = MaterialTheme.colors.surface,
+                        disabledIndicatorColor = Color.Transparent,
+                        disabledLabelColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        cursorColor = Color.Gray
 
-                ),
-                shape = RoundedCornerShape(topStart = 8.dp, bottomStart = 8.dp),
-                placeholder = {
-                    Text(
-                        text = "MM/YY",
-                        style = TextStyle(fontSize = 14.sp),
-                        color = Color.Black
-                    )
-                },
-                modifier = modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-            )
+                    ),
+                    shape = RoundedCornerShape(topEnd = 8.dp, bottomEnd = 8.dp),
+                    placeholder = {
+                        Text(
+                            text = "CVV",
+                            style = TextStyle(fontSize = 14.sp),
+                            color = Color.Black
+                        )
+                    },
+                    modifier = modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                )
+            }
+
+
         }
 
-        Image(
-            painter = painterResource(id = R.drawable.vertical_divider_line),
-            contentDescription = "dividing line"
-        )
-        //CVV Card
-        Card(modifier = modifier.weight(1f), elevation = 4.dp) {
-            var value by remember { mutableStateOf("") }
-            Image(
-                painter = painterResource(id = R.drawable.filled_bg_white),
-                contentDescription = null
-            )
-            OutlinedTextField(
-                value = value,
-                onValueChange = { newText -> if (newText.length <= 3) value = newText },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                colors = TextFieldDefaults.textFieldColors(
-                    backgroundColor = MaterialTheme.colors.surface,
-                    disabledIndicatorColor = Color.Transparent,
-                    disabledLabelColor = Color.Transparent,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    cursorColor = Color.Gray
-
-                ),
-                shape = RoundedCornerShape(topEnd = 8.dp, bottomEnd = 8.dp),
-                placeholder = {
-                    Text(
-                        text = "CVV",
-                        style = TextStyle(fontSize = 14.sp),
-                        color = Color.Black
-                    )
-                },
-                modifier = modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-            )
-        }
-
     }
+
 }
+
 
 fun cardExpiryDateFilter(text: AnnotatedString): TransformedText {
 
@@ -420,17 +630,15 @@ fun cardNumberFormatting(text: AnnotatedString): TransformedText {
 
 @Preview(showBackground = true, widthDp = 518)
 @Composable
-fun MMM_CVVScreenPreview() {
-    SeerBitTheme {
-        MMM_CVVScreen(modifier = Modifier)
-    }
-}
-
-@Preview(showBackground = true, widthDp = 518)
-@Composable
 fun CardDetailsPreview() {
     SeerBitTheme {
-        CardDetailsScreen()
+        CardDetailsScreen(
+            cardNumber = "",
+            onChangeCardNumber = {},
+            onChangeCardExpiryMonth = {},
+            onChangeCardExpiryYear = {},
+            onChangeCardCvv = {}
+        )
     }
 }
 
@@ -511,7 +719,9 @@ fun MyAppNavHost(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
     startDestination: String = Debit_CreditCard.route,
-    currentDestination: NavDestination?
+    currentDestination: NavDestination?,
+    merchantDetailsState: MerchantDetailsState,
+    viewModel: InitiateTransactionViewModel
 ) {
     NavHost(
         modifier = modifier,
@@ -528,19 +738,63 @@ fun MyAppNavHost(
         }
 
         composable(route = Debit_CreditCard.route) {
+            viewModel.resetTransactionState()
             CardHomeScreen(
-                onNavigateToPinScreen = { navController.navigateSingleTopTo(Route.PIN_SCREEN) },
+                onNavigateToPinScreen = { cardDTO ->
+                    // if there is an error loading the report
+                    viewModel.initiateTransaction(cardDTO)
+                },
+
                 onOtherPaymentButtonClicked = { navController.navigateSingleTopTo(Route.OTHER_PAYMENT_SCREEN) },
                 currentDestination = currentDestination,
-                navController = navController
+                navController = navController,
+                merchantDetailsState = merchantDetailsState,
+                initiateTransactionViewModel = viewModel
             )
         }
+
+        composable("${Route.PIN_SCREEN}/{paymentRef}/{cvv}/{cardNumber}/{cardExpiryMonth}/{cardExpiryYear}",
+            arguments = listOf(
+                // declaring argument type
+                navArgument("paymentRef") { type = NavType.StringType },
+                navArgument("cvv") { type = NavType.StringType },
+                navArgument("cardNumber") { type = NavType.StringType },
+                navArgument("cardExpiryMonth") { type = NavType.StringType },
+                navArgument("cardExpiryYear") { type = NavType.StringType }
+            )
+        ) { navBackStackEntry ->
+            val paymentReference = navBackStackEntry.arguments?.getString("paymentRef")
+            val cvv = navBackStackEntry.arguments?.getString("cvv")
+            val cardNumber = navBackStackEntry.arguments?.getString("cardNumber")
+            val cardExpiryMonth = navBackStackEntry.arguments?.getString("cardExpiryMonth")
+            val cardExpiryYear = navBackStackEntry.arguments?.getString("cardExpiryYear")
+
+            CardEnterPinScreen(
+                onPayButtonClicked = { cardDTO ->
+                    viewModel.resetTransactionState()
+                    viewModel.initiateTransaction(cardDTO)
+                },
+                currentDestination = currentDestination,
+                navController = navController,
+                merchantDetailsState = merchantDetailsState,
+                initiateTransactionViewModel = viewModel,
+                onOtherPaymentButtonClicked = {},
+                paymentReference = paymentReference!!,
+                cvv = cvv!!,
+                cardNumber = cardNumber!!,
+                cardExpiryMonth = cardExpiryMonth!!,
+                cardExpiryYear = cardExpiryYear!!
+
+            )
+        }
+
         composable(route = Ussd.route) {
             USSDHomeScreen(
                 navigateToLoadingScreen = { navController.navigateSingleTopTo(Route.PIN_SCREEN) },
                 currentDestination = currentDestination,
-                navController = navController
-            )
+                navController = navController,
+
+                )
         }
 
         composable(route = BankAccount.route) {
@@ -580,13 +834,7 @@ fun MyAppNavHost(
             )
         }
 
-        composable(Route.PIN_SCREEN) {
-            CardEnterPinScreen(
-                onNavigateToOtpScreen = { navController.navigateSingleTopNoPopUpToHome("otpscreen") }
-            )
 
-
-        }
         composable("otpscreen") {
             OTPScreen(
                 onPaymentMethodClick = {}
@@ -594,6 +842,46 @@ fun MyAppNavHost(
 
 
         }
+    }
+}
+
+
+@Composable
+fun ErrorDialog(message: String) {
+    val openDialog = remember { mutableStateOf(true) }
+    if (openDialog.value) {
+        AlertDialog(
+            onDismissRequest = {
+                openDialog.value = false
+            },
+            title = {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(text = stringResource(R.string.problem_occurred))
+                }
+
+            },
+            text = {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(message)
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = { openDialog.value = false }, colors = ButtonDefaults.buttonColors(
+                        backgroundColor = SignalRed
+                    )
+                ) {
+                    Text(text = "Close")
+
+                }
+            },
+        )
     }
 }
 

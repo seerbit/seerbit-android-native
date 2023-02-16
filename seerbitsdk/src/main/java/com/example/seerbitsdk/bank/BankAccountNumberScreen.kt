@@ -38,7 +38,9 @@ fun BankAccountNumberScreen(
                 charges = 0.45,
                 amount = "60,000.00",
                 currencyText = "NGN",
-                "Enter your Bank Account Number"
+                "Enter your Bank Account Number",
+                "",
+                ""
             )
 
             Spacer(modifier = Modifier.height(21.dp))

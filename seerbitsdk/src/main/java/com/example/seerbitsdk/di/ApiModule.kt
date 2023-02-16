@@ -12,13 +12,14 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
+import javax.inject.Singleton
 
-
-@Module
 @InstallIn(SingletonComponent::class)
-object ApiModule {
+@Module
+class ApiModule {
 
     @Provides
+    @Singleton
     fun provideSeerBitSDKService(): SeerBitService {
         return Retrofit.Builder()
             .client(okHttpClient.build())
@@ -31,7 +32,7 @@ object ApiModule {
 
     private val okHttpClient = OkHttpClient.Builder()
         .addInterceptor(Interceptor { chain: Interceptor.Chain ->
-            val token = "SBTESTPUBK_t4G16GCA1O51AV0Va3PPretaisXubSw1"
+            val token = "68826aea9005de7812429b7983838b06e2c7fffbb3d9487f33bc51c943a3a499"
             var request = chain.request()
             request = request.newBuilder()
                 .addHeader("Authorization", "Bearer $token")

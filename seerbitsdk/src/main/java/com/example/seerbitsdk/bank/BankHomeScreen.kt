@@ -56,7 +56,9 @@ fun BankScreen(
                 charges = 0.45,
                 amount = "60,000.00",
                 currencyText = "NGN",
-                "Choose your bank to start this payment"
+                "Choose your bank to start this payment",
+                "",
+                ""
             )
 
             Spacer(modifier = Modifier.height(21.dp))

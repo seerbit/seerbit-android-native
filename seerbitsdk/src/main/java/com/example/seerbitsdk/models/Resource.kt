@@ -1,4 +1,4 @@
-package com.example.seerbitsdk.api
+package com.example.seerbitsdk.models
 
 sealed class Resource<T>(
     val data: T? = null,

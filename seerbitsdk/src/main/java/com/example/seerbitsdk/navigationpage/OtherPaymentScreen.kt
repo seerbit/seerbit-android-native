@@ -56,7 +56,9 @@ fun OtherPaymentScreen(
                 charges = 0.45,
                 amount = "60,000.00",
                 currencyText = "",
-                "Other Payment Channels"
+                "Other Payment Channels",
+                "",
+                ""
             )
             Spacer(modifier = Modifier.height(8.dp))
 

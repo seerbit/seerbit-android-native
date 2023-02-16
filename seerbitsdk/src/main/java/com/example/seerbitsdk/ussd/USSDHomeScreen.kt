@@ -60,6 +60,8 @@ fun USSDHomeScreen(
                 charges = 0.45,
                 amount = "60,000.00",
                 currencyText = "NGN",
+                "",
+                "",
                 ""
             )
 
