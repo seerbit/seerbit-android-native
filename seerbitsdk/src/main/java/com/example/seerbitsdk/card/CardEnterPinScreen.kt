@@ -67,7 +67,6 @@ fun CardEnterPinScreen(
     cardExpiryYear: String
 
 ) {
-    var showPinScreen by remember { mutableStateOf(false) }
     Column(modifier = modifier) {
 
 
