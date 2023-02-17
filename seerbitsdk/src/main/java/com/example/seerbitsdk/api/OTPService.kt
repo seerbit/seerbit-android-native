@@ -1,9 +1,9 @@
 package com.example.seerbitsdk.api
 
 import com.example.seerbitsdk.BuildConfig
-import com.example.seerbitsdk.models.transfer.TransferDTO
-import com.example.seerbitsdk.models.card.CardDTO
+import com.example.seerbitsdk.models.CardOTPDTO
 import com.example.seerbitsdk.models.card.CardResponse
+import com.example.seerbitsdk.models.home.MerchantDetailsResponse
 import com.example.seerbitsdk.models.query.QueryTransactionResponse
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -17,17 +17,11 @@ import retrofit2.http.POST
 import retrofit2.http.Path
 import java.util.concurrent.TimeUnit
 
-interface InitiateTransactionService {
+interface OTPService {
 
-    @POST("initiates")
-    suspend fun initiateCard(@Body cardDTO: CardDTO): Response<CardResponse>
-
-    @POST("initiates")
-    suspend fun initiateTransfer(@Body transferDTO: TransferDTO): Response<CardResponse>
-
-    @GET("query/{paymentReference}")
-    suspend fun queryTransaction(@Path("paymentReference") paymentReference: String)
-            : Response<QueryTransactionResponse>
+    @POST("otp")
+    suspend fun sendOtp(@Body sendOTPDTO: CardOTPDTO)
+            : Response<CardResponse>
 }
 
 
@@ -56,14 +50,15 @@ private fun logger(): HttpLoggingInterceptor {
 }
 
 
+
 private val retrofit = Retrofit.Builder()
     .baseUrl("https://seerbitapi.com/sandbox/")
     .client(okHttpClient.build())
     .addConverterFactory(GsonConverterFactory.create())
     .build()
 
-object InitiateTransactionApiService {
-    val retrofitService: InitiateTransactionService by lazy {
-        retrofit.create(InitiateTransactionService::class.java)
+object OtpApiService {
+    val retrofitService: OTPService by lazy {
+        retrofit.create(OTPService::class.java)
     }
 }

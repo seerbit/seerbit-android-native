@@ -19,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.intl.Locale
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -68,15 +69,18 @@ fun OTPScreen(
                         fontFamily = FontFamily.SansSerif,
                         fontWeight = FontWeight.Normal,
                         lineHeight = 14.sp,
+                        textAlign = TextAlign.Center
 
-                        ),
+                    ),
                     modifier = Modifier
                         .align(alignment = Alignment.CenterVertically)
                         .padding(10.dp)
                 )
             }
             Spacer(modifier = Modifier.height(20.dp))
-            OTPInputField(Modifier, "Enter OTP")
+            OTPInputField(Modifier, "Enter OTP") {
+
+            }
             Spacer(modifier = modifier.height(20.dp))
 
             Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
@@ -112,7 +116,10 @@ fun OTPScreenPreview() {
 
 
 @Composable
-fun OTPInputField(modifier: Modifier = Modifier, placeholder: String) {
+fun OTPInputField(
+    modifier: Modifier = Modifier, placeholder: String,
+    onEnterOTP: (String) -> Unit
+) {
     Column {
 
 
@@ -124,7 +131,11 @@ fun OTPInputField(modifier: Modifier = Modifier, placeholder: String) {
             )
             OutlinedTextField(
                 value = value,
-                onValueChange = { newText -> value = newText },
+                onValueChange = { newText ->
+                    if (newText.length <= 6)
+                        value = newText
+                    onEnterOTP(newText)
+                },
 
                 colors = TextFieldDefaults.textFieldColors(
                     backgroundColor = MaterialTheme.colors.surface,

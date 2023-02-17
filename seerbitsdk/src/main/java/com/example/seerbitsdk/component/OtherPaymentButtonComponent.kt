@@ -35,7 +35,7 @@ Row(modifier = Modifier.fillMaxWidth()) {
 
         modifier = Modifier
             .height(50.dp)
-            .weight(1.5f)
+            .weight(2.0f)
             .padding(end = 8.dp)
 
     ) {

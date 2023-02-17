@@ -45,7 +45,9 @@ fun BankAccountNumberScreen(
 
             Spacer(modifier = Modifier.height(21.dp))
 
-            OTPInputField(Modifier, "10 Digit Bank Account Number")
+            OTPInputField(Modifier, "10 Digit Bank Account Number"){
+
+            }
             Spacer(modifier = modifier.height(20.dp))
 
             Spacer(modifier = modifier.height(10.dp))

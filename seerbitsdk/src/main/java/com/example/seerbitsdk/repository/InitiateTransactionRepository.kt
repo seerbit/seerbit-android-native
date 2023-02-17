@@ -1,6 +1,6 @@
 package com.example.seerbitsdk.repository
 
-import com.example.seerbitsdk.api.InitiateApiService
+import com.example.seerbitsdk.api.InitiateTransactionApiService
 import com.example.seerbitsdk.api.SeerBitApi
 import com.example.seerbitsdk.models.card.CardDTO
 import com.example.seerbitsdk.models.card.CardResponse
@@ -11,10 +11,10 @@ import retrofit2.Response
 class InitiateTransactionRepository {
 
     suspend fun initiateCard(cardDTO: CardDTO): Response<CardResponse> {
-        return InitiateApiService.retrofitService.initiateCard(cardDTO)
+        return InitiateTransactionApiService.retrofitService.initiateCard(cardDTO)
     }
     suspend fun initiateTransfer(transferDTO: TransferDTO): Response<CardResponse> {
-        return InitiateApiService.retrofitService.initiateTransfer(transferDTO)
+        return InitiateTransactionApiService.retrofitService.initiateTransfer(transferDTO)
     }
 
     suspend fun queryTransaction(paymentReference: String): Response<QueryTransactionResponse> {

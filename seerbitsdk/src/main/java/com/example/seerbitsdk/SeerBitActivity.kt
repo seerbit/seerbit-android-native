@@ -1,7 +1,9 @@
 package com.example.seerbitsdk
 
 import android.app.Activity
+import android.content.Intent
 import android.content.pm.ActivityInfo
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -25,6 +27,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
@@ -47,14 +50,14 @@ import com.example.seerbitsdk.card.CardEnterPinScreen
 import com.example.seerbitsdk.card.OTPScreen
 import com.example.seerbitsdk.component.*
 import com.example.seerbitsdk.models.card.CardDTO
-import com.example.seerbitsdk.models.card.CardDetails
+import com.example.seerbitsdk.models.CardDetails
 import com.example.seerbitsdk.navigationpage.OtherPaymentScreen
 import com.example.seerbitsdk.screenstate.InitiateTransactionState
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.transfer.TransferHomeScreen
 import com.example.seerbitsdk.ui.theme.*
 import com.example.seerbitsdk.ussd.USSDHomeScreen
-import com.example.seerbitsdk.viewmodels.InitiateTransactionViewModel
+import com.example.seerbitsdk.viewmodels.TransactionViewModel
 import com.example.seerbitsdk.viewmodels.MerchantDetailsViewModel
 
 class SeerBitActivity : ComponentActivity() {
@@ -62,7 +65,7 @@ class SeerBitActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             val viewModel: MerchantDetailsViewModel by viewModels()
-            val transactionViewModel: InitiateTransactionViewModel by viewModels()
+            val transactionViewModel: TransactionViewModel by viewModels()
             transactionViewModel.resetTransactionState()
             SeerBitApp(viewModel, transactionViewModel)
 
@@ -88,7 +91,7 @@ fun DefaultPreview() {
 @Composable
 fun SeerBitApp(
     viewModel: MerchantDetailsViewModel,
-    transactionViewModel: InitiateTransactionViewModel
+    transactionViewModel: TransactionViewModel
 ) {
     SeerBitTheme {
         // A surface container using the 'background' color from the theme
@@ -180,7 +183,7 @@ fun CardHomeScreen(
     navController: NavHostController,
     merchantDetailsState: MerchantDetailsState,
     onOtherPaymentButtonClicked: () -> Unit,
-    initiateTransactionViewModel: InitiateTransactionViewModel
+    transactionViewModel: TransactionViewModel
 ) {
 
     var cardDetailsData: CardDetails by remember { mutableStateOf(CardDetails("", "", "", "")) }
@@ -190,6 +193,8 @@ fun CardHomeScreen(
     var cardNumber by rememberSaveable { mutableStateOf("") }
     var cardExpiryMonth by rememberSaveable { mutableStateOf("") }
     var cardExpiryYear by rememberSaveable { mutableStateOf("") }
+    var redirectToUrl: Boolean = false
+    var redirectUrl: String = ""
 
     var showErrorDialog by remember { mutableStateOf(false) }
 
@@ -238,10 +243,10 @@ fun CardHomeScreen(
             CardDetailsScreen(
                 cardNumber = cardDetailsData.cardNumber,
                 onChangeCardCvv = {
-                cvv = it
-            }, onChangeCardExpiryMonth = {
-                cardExpiryMonth = it
-            },
+                    cvv = it
+                }, onChangeCardExpiryMonth = {
+                    cardExpiryMonth = it
+                },
                 onChangeCardExpiryYear = {
                     cardExpiryYear = it
                 },
@@ -280,7 +285,7 @@ fun CardHomeScreen(
                 retry = false
             )
 
-            cardDTO.paymentReference = initiateTransactionViewModel.generateRandomReference()
+            cardDTO.paymentReference = transactionViewModel.generateRandomReference()
 
             if (showCircularProgressBar) {
                 showCircularProgress(showProgress = true)
@@ -295,20 +300,25 @@ fun CardHomeScreen(
                 PayButton(
                     amount = "NGN 60,000",
                     onClick = {
-                        showErrorDialog =
-                            if (validateCardDetails( cvv.isValidCvv(), cardNumber.isValidCardNumber() , cardExpiryMonth.isValidCardExpiryMonth())) {
-                                onNavigateToPinScreen(cardDTO)
-                                false
-                            } else {
-                                true
-                            }
+
+                        showErrorDialog = if (validateCardDetails(
+                                cvv.isValidCvv(),
+                                cardNumber.isValidCardNumber(),
+                                cardExpiryMonth.isValidCardExpiryMonth()
+                            )
+                        ) {
+                            onNavigateToPinScreen(cardDTO)
+                            false
+                        } else {
+                            true
+                        }
                     }
                 )
             }
 
 
             val transactionState: InitiateTransactionState =
-                initiateTransactionViewModel.initiateTransactionState.value
+                transactionViewModel.initiateTransactionState.value
 
             if (transactionState.hasError) {
                 ErrorDialog(message = transactionState.errorMessage ?: "Something went wrong")
@@ -316,14 +326,25 @@ fun CardHomeScreen(
 
             showCircularProgressBar = transactionState.isLoading
 
+
             if (transactionState.data != null) {
-                val paymentRef = transactionState.data.data?.payments?.paymentReference ?: "DFJLAJLD"
-                navController.navigateSingleTopTo(
-                    "${Route.PIN_SCREEN}/$paymentRef/$cvv/$cardNumber/$cardExpiryMonth/$cardExpiryYear"
-                )
+                val paymentRef = transactionState.data.data?.payments?.paymentReference ?: ""
+                val toEnterPinScreen = transactionState.data.data?.message == KINDLY_ENTER_PIN
+                redirectUrl = transactionState.data.data?.payments?.redirectUrl!!
+                if (toEnterPinScreen) {
+                    navController.navigateSingleTopTo(
+                        "${Route.PIN_SCREEN}/$paymentRef/$cvv/$cardNumber/$cardExpiryMonth/$cardExpiryYear/$toEnterPinScreen"
+                    )
+                }
+                else if(redirectUrl.isNotEmpty()){
+                    val urlIntent = Intent(
+                        Intent.ACTION_VIEW,
+                        Uri.parse(redirectUrl)
+                    )
+                    LocalContext.current.startActivity(urlIntent)
+                }
+                transactionViewModel.resetTransactionState()
             }
-
-
             Spacer(modifier = Modifier.height(100.dp))
             Row(modifier = Modifier.fillMaxWidth()) {
 
@@ -384,9 +405,13 @@ fun CardHomeScreen(
 @Composable
 fun HeaderScreenPreview() {
     val viewModel: MerchantDetailsViewModel = viewModel()
-    val initiateTransactionViewModel: InitiateTransactionViewModel = viewModel()
-    SeerBitApp(viewModel, initiateTransactionViewModel)
+    val transactionViewModel: TransactionViewModel = viewModel()
+    SeerBitApp(viewModel, transactionViewModel)
 }
+
+
+
+
 
 @Composable
 fun CardDetailsScreen(
@@ -405,10 +430,7 @@ fun CardDetailsScreen(
 
         Card(modifier = modifier, elevation = 4.dp) {
             var value by rememberSaveable { mutableStateOf(cardNumber) }
-            Image(
-                painter = painterResource(id = R.drawable.filled_bg_white),
-                contentDescription = null
-            )
+
             OutlinedTextField(
                 value = value,
                 visualTransformation = { cardNumberFormatting(it) },
@@ -418,8 +440,10 @@ fun CardDetailsScreen(
                         onChangeCardNumber(newText)
                     }
                 },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.NumberPassword,
+                    imeAction = ImeAction.Send
+                ),
                 colors = TextFieldDefaults.textFieldColors(
                     backgroundColor = MaterialTheme.colors.surface,
                     disabledIndicatorColor = Color.Transparent,
@@ -450,10 +474,6 @@ fun CardDetailsScreen(
 
             Card(modifier = modifier.weight(1f), elevation = 4.dp) {
                 var value by rememberSaveable { mutableStateOf("") }
-                Image(
-                    painter = painterResource(id = R.drawable.filled_bg_white),
-                    contentDescription = null
-                )
                 OutlinedTextField(
                     value = value,
                     visualTransformation = { cardExpiryDateFilter(it) },
@@ -468,8 +488,10 @@ fun CardDetailsScreen(
                             }
                         }
 
-                    },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    }, keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.NumberPassword,
+                        imeAction = ImeAction.Send
+                    ),
                     colors = TextFieldDefaults.textFieldColors(
                         backgroundColor = MaterialTheme.colors.surface,
                         disabledIndicatorColor = Color.Transparent,
@@ -500,10 +522,7 @@ fun CardDetailsScreen(
             //CVV Card
             Card(modifier = modifier.weight(1f), elevation = 4.dp) {
                 var value by rememberSaveable { mutableStateOf("") }
-                Image(
-                    painter = painterResource(id = R.drawable.filled_bg_white),
-                    contentDescription = null
-                )
+
                 OutlinedTextField(
                     value = value,
                     onValueChange = { newText ->
@@ -511,8 +530,10 @@ fun CardDetailsScreen(
                             value = newText
                             onChangeCardCvv(newText)
                         }
-                    },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    }, keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.NumberPassword,
+                        imeAction = ImeAction.Send
+                    ),
                     colors = TextFieldDefaults.textFieldColors(
                         backgroundColor = MaterialTheme.colors.surface,
                         disabledIndicatorColor = Color.Transparent,
@@ -703,7 +724,7 @@ fun MyAppNavHost(
     startDestination: String = Debit_CreditCard.route,
     currentDestination: NavDestination?,
     merchantDetailsState: MerchantDetailsState,
-    viewModel: InitiateTransactionViewModel
+    viewModel: TransactionViewModel
 ) {
     NavHost(
         modifier = modifier,
@@ -731,18 +752,20 @@ fun MyAppNavHost(
                 currentDestination = currentDestination,
                 navController = navController,
                 merchantDetailsState = merchantDetailsState,
-                initiateTransactionViewModel = viewModel
+                transactionViewModel = viewModel
             )
         }
 
-        composable("${Route.PIN_SCREEN}/{paymentRef}/{cvv}/{cardNumber}/{cardExpiryMonth}/{cardExpiryYear}",
+        composable(
+            "${Route.PIN_SCREEN}/{paymentRef}/{cvv}/{cardNumber}/{cardExpiryMonth}/{cardExpiryYear}/{isEnterPin}",
             arguments = listOf(
                 // declaring argument type
                 navArgument("paymentRef") { type = NavType.StringType },
                 navArgument("cvv") { type = NavType.StringType },
                 navArgument("cardNumber") { type = NavType.StringType },
                 navArgument("cardExpiryMonth") { type = NavType.StringType },
-                navArgument("cardExpiryYear") { type = NavType.StringType }
+                navArgument("cardExpiryYear") { type = NavType.StringType },
+                navArgument("isEnterPin") { type = NavType.BoolType },
             )
         ) { navBackStackEntry ->
             val paymentReference = navBackStackEntry.arguments?.getString("paymentRef")
@@ -750,6 +773,7 @@ fun MyAppNavHost(
             val cardNumber = navBackStackEntry.arguments?.getString("cardNumber")
             val cardExpiryMonth = navBackStackEntry.arguments?.getString("cardExpiryMonth")
             val cardExpiryYear = navBackStackEntry.arguments?.getString("cardExpiryYear")
+            val isEnterPin = navBackStackEntry.arguments?.getBoolean("isEnterPin")
 
             CardEnterPinScreen(
                 onPayButtonClicked = { cardDTO ->
@@ -759,14 +783,14 @@ fun MyAppNavHost(
                 currentDestination = currentDestination,
                 navController = navController,
                 merchantDetailsState = merchantDetailsState,
-                initiateTransactionViewModel = viewModel,
+                transactionViewModel = viewModel,
                 onOtherPaymentButtonClicked = { navController.navigateSingleTopTo(Route.OTHER_PAYMENT_SCREEN) },
                 paymentReference = paymentReference!!,
                 cvv = cvv!!,
                 cardNumber = cardNumber!!,
                 cardExpiryMonth = cardExpiryMonth!!,
-                cardExpiryYear = cardExpiryYear!!
-
+                cardExpiryYear = cardExpiryYear!!,
+                isEnterPin = isEnterPin!!
             )
         }
 

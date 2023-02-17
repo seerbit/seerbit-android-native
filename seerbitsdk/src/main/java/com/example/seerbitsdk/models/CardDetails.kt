@@ -1,4 +1,4 @@
-package com.example.seerbitsdk.models.card
+package com.example.seerbitsdk.models
 
 data class CardDetails(
     var cardNumber : String,

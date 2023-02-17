@@ -27,3 +27,12 @@ data class InitiateTransactionState(
     val errorMessage: String? = null
 
 )
+
+
+data class OTPState(
+    val data: CardResponse? = null,
+    val isLoading: Boolean = false,
+    val hasError: Boolean = false,
+    val errorMessage: String? = null
+
+)

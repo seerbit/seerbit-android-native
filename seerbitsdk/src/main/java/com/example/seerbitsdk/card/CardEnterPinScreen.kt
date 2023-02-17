@@ -27,14 +27,16 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.seerbitsdk.*
 import com.example.seerbitsdk.component.*
+import com.example.seerbitsdk.models.CardOTPDTO
+import com.example.seerbitsdk.models.Transaction
 import com.example.seerbitsdk.models.card.CardDTO
 import com.example.seerbitsdk.screenstate.InitiateTransactionState
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
+import com.example.seerbitsdk.screenstate.OTPState
 import com.example.seerbitsdk.screenstate.QueryTransactionState
 import com.example.seerbitsdk.ui.theme.SeerBitTheme
-import com.example.seerbitsdk.viewmodels.InitiateTransactionViewModel
+import com.example.seerbitsdk.viewmodels.TransactionViewModel
 import com.example.seerbitsdk.viewmodels.MerchantDetailsViewModel
-import kotlinx.coroutines.launch
 
 
 @Composable
@@ -59,12 +61,13 @@ fun CardEnterPinScreen(
     navController: NavHostController,
     merchantDetailsState: MerchantDetailsState,
     onOtherPaymentButtonClicked: () -> Unit,
-    initiateTransactionViewModel: InitiateTransactionViewModel,
+    transactionViewModel: TransactionViewModel,
     paymentReference: String,
     cvv: String,
     cardNumber: String,
     cardExpiryMonth: String,
-    cardExpiryYear: String
+    cardExpiryYear: String,
+    isEnterPin: Boolean
 
 ) {
     Column(modifier = modifier) {
@@ -89,57 +92,67 @@ fun CardEnterPinScreen(
                     .weight(1f)
             ) {
 
-                var pin by rememberSaveable { mutableStateOf("") }
+                var pin by remember { mutableStateOf("") }
+                var isEnterOTP by remember { mutableStateOf(false) }
                 var showErrorDialog by rememberSaveable { mutableStateOf(false) }
                 var showCircularProgressBar by rememberSaveable { mutableStateOf(false) }
+                var linkingReference by remember { mutableStateOf("") }
+                var otp by remember { mutableStateOf("") }
 
                 Spacer(modifier = Modifier.height(21.dp))
                 SeerbitPaymentDetailScreen(
-                    charges = 0.45,
+
+                    charges = merchantDetailsData.payload?.cardFee?.visa!!.toDouble(),
                     amount = "60,000.00",
-                    currencyText = "NGN",
+                    currencyText = merchantDetailsData.payload.defaultCurrency!!,
                     "",
-                    merchantDetailsData.payload?.businessName!!,
+                    merchantDetailsData.payload.businessName!!,
                     merchantDetailsData.payload.supportEmail!!
                 )
 
 
-                Text(
-                    text = "Enter your four digit card pin to authorize the payment",
-                    style = TextStyle(
-                        fontSize = 14.sp,
-                        fontFamily = FontFamily.SansSerif,
-                        fontWeight = FontWeight.Normal,
-                        lineHeight = 10.sp
-                    ),
-                    modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
-                )
-                Spacer(modifier = Modifier.height(40.dp))
-
+                if (!isEnterOTP) {
+                    Text(
+                        text = "Enter your four digit card pin to authorize the payment",
+                        style = TextStyle(
+                            fontSize = 14.sp,
+                            fontFamily = FontFamily.SansSerif,
+                            fontWeight = FontWeight.Normal,
+                            lineHeight = 10.sp
+                        ),
+                        modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
+                    )
+                    Spacer(modifier = Modifier.height(40.dp))
+                }
 
                 if (showErrorDialog) {
                     ErrorDialog(message = "invalid pin")
                 }
 
+                val cardOTPDTO = CardOTPDTO(
+                    transaction = Transaction(
+                        linkingReference, otp
+                    )
+                )
                 val cardDTO = CardDTO(
                     deviceType = "Desktop",
-                    country = merchantDetailsData.payload?.address?.country!!,
+                    country = merchantDetailsData.payload.address?.country!!,
                     60000.0,
                     cvv = cvv,
                     redirectUrl = "http://localhost:3002/#/",
                     productId = "",
                     mobileNumber = merchantDetailsData.payload.number,
-                    paymentReference = initiateTransactionViewModel.generateRandomReference(),
+                    paymentReference = paymentReference,
                     fee = merchantDetailsData.payload.cardFee?.mc,
                     expiryMonth = cardExpiryMonth,
                     fullName = "Amos Aorme",
                     "MASTERCARD",
                     publicKey = merchantDetailsData.payload.testPublicKey,
                     expiryYear = cardExpiryYear,
-                    source = "",
+                    source = "MODAL",
                     paymentType = "CARD",
                     sourceIP = "0.0.0.1",
-                    pin = "",
+                    pin = pin,
                     currency = merchantDetailsData.payload.defaultCurrency,
                     "LOCAL",
                     false,
@@ -147,40 +160,101 @@ fun CardEnterPinScreen(
                     cardNumber = cardNumber,
                     retry = false
                 )
-                cardDTO.paymentReference = initiateTransactionViewModel.generateRandomReference()
-
-                PinInputField(onEnterPin = {
-                    pin = it
-                })
 
 
-                //HANDLE INITIATE TRANSACTION RESPONSE
-                val transactionState: InitiateTransactionState =
-                    initiateTransactionViewModel.initiateTransactionState.value
+                if (isEnterPin && !isEnterOTP) {
+                    PinInputField(onEnterPin = {
+                        pin = it
+                    })
+                } else {
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = "Kindly enter the OTP sent to *******9502 and\n" +
+                                    "o***********@gmail.com or enter the OTP genrates on your hardware token device",
+                            style = TextStyle(
+                                fontSize = 14.sp,
+                                fontFamily = FontFamily.SansSerif,
+                                fontWeight = FontWeight.Normal,
+                                lineHeight = 14.sp,
+                                textAlign = TextAlign.Center
 
-                //HANDLES initiate query response
-                val queryTransactionStateState: QueryTransactionState =
-                    initiateTransactionViewModel.queryTransactionState.value
+                            ),
+                            modifier = Modifier
+                                .align(alignment = Alignment.CenterVertically)
+                                .padding(10.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(20.dp))
+                    OTPInputField(Modifier, "Enter OTP") {
+                        otp = it
+                    }
+                    Spacer(modifier = modifier.height(20.dp))
 
-                if (transactionState.hasError) {
-                    ErrorDialog(message = transactionState.errorMessage ?: "Something went wrong")
+                    Row(
+                        horizontalArrangement = Arrangement.End,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(text = "Resend OTP")
+                    }
+                    Spacer(modifier = modifier.height(10.dp))
 
+                    AuthorizeButton(buttonText = "Authorize Payment",
+                        onClick = {
+                            if (otp.length < 6) {
+                                showErrorDialog = true
+                            } else {
+                                transactionViewModel.sendOtp(cardOTPDTO)
+                                showErrorDialog = false
+                            }
+                        }
+                    )
                 }
 
-                if (transactionState.isLoading) {
-                    showCircularProgress(showProgress = true)
-                }
-
+                //this handles when to show progress bar
                 if (showCircularProgressBar) {
                     showCircularProgress(showProgress = true)
                 }
 
+                //HANDLE ENTER OTP STATE
+                val otpState: OTPState = transactionViewModel.otpState.value
+                //HANDLE INITIATE TRANSACTION RESPONSE
+                val initiateCardPaymentEnterPinState: InitiateTransactionState =
+                    transactionViewModel.initiateTransactionState.value
+                //HANDLES initiate query response
+                val queryTransactionStateState: QueryTransactionState =
+                    transactionViewModel.queryTransactionState.value
 
-                transactionState.data?.let {
+
+                if (otpState.hasError) {
+                    ErrorDialog(message = otpState.errorMessage ?: "Something went wrong")
+                }
+                if (otpState.isLoading) {
+                    showCircularProgress(showProgress = true)
+                }
+                otpState.data?.let {
+
+                }
+
+                //enter payment states
+                if (initiateCardPaymentEnterPinState.hasError) {
+                    ErrorDialog(
+                        message = initiateCardPaymentEnterPinState.errorMessage
+                            ?: "Something went wrong"
+                    )
+                }
+                if (initiateCardPaymentEnterPinState.isLoading) {
+                    showCircularProgress(showProgress = true)
+                }
+                initiateCardPaymentEnterPinState.data?.let {
                     val paymentReference2 = it.data?.payments?.paymentReference
+                    linkingReference = it.data?.payments?.linkingReference!!
+                    isEnterOTP = it.data.message == KINDLY_ENTER_OTP
 
                     if (paymentReference2 != null)
-                        initiateTransactionViewModel.queryTransaction(paymentReference2)
+                    //transactionViewModel.queryTransaction(paymentReference2)
                     else {
                         ErrorDialog(message = it.message ?: "An Error Occurred")
                     }
@@ -188,38 +262,39 @@ fun CardEnterPinScreen(
                 }
 
 
+                //querying transaction happens after otp has been inputted
                 if (queryTransactionStateState.hasError) {
                     ErrorDialog(
                         message = queryTransactionStateState.errorMessage ?: "Something went wrong"
                     )
                 }
-
                 if (queryTransactionStateState.isLoading) {
-                    showCircularProgressBar = true
+                    //  showCircularProgressBar = true
                 }
-
-                if (queryTransactionStateState.data?.data != null && transactionState.data?.data?.payments?.paymentReference != null) {
+                if (queryTransactionStateState.data?.data != null && initiateCardPaymentEnterPinState.data?.data?.payments?.paymentReference != null) {
                     if (queryTransactionStateState.data.data.code != PENDING_CODE) {
                         ErrorDialog(message = "Success!!")
-                        showCircularProgressBar = false
+                        //  showCircularProgressBar = false
                     } else {
-                        showCircularProgressBar = true
+                        //   showCircularProgressBar = true
                     }
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 //payment button
-                PayButton(
-                    amount = "NGN 60,000",
-                    onClick = {
+                if (isEnterPin && !isEnterOTP) {
+                    PayButton(
+                        amount = "NGN 60,000",
+                        onClick = {
 
-                        showErrorDialog = if (pin.length < 4) {
-                            true
-                        } else {
-                            onPayButtonClicked(cardDTO)
-                            false
+                            showErrorDialog = if (pin.length < 4) {
+                                true
+                            } else {
+                                onPayButtonClicked(cardDTO)
+                                false
+                            }
                         }
-                    }
-                )
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(76.dp))
                 OtherPaymentButtonComponent(
@@ -239,19 +314,20 @@ fun HeaderScreenPreview() {
 
     SeerBitTheme {
         val viewModel: MerchantDetailsViewModel = viewModel()
-        val viewModel2: InitiateTransactionViewModel = viewModel()
+        val viewModel2: TransactionViewModel = viewModel()
         CardEnterPinScreen(
             onPayButtonClicked = {},
             currentDestination = null,
             navController = rememberNavController(),
             merchantDetailsState = viewModel.merchantState.value,
             onOtherPaymentButtonClicked = { /*TODO*/ },
-            initiateTransactionViewModel = viewModel2,
+            transactionViewModel = viewModel2,
             paymentReference = "",
             cvv = "",
             cardNumber = "",
             cardExpiryMonth = "",
-            cardExpiryYear = ""
+            cardExpiryYear = "",
+            isEnterPin = true
         )
     }
 }
