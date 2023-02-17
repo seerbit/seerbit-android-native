@@ -330,7 +330,9 @@ fun CardHomeScreen(
             if (transactionState.data != null) {
                 val paymentRef = transactionState.data.data?.payments?.paymentReference ?: ""
                 val toEnterPinScreen = transactionState.data.data?.message == KINDLY_ENTER_PIN
-                redirectUrl = transactionState.data.data?.payments?.redirectUrl!!
+               transactionState.data.data?.payments?.redirectUrl?.let {
+                   redirectUrl = it
+                }
                 if (toEnterPinScreen) {
                     navController.navigateSingleTopTo(
                         "${Route.PIN_SCREEN}/$paymentRef/$cvv/$cardNumber/$cardExpiryMonth/$cardExpiryYear/$toEnterPinScreen"

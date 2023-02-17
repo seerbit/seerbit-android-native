@@ -123,7 +123,7 @@ class TransactionViewModel : ViewModel() {
 
 
     fun generateRandomReference() : String {
-        val str = "ABCDEFGHIJKLMNOPQRSTNVabcdefghijklmnopqrstuvwxyzABCD123456789"
+        val str = "ABCDEFGHIJKLMNOPQRSTNVabcdef*6*(_-ghijklmnopqrstuvwxyzABCD123456789"
         var password = ""
         for (i in 1..80) {
             password += str.random()
