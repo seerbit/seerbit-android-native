@@ -383,7 +383,6 @@ fun CardHomeScreen(
                 ) {
                     Text(
                         text = "Cancel Payment",
-
                         style = TextStyle(
                             fontSize = 14.sp,
                             fontFamily = Faktpro,
