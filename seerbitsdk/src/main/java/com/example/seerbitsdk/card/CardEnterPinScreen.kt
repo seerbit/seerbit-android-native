@@ -235,7 +235,9 @@ fun CardEnterPinScreen(
                     showCircularProgress(showProgress = true)
                 }
                 otpState.data?.let {
-
+                    if(it.status == "SUCCESS"){
+                        SuccessDialog(message = "Transaction Successful ")
+                    }
                 }
 
                 //enter payment states

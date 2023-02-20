@@ -5,6 +5,7 @@ import com.example.seerbitsdk.models.transfer.TransferDTO
 import com.example.seerbitsdk.models.card.CardDTO
 import com.example.seerbitsdk.models.card.CardResponse
 import com.example.seerbitsdk.models.query.QueryTransactionResponse
+import com.example.seerbitsdk.models.ussd.UssdDTO
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -24,6 +25,10 @@ interface InitiateTransactionService {
 
     @POST("initiates")
     suspend fun initiateTransfer(@Body transferDTO: TransferDTO): Response<CardResponse>
+
+    //This will be in use once we're on live
+    @POST("initiates")
+    suspend fun initiateUssd(@Body ussdDTO: UssdDTO): Response<CardResponse>
 
     @GET("query/{paymentReference}")
     suspend fun queryTransaction(@Path("paymentReference") paymentReference: String)

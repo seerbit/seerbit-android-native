@@ -4,6 +4,8 @@ import com.example.seerbitsdk.BuildConfig
 import com.example.seerbitsdk.models.card.CardResponse
 import com.example.seerbitsdk.models.home.MerchantDetailsResponse
 import com.example.seerbitsdk.models.query.QueryTransactionResponse
+import com.example.seerbitsdk.models.transfer.TransferDTO
+import com.example.seerbitsdk.models.ussd.UssdDTO
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -26,6 +28,13 @@ interface SeerBitService {
     @GET("query/{paymentReference}")
     suspend fun queryTransaction(@Path("paymentReference") paymentReference: String)
             : Response<QueryTransactionResponse>
+
+    // using this here because the url points to live
+    @POST("initiates")
+    suspend fun initiateUssd(@Body ussdDTO: UssdDTO): Response<CardResponse>
+    // using this here because the url points to live
+    @POST("initiates")
+    suspend fun initiateTransfer(@Body transferDTO: TransferDTO): Response<CardResponse>
 
 }
 
@@ -72,7 +81,7 @@ private val retrofit = Retrofit.Builder()
     .addConverterFactory(GsonConverterFactory.create())
     .build()
 
-object SeerBitApi {
+object MerchantServiceApi {
     val retrofitService: SeerBitService by lazy {
         retrofit.create(SeerBitService::class.java)
     }

@@ -330,15 +330,14 @@ fun CardHomeScreen(
             if (transactionState.data != null) {
                 val paymentRef = transactionState.data.data?.payments?.paymentReference ?: ""
                 val toEnterPinScreen = transactionState.data.data?.message == KINDLY_ENTER_PIN
-               transactionState.data.data?.payments?.redirectUrl?.let {
-                   redirectUrl = it
+                transactionState.data.data?.payments?.redirectUrl?.let {
+                    redirectUrl = it
                 }
                 if (toEnterPinScreen) {
                     navController.navigateSingleTopTo(
                         "${Route.PIN_SCREEN}/$paymentRef/$cvv/$cardNumber/$cardExpiryMonth/$cardExpiryYear/$toEnterPinScreen"
                     )
-                }
-                else if(redirectUrl.isNotEmpty()){
+                } else if (redirectUrl.isNotEmpty()) {
                     val urlIntent = Intent(
                         Intent.ACTION_VIEW,
                         Uri.parse(redirectUrl)
@@ -409,9 +408,6 @@ fun HeaderScreenPreview() {
     val transactionViewModel: TransactionViewModel = viewModel()
     SeerBitApp(viewModel, transactionViewModel)
 }
-
-
-
 
 
 @Composable
@@ -796,12 +792,19 @@ fun MyAppNavHost(
         }
 
         composable(route = Ussd.route) {
+            viewModel.resetTransactionState()
             USSDHomeScreen(
-                navigateToLoadingScreen = { navController.navigateSingleTopTo(Route.PIN_SCREEN) },
+                onConfirmPaymentClicked = {
+                    //
+                },
+
+                onOtherPaymentButtonClicked = { navController.navigateSingleTopTo(Route.OTHER_PAYMENT_SCREEN) },
                 currentDestination = currentDestination,
                 navController = navController,
-
-                )
+                merchantDetailsState = merchantDetailsState,
+                transactionViewModel = viewModel,
+                navigateToLoadingScreen = { navController.navigateSingleTopTo(Route.PIN_SCREEN) },
+            )
         }
 
         composable(route = BankAccount.route) {
@@ -823,10 +826,15 @@ fun MyAppNavHost(
 
 
         composable(route = Transfer.route) {
+            viewModel.resetTransactionState()
             TransferHomeScreen(
-                navigateToLoadingScreen = { },
+                navigateToLoadingScreen = { /*TODO*/ },
+                currentDestination = null,
+                navController = rememberNavController(),
                 onOtherPaymentButtonClicked = { navController.navigateSingleTopTo(Route.OTHER_PAYMENT_SCREEN) },
-                onCancelPaymentButtonClicked = { navController.navigateSingleTopTo(Debit_CreditCard.route) }
+                onCancelPaymentButtonClicked = { navController.navigateSingleTopTo(Debit_CreditCard.route) },
+                merchantDetailsState = merchantDetailsState,
+                transactionViewModel = viewModel
             )
         }
 
@@ -837,7 +845,12 @@ fun MyAppNavHost(
             USSDHomeScreen(
                 navigateToLoadingScreen = {},
                 currentDestination = currentDestination,
-                navController = navController
+                navController = navController,
+                onConfirmPaymentClicked = {
+                },
+                onOtherPaymentButtonClicked = { navController.navigateSingleTopTo(com.example.seerbitsdk.component.Route.OTHER_PAYMENT_SCREEN) },
+                merchantDetailsState = merchantDetailsState,
+                transactionViewModel = viewModel
             )
         }
 
@@ -891,6 +904,46 @@ fun ErrorDialog(message: String) {
         )
     }
 }
+
+@Composable
+fun SuccessDialog(message: String) {
+    val openDialog = remember { mutableStateOf(true) }
+    if (openDialog.value) {
+        AlertDialog(
+            onDismissRequest = {
+                openDialog.value = false
+            },
+            title = {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(text = "Success")
+                }
+
+            },
+            text = {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(message)
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = { openDialog.value = false }, colors = ButtonDefaults.buttonColors(
+                        backgroundColor = SignalRed
+                    )
+                ) {
+                    Text(text = "Close")
+
+                }
+            },
+        )
+    }
+}
+
 
 
 

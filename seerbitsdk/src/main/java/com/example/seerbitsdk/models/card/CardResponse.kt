@@ -26,7 +26,26 @@ data class Payments(
     val linkingReference: String? = null,
 
     @SerializedName("cardToken")
-    val cardToken: String? = null
+    val cardToken: String? = null,
+
+    @SerializedName("ussdDailCode")
+    val ussdDailCode: String? = null,
+
+    @SerializedName("walletName")
+    val walletName: String? = null,
+
+    @SerializedName("wallet")
+    val wallet: String? = null,
+
+    @SerializedName("accountNumber")
+    val accountNumber: String? = null,
+
+    @SerializedName("bankName")
+    val bankName: String? = null,
+
+
+
+
 )
 
 data class Data(

@@ -5,6 +5,7 @@ import com.example.seerbitsdk.models.Resource
 import com.example.seerbitsdk.models.TransactionDTO
 import com.example.seerbitsdk.models.card.CardDTO
 import com.example.seerbitsdk.models.transfer.TransferDTO
+import com.example.seerbitsdk.models.ussd.UssdDTO
 import com.example.seerbitsdk.repository.InitiateTransactionRepository
 import kotlinx.coroutines.flow.flow
 import okhttp3.ResponseBody
@@ -39,6 +40,22 @@ class InitiateUseCase {
                             emit(Resource.Error(jsonObject.getString("message")))
                     }
                 }
+                is UssdDTO -> {
+                    val apiResponse = initiateTransactionRepository.initiateUssd(transactionDTO)
+                    if (apiResponse.isSuccessful) {
+                        val result = apiResponse.body()
+                        emit(Resource.Success(result))
+                    } else {
+                        val jsonObject = JSONObject(
+                            Objects.requireNonNull<ResponseBody>(apiResponse.errorBody()).string()
+                        )
+                        if(apiResponse.code() == 500)
+                            emit(Resource.Error(jsonObject.getString("error")))
+                        else
+                            emit(Resource.Error(jsonObject.getString("message")))
+                    }
+                }
+
                 is TransferDTO -> {
                     val apiResponse = initiateTransactionRepository.initiateTransfer(transactionDTO)
                     if (apiResponse.isSuccessful) {

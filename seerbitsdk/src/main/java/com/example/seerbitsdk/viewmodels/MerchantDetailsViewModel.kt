@@ -23,12 +23,6 @@ class MerchantDetailsViewModel : ViewModel() {
 
     private val merchantDetailsUseCase: GetMerchantDetailUseCase = GetMerchantDetailUseCase()
 
-    private var _initiateTransactionState = mutableStateOf(InitiateTransactionState())
-    val initiateTransactionState: State<InitiateTransactionState>
-        get() = _initiateTransactionState
-
-    private val initiateTransactionUseCase: InitiateUseCase = InitiateUseCase()
-
 
     init {
         fetchMerchantDetails()
