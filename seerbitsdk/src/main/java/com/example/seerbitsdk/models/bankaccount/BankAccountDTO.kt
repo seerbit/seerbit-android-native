@@ -2,7 +2,7 @@ package com.example.seerbitsdk.models.bankaccount
 
 import com.google.gson.annotations.SerializedName
 
-data class BankAccontDTO(
+data class BankAccountDTO(
 
 	@field:SerializedName("deviceType")
 	val deviceType: String? = null,
@@ -50,7 +50,7 @@ data class BankAccontDTO(
 	val source: String? = null,
 
 	@field:SerializedName("accountNumber")
-	val accountNumber: String? = null,
+	var accountNumber: String? = null,
 
 	@field:SerializedName("paymentType")
 	val paymentType: String? = null,
@@ -62,7 +62,7 @@ data class BankAccontDTO(
 	val currency: String? = null,
 
 	@field:SerializedName("bvn")
-	val bvn: String? = null,
+	var bvn: String? = null,
 
 	@field:SerializedName("email")
 	val email: String? = null,

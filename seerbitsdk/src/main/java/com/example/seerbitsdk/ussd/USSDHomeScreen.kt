@@ -219,13 +219,6 @@ fun USSDHomeScreen(
 
 
             }
-            Spacer(modifier = Modifier.height(70.dp))
-            OtherPaymentButtonComponent(onOtherPaymentButtonClicked = onOtherPaymentButtonClicked) {
-
-            }
-            Spacer(modifier = Modifier.height(20.dp))
-            BottomSeerBitWaterMark(modifier = Modifier.align(alignment = Alignment.CenterHorizontally))
-
 
         }
     }

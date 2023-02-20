@@ -347,53 +347,9 @@ fun CardHomeScreen(
                 transactionViewModel.resetTransactionState()
             }
             Spacer(modifier = Modifier.height(100.dp))
-            Row(modifier = Modifier.fillMaxWidth()) {
 
-                Button(
-                    onClick = onOtherPaymentButtonClicked,
-                    colors = ButtonDefaults.buttonColors(backgroundColor = LighterGray),
-                    shape = RoundedCornerShape(4.dp),
+            OtherPaymentButtonComponent(onOtherPaymentButtonClicked = onOtherPaymentButtonClicked, onCancelButtonClicked ={})
 
-                    modifier = Modifier
-                        .height(50.dp)
-                        .weight(1.5f)
-                        .padding(end = 8.dp)
-
-                ) {
-                    Text(
-                        text = "Change Payment Method",
-                        style = TextStyle(
-                            fontSize = 14.sp,
-                            fontFamily = Faktpro,
-                            fontWeight = FontWeight.Normal,
-                            lineHeight = 10.sp
-                        )
-                    )
-                }
-
-                Button(
-                    onClick = {},
-                    colors = ButtonDefaults.buttonColors(backgroundColor = SignalRed),
-                    shape = RoundedCornerShape(4.dp),
-                    modifier = Modifier
-                        .height(50.dp)
-                        .weight(1f)
-
-                ) {
-                    Text(
-                        text = "Cancel Payment",
-                        style = TextStyle(
-                            fontSize = 14.sp,
-                            fontFamily = Faktpro,
-                            fontWeight = FontWeight.Normal,
-                            lineHeight = 10.sp,
-                            color = DeepRed,
-                        ),
-                        modifier = Modifier.align(alignment = Alignment.CenterVertically)
-                    )
-                }
-
-            }
             Spacer(modifier = Modifier.height(100.dp))
             BottomSeerBitWaterMark(modifier = Modifier.align(alignment = Alignment.CenterHorizontally))
         }
@@ -818,9 +774,31 @@ fun MyAppNavHost(
                 navController = navController
             )
         }
-        composable(route = Route.BANK_ACCOUNT_NUMBER_SCREEN) {
+        composable("${Route.BANK_ACCOUNT_NUMBER_SCREEN}/{accountNumber}/{bvn}/{birthday}/{otp}",
+            arguments = listOf(
+                // declaring argument type
+                navArgument("accountNumber") { type = NavType.StringType },
+                navArgument("bvn") { type = NavType.StringType },
+                navArgument("birthday") { type = NavType.StringType },
+                navArgument("otp") { type = NavType.StringType },
+            )
+        ) { navBackStackEntry ->
+            val accountNumber = navBackStackEntry.arguments?.getString("accountNumber")
+            val bvn = navBackStackEntry.arguments?.getString("bvn")
+            val birthday = navBackStackEntry.arguments?.getString("birthday")
+            val otp = navBackStackEntry.arguments?.getString("otp")
+
+
             BankAccountNumberScreen(
-                onPaymentMethodClick = {}
+                onPaymentMethodClick = {},
+                onConfirmedButtonClicked = {},
+                navController = navController,
+                merchantDetailsState = merchantDetailsState,
+                transactionViewModel = viewModel,
+                bankAccountNumber = accountNumber!!,
+                birthday = birthday!!,
+                bvn = bvn!!,
+                otp = otp!!
             )
         }
 
@@ -932,7 +910,8 @@ fun SuccessDialog(message: String) {
             },
             confirmButton = {
                 Button(
-                    onClick = { openDialog.value = false }, colors = ButtonDefaults.buttonColors(
+                    onClick = { openDialog.value = false },
+                    colors = ButtonDefaults.buttonColors(
                         backgroundColor = SignalRed
                     )
                 ) {

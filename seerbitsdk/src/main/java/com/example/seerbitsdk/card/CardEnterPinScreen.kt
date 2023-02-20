@@ -173,7 +173,7 @@ fun CardEnterPinScreen(
                     ) {
                         Text(
                             text = "Kindly enter the OTP sent to *******9502 and\n" +
-                                    "o***********@gmail.com or enter the OTP genrates on your hardware token device",
+                                    "o***********@gmail.com or enter the OTP generates on your hardware token device",
                             style = TextStyle(
                                 fontSize = 14.sp,
                                 fontFamily = FontFamily.SansSerif,

@@ -156,7 +156,6 @@ fun TransferHomeScreen(
                     accountNumber = it.data.payments.accountNumber!!
                 }
                 isSuccesfulResponse = true
-                transactionViewModel.queryTransaction(transferDTO.paymentReference!!)
             }
 
             //querying transaction happens after otp has been inputted
@@ -169,6 +168,7 @@ fun TransferHomeScreen(
                 showCircularProgressBar = true
             }
             if (queryTransactionStateState.data?.data != null) {
+
                 if (queryTransactionStateState.data.data.code != PENDING_CODE) {
                     showCircularProgressBar = false
                 } else {
@@ -240,10 +240,6 @@ fun TransferHomeScreen(
             )
             Spacer(modifier = Modifier.height(50.dp))
 
-            OtherPaymentButtonComponent(
-                onOtherPaymentButtonClicked = onOtherPaymentButtonClicked,
-                onCancelButtonClicked = onCancelPaymentButtonClicked
-            )
         }
 
 

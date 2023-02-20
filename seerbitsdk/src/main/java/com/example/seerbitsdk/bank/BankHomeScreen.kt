@@ -72,12 +72,7 @@ fun BankScreen(
                 buttonText = "Pay $50",
                 onClick = onNavigateToBankAccountNumberScreen
             )
-            Spacer(modifier = Modifier.height(16.dp))
-            Spacer(modifier = Modifier.height(60.dp))
 
-            OtherPaymentButtonComponent(
-                onOtherPaymentButtonClicked = { /*TODO*/ },
-                onCancelButtonClicked = {})
 
         }
     }
