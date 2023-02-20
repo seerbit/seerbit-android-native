@@ -172,7 +172,8 @@ fun TransferHomeScreen(
                 if (queryTransactionStateState.data.data.code != PENDING_CODE) {
                     showCircularProgressBar = false
                 } else {
-                    //   showCircularProgressBar = true
+                    showCircularProgressBar = true
+                    transactionViewModel.queryTransaction(transferDTO.paymentReference!!)
                 }
             }
 

@@ -36,6 +36,7 @@ class TransactionViewModel : ViewModel() {
 
     fun resetTransactionState(){
         _initiateTransactionState.value = InitiateTransactionState()
+        _queryTransactionState.value = QueryTransactionState()
     }
 
 

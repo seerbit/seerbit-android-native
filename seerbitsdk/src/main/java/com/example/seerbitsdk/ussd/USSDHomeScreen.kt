@@ -148,7 +148,7 @@ fun USSDHomeScreen(
                         ussdCode = it.data?.payments?.ussdDailCode.toString()
                     }
                     isSuccesfulResponse = true
-                    transactionViewModel.queryTransaction(paymentReference2!!)
+
 
 
 
@@ -168,7 +168,7 @@ fun USSDHomeScreen(
                     if (queryTransactionStateState.data.data.code != PENDING_CODE) {
                         //todo showSuccessScreen
                     } else {
-                        //   showCircularProgressBar = true
+                        transactionViewModel.queryTransaction(ussdDTO.paymentReference!!)
                     }
                 }
 
@@ -208,6 +208,8 @@ fun USSDHomeScreen(
                         onClick = {
                             if (isSuccesfulResponse) {
                                 showLoadingScreen = true
+                                transactionViewModel.queryTransaction(ussdDTO.paymentReference!!)
+
                             }
 
                         }
@@ -219,6 +221,7 @@ fun USSDHomeScreen(
 
 
             }
+
 
         }
     }

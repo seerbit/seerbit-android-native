@@ -1,6 +1,7 @@
 package com.example.seerbitsdk
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.net.Uri
@@ -54,6 +55,7 @@ import com.example.seerbitsdk.models.CardDetails
 import com.example.seerbitsdk.navigationpage.OtherPaymentScreen
 import com.example.seerbitsdk.screenstate.InitiateTransactionState
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
+import com.example.seerbitsdk.screenstate.QueryTransactionState
 import com.example.seerbitsdk.transfer.TransferHomeScreen
 import com.example.seerbitsdk.ui.theme.*
 import com.example.seerbitsdk.ussd.USSDHomeScreen
@@ -72,7 +74,6 @@ class SeerBitActivity : ComponentActivity() {
         }
     }
 }
-
 
 @Composable
 fun Greeting(name: String) {
@@ -193,14 +194,16 @@ fun CardHomeScreen(
     var cardNumber by rememberSaveable { mutableStateOf("") }
     var cardExpiryMonth by rememberSaveable { mutableStateOf("") }
     var cardExpiryYear by rememberSaveable { mutableStateOf("") }
-    var redirectToUrl: Boolean = false
-    var redirectUrl: String = ""
+    var isSuccessfulResponse by rememberSaveable { mutableStateOf(false) }
+    var redirectUrl by rememberSaveable { mutableStateOf("") }
+    var canRedirectToUrl by remember { mutableStateOf(false) }
+
 
     var showErrorDialog by remember { mutableStateOf(false) }
 
     //determines if to show progress bar when loading
-    var showCircularProgressBar by rememberSaveable { mutableStateOf(false) }
-
+    var showCircularProgressBar by remember { mutableStateOf(false) }
+    var paymentRef by remember { mutableStateOf("") }
     if (merchantDetailsState.hasError) {
         ErrorDialog(message = merchantDetailsState.errorMessage ?: "Something went wrong")
     }
@@ -266,7 +269,7 @@ fun CardHomeScreen(
                 redirectUrl = "http://localhost:3002/#/",
                 productId = "",
                 mobileNumber = merchantDetailsData.payload.number,
-                paymentReference = generateRandomReference(),
+                paymentReference = transactionViewModel.generateRandomReference(),
                 fee = merchantDetailsData.payload.cardFee.mc,
                 expiryMonth = cardExpiryMonth,
                 fullName = "Amos Aorme",
@@ -285,7 +288,6 @@ fun CardHomeScreen(
                 retry = false
             )
 
-            cardDTO.paymentReference = transactionViewModel.generateRandomReference()
 
             if (showCircularProgressBar) {
                 showCircularProgress(showProgress = true)
@@ -321,40 +323,76 @@ fun CardHomeScreen(
                 transactionViewModel.initiateTransactionState.value
 
             if (transactionState.hasError) {
+                showCircularProgressBar = false
                 ErrorDialog(message = transactionState.errorMessage ?: "Something went wrong")
             }
+            if(transactionState.isLoading){
+                showCircularProgressBar = true
+            }
+            else {showCircularProgressBar = false}
 
-            showCircularProgressBar = transactionState.isLoading
+            //HANDLES initiate query response
+            val queryTransactionStateState: QueryTransactionState =
+                transactionViewModel.queryTransactionState.value
+            //querying transaction happens after otp has been inputted
+            if (queryTransactionStateState.hasError) {
+                ErrorDialog(
+                    message = queryTransactionStateState.errorMessage ?: "Something went wrong"
+                )
+            }
+            if (queryTransactionStateState.isLoading) {
+                showCircularProgressBar = true
+            }
+
+           queryTransactionStateState.data?.data?.let {
+                showCircularProgressBar = queryTransactionStateState.data.data.code == PENDING_CODE
+            }
 
 
-            if (transactionState.data != null) {
-                val paymentRef = transactionState.data.data?.payments?.paymentReference ?: ""
+
+
+
+            transactionState.data?.let {
+                paymentRef = transactionState.data.data?.payments?.paymentReference ?: ""
                 val toEnterPinScreen = transactionState.data.data?.message == KINDLY_ENTER_PIN
                 transactionState.data.data?.payments?.redirectUrl?.let {
                     redirectUrl = it
+                    canRedirectToUrl = true
                 }
                 if (toEnterPinScreen) {
                     navController.navigateSingleTopTo(
                         "${Route.PIN_SCREEN}/$paymentRef/$cvv/$cardNumber/$cardExpiryMonth/$cardExpiryYear/$toEnterPinScreen"
                     )
-                } else if (redirectUrl.isNotEmpty()) {
-                    val urlIntent = Intent(
-                        Intent.ACTION_VIEW,
-                        Uri.parse(redirectUrl)
-                    )
-                    LocalContext.current.startActivity(urlIntent)
+                    redirectUrl = ""
+                } else if (canRedirectToUrl) {
+                    redirectUrl(redirectUrl = redirectUrl)
+                    transactionViewModel.queryTransaction(paymentRef)
+                    canRedirectToUrl = false
                 }
-                transactionViewModel.resetTransactionState()
+
+
             }
             Spacer(modifier = Modifier.height(100.dp))
 
-            OtherPaymentButtonComponent(onOtherPaymentButtonClicked = onOtherPaymentButtonClicked, onCancelButtonClicked ={})
+            OtherPaymentButtonComponent(
+                onOtherPaymentButtonClicked = onOtherPaymentButtonClicked,
+                onCancelButtonClicked = {})
 
             Spacer(modifier = Modifier.height(100.dp))
             BottomSeerBitWaterMark(modifier = Modifier.align(alignment = Alignment.CenterHorizontally))
         }
 
     }
+}
+
+
+@Composable
+fun redirectUrl(context: Context = LocalContext.current, redirectUrl: String) {
+    val urlIntent = Intent(
+        Intent.ACTION_VIEW,
+        Uri.parse(redirectUrl)
+    )
+    LocalContext.current.startActivity(urlIntent)
 }
 
 @Preview(showBackground = true, widthDp = 400, heightDp = 700)
@@ -774,7 +812,8 @@ fun MyAppNavHost(
                 navController = navController
             )
         }
-        composable("${Route.BANK_ACCOUNT_NUMBER_SCREEN}/{accountNumber}/{bvn}/{birthday}/{otp}",
+        composable(
+            "${Route.BANK_ACCOUNT_NUMBER_SCREEN}/{accountNumber}/{bvn}/{birthday}/{otp}",
             arguments = listOf(
                 // declaring argument type
                 navArgument("accountNumber") { type = NavType.StringType },
@@ -922,6 +961,7 @@ fun SuccessDialog(message: String) {
         )
     }
 }
+
 
 
 

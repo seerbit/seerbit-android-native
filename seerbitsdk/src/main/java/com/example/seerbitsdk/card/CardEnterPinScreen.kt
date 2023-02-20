@@ -83,6 +83,7 @@ fun CardEnterPinScreen(
         }
 
 
+
         merchantDetailsState.data?.let { merchantDetailsData ->
 
             Column(
@@ -95,7 +96,7 @@ fun CardEnterPinScreen(
                 var pin by remember { mutableStateOf("") }
                 var isEnterOTP by remember { mutableStateOf(false) }
                 var showErrorDialog by rememberSaveable { mutableStateOf(false) }
-                var showCircularProgressBar by rememberSaveable { mutableStateOf(false) }
+                var showCircularProgressBar by remember { mutableStateOf(false) }
                 var linkingReference by remember { mutableStateOf("") }
                 var otp by remember { mutableStateOf("") }
 
@@ -236,7 +237,7 @@ fun CardEnterPinScreen(
                 }
                 otpState.data?.let {
                     if(it.status == "SUCCESS"){
-                        SuccessDialog(message = "Transaction Successful ")
+                        transactionViewModel.queryTransaction(cardDTO.paymentReference!!)
                     }
                 }
 
@@ -271,14 +272,12 @@ fun CardEnterPinScreen(
                     )
                 }
                 if (queryTransactionStateState.isLoading) {
-                    //  showCircularProgressBar = true
+                     showCircularProgressBar = true
                 }
-                if (queryTransactionStateState.data?.data != null && initiateCardPaymentEnterPinState.data?.data?.payments?.paymentReference != null) {
+                 queryTransactionStateState.data?.data?.let{
                     if (queryTransactionStateState.data.data.code != PENDING_CODE) {
-                        ErrorDialog(message = "Success!!")
-                        //  showCircularProgressBar = false
+
                     } else {
-                        //   showCircularProgressBar = true
                     }
                 }
                 Spacer(modifier = Modifier.height(16.dp))
@@ -298,10 +297,7 @@ fun CardEnterPinScreen(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(76.dp))
-                OtherPaymentButtonComponent(
-                    onOtherPaymentButtonClicked = onOtherPaymentButtonClicked,
-                    onCancelButtonClicked = {})
+
 
             }
 
