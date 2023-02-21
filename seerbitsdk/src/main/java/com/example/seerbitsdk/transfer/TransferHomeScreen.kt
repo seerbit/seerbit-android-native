@@ -56,7 +56,7 @@ fun TransferHomeScreen(
     onCancelPaymentButtonClicked: () -> Unit,
     onOtherPaymentButtonClicked: () -> Unit,
     merchantDetailsState: MerchantDetailsState?,
-    transactionViewModel: TransactionViewModel
+    transactionViewModel: TransactionViewModel = viewModel()
 
 ) {
 

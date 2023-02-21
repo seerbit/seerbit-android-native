@@ -35,6 +35,7 @@ import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.screenstate.OTPState
 import com.example.seerbitsdk.screenstate.QueryTransactionState
 import com.example.seerbitsdk.ui.theme.SeerBitTheme
+import com.example.seerbitsdk.viewmodels.CardEnterPinViewModel
 import com.example.seerbitsdk.viewmodels.TransactionViewModel
 import com.example.seerbitsdk.viewmodels.MerchantDetailsViewModel
 
@@ -67,10 +68,12 @@ fun CardEnterPinScreen(
     cardNumber: String,
     cardExpiryMonth: String,
     cardExpiryYear: String,
-    isEnterPin: Boolean
+    isEnterPin: Boolean,
+    resetVM : () -> Unit,
 
 ) {
     Column(modifier = modifier) {
+
 
 
         // if there is an error loading the report
@@ -81,7 +84,7 @@ fun CardEnterPinScreen(
         if (merchantDetailsState.isLoading) {
             showCircularProgress(showProgress = true)
         }
-
+        
 
 
         merchantDetailsState.data?.let { merchantDetailsData ->
@@ -93,12 +96,16 @@ fun CardEnterPinScreen(
                     .weight(1f)
             ) {
 
+
                 var pin by remember { mutableStateOf("") }
                 var isEnterOTP by remember { mutableStateOf(false) }
-                var showErrorDialog by rememberSaveable { mutableStateOf(false) }
+                var showErrorDialog by remember { mutableStateOf(false) }
                 var showCircularProgressBar by remember { mutableStateOf(false) }
-                var linkingReference by remember { mutableStateOf("") }
+                var linkingReference : String? by remember { mutableStateOf("") }
+                var paymentReference2 by remember { mutableStateOf("") }
                 var otp by remember { mutableStateOf("") }
+                var startQueryingTransaction by remember { mutableStateOf(false) }
+
 
                 Spacer(modifier = Modifier.height(21.dp))
                 SeerbitPaymentDetailScreen(
@@ -130,11 +137,7 @@ fun CardEnterPinScreen(
                     ErrorDialog(message = "invalid pin")
                 }
 
-                val cardOTPDTO = CardOTPDTO(
-                    transaction = Transaction(
-                        linkingReference, otp
-                    )
-                )
+
                 val cardDTO = CardDTO(
                     deviceType = "Desktop",
                     country = merchantDetailsData.payload.address?.country!!,
@@ -162,6 +165,11 @@ fun CardEnterPinScreen(
                     retry = false
                 )
 
+                val cardOTPDTO = CardOTPDTO(
+                    transaction = Transaction(
+                        linkingReference, otp
+                    )
+                )
 
                 if (isEnterPin && !isEnterOTP) {
                     PinInputField(onEnterPin = {
@@ -189,6 +197,7 @@ fun CardEnterPinScreen(
                         )
                     }
                     Spacer(modifier = Modifier.height(20.dp))
+
                     OTPInputField(Modifier, "Enter OTP") {
                         otp = it
                     }
@@ -207,7 +216,10 @@ fun CardEnterPinScreen(
                             if (otp.length < 6) {
                                 showErrorDialog = true
                             } else {
+
+
                                 transactionViewModel.sendOtp(cardOTPDTO)
+                                startQueryingTransaction = true
                                 showErrorDialog = false
                             }
                         }
@@ -233,11 +245,13 @@ fun CardEnterPinScreen(
                     ErrorDialog(message = otpState.errorMessage ?: "Something went wrong")
                 }
                 if (otpState.isLoading) {
-                    showCircularProgress(showProgress = true)
+                    showCircularProgressBar = true
                 }
-                otpState.data?.let {
-                    if(it.status == "SUCCESS"){
-                        transactionViewModel.queryTransaction(cardDTO.paymentReference!!)
+                if(startQueryingTransaction) {
+                    otpState.data?.let {
+                        if (it.status == "SUCCESS") {
+                            transactionViewModel.queryTransaction(cardDTO.paymentReference!!)
+                        }
                     }
                 }
 
@@ -249,35 +263,32 @@ fun CardEnterPinScreen(
                     )
                 }
                 if (initiateCardPaymentEnterPinState.isLoading) {
-                    showCircularProgress(showProgress = true)
+                    showCircularProgressBar = true
                 }
                 initiateCardPaymentEnterPinState.data?.let {
-                    val paymentReference2 = it.data?.payments?.paymentReference
-                    linkingReference = it.data?.payments?.linkingReference!!
+                     paymentReference2 = it.data?.payments?.paymentReference!!
+                    linkingReference = it.data.payments.linkingReference
                     isEnterOTP = it.data.message == KINDLY_ENTER_OTP
 
-                    if (paymentReference2 != null)
-                    //transactionViewModel.queryTransaction(paymentReference2)
-                    else {
-                        ErrorDialog(message = it.message ?: "An Error Occurred")
+                }
+
+
+                if(startQueryingTransaction) {
+                    //querying transaction happens after otp has been inputted
+                    if (queryTransactionStateState.hasError) {
+                        ErrorDialog(
+                            message = queryTransactionStateState.errorMessage
+                                ?: "Something went wrong"
+                        )
                     }
+                    if (queryTransactionStateState.isLoading) {
+                        showCircularProgressBar = true
+                    }
+                    queryTransactionStateState.data?.data?.let {
+                        if (queryTransactionStateState.data.data.code != PENDING_CODE) {
 
-                }
-
-
-                //querying transaction happens after otp has been inputted
-                if (queryTransactionStateState.hasError) {
-                    ErrorDialog(
-                        message = queryTransactionStateState.errorMessage ?: "Something went wrong"
-                    )
-                }
-                if (queryTransactionStateState.isLoading) {
-                     showCircularProgressBar = true
-                }
-                 queryTransactionStateState.data?.data?.let{
-                    if (queryTransactionStateState.data.data.code != PENDING_CODE) {
-
-                    } else {
+                        } else {
+                        }
                     }
                 }
                 Spacer(modifier = Modifier.height(16.dp))
@@ -286,7 +297,6 @@ fun CardEnterPinScreen(
                     PayButton(
                         amount = "NGN 60,000",
                         onClick = {
-
                             showErrorDialog = if (pin.length < 4) {
                                 true
                             } else {
@@ -296,9 +306,6 @@ fun CardEnterPinScreen(
                         }
                     )
                 }
-
-
-
             }
 
         }
@@ -325,8 +332,10 @@ fun HeaderScreenPreview() {
             cardNumber = "",
             cardExpiryMonth = "",
             cardExpiryYear = "",
-            isEnterPin = true
-        )
+            isEnterPin = false,
+        ){
+
+        }
     }
 }
 

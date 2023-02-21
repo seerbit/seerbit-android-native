@@ -49,7 +49,7 @@ fun USSDHomeScreen(
     onConfirmPaymentClicked: () -> Unit,
     onOtherPaymentButtonClicked: () -> Unit,
     merchantDetailsState: MerchantDetailsState?,
-    transactionViewModel: TransactionViewModel
+    transactionViewModel: TransactionViewModel = viewModel()
 
 ) {
     var showLoadingScreen by remember { mutableStateOf(false) }

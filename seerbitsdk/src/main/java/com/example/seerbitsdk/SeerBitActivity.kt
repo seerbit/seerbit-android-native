@@ -59,10 +59,15 @@ import com.example.seerbitsdk.screenstate.QueryTransactionState
 import com.example.seerbitsdk.transfer.TransferHomeScreen
 import com.example.seerbitsdk.ui.theme.*
 import com.example.seerbitsdk.ussd.USSDHomeScreen
+import com.example.seerbitsdk.viewmodels.CardEnterPinViewModel
 import com.example.seerbitsdk.viewmodels.TransactionViewModel
 import com.example.seerbitsdk.viewmodels.MerchantDetailsViewModel
 
 class SeerBitActivity : ComponentActivity() {
+    private val viewModel: MerchantDetailsViewModel by viewModels()
+    private val transactionViewModel: TransactionViewModel by viewModels()
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -88,11 +93,10 @@ fun DefaultPreview() {
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun SeerBitApp(
     viewModel: MerchantDetailsViewModel,
-    transactionViewModel: TransactionViewModel
+    transactionViewModel: TransactionViewModel,
 ) {
     SeerBitTheme {
         // A surface container using the 'background' color from the theme
@@ -125,7 +129,7 @@ fun SeerBitApp(
                 modifier = Modifier.padding(8.dp),
                 currentDestination = currentBackStack?.destination,
                 merchantDetailsState = viewModel.merchantState.value,
-                viewModel = transactionViewModel,
+                viewModel = transactionViewModel
             )
 
         }
@@ -187,6 +191,7 @@ fun CardHomeScreen(
     transactionViewModel: TransactionViewModel
 ) {
 
+    transactionViewModel.resetTransactionState()
     var cardDetailsData: CardDetails by remember { mutableStateOf(CardDetails("", "", "", "")) }
 
     //card details
@@ -200,10 +205,12 @@ fun CardHomeScreen(
 
 
     var showErrorDialog by remember { mutableStateOf(false) }
+    var startQueryingTransaction by remember { mutableStateOf(false) }
 
     //determines if to show progress bar when loading
     var showCircularProgressBar by remember { mutableStateOf(false) }
     var paymentRef by remember { mutableStateOf("") }
+
     if (merchantDetailsState.hasError) {
         ErrorDialog(message = merchantDetailsState.errorMessage ?: "Something went wrong")
     }
@@ -211,7 +218,6 @@ fun CardHomeScreen(
     if (merchantDetailsState.isLoading) {
         showCircularProgress(showProgress = true)
     }
-
 
     merchantDetailsState.data?.let { merchantDetailsData ->
         Column(
@@ -326,26 +332,26 @@ fun CardHomeScreen(
                 showCircularProgressBar = false
                 ErrorDialog(message = transactionState.errorMessage ?: "Something went wrong")
             }
-            if(transactionState.isLoading){
-                showCircularProgressBar = true
-            }
-            else {showCircularProgressBar = false}
+            showCircularProgressBar = transactionState.isLoading
 
             //HANDLES initiate query response
             val queryTransactionStateState: QueryTransactionState =
                 transactionViewModel.queryTransactionState.value
             //querying transaction happens after otp has been inputted
-            if (queryTransactionStateState.hasError) {
-                ErrorDialog(
-                    message = queryTransactionStateState.errorMessage ?: "Something went wrong"
-                )
-            }
-            if (queryTransactionStateState.isLoading) {
-                showCircularProgressBar = true
-            }
+            if (startQueryingTransaction) {
+                if (queryTransactionStateState.hasError) {
+                    ErrorDialog(
+                        message = queryTransactionStateState.errorMessage ?: "Something went wrong"
+                    )
+                }
+                if (queryTransactionStateState.isLoading) {
+                    showCircularProgressBar = true
+                }
 
-           queryTransactionStateState.data?.data?.let {
-                showCircularProgressBar = queryTransactionStateState.data.data.code == PENDING_CODE
+                queryTransactionStateState.data?.data?.let {
+                    showCircularProgressBar =
+                        queryTransactionStateState.data.data.code == PENDING_CODE
+                }
             }
 
 
@@ -355,20 +361,24 @@ fun CardHomeScreen(
             transactionState.data?.let {
                 paymentRef = transactionState.data.data?.payments?.paymentReference ?: ""
                 val toEnterPinScreen = transactionState.data.data?.message == KINDLY_ENTER_PIN
+                val notEnterPin : Boolean = false
                 transactionState.data.data?.payments?.redirectUrl?.let {
                     redirectUrl = it
                     canRedirectToUrl = true
                 }
                 if (toEnterPinScreen) {
+                    redirectUrl = ""
                     navController.navigateSingleTopTo(
                         "${Route.PIN_SCREEN}/$paymentRef/$cvv/$cardNumber/$cardExpiryMonth/$cardExpiryYear/$toEnterPinScreen"
                     )
-                    redirectUrl = ""
+
                 } else if (canRedirectToUrl) {
                     redirectUrl(redirectUrl = redirectUrl)
                     transactionViewModel.queryTransaction(paymentRef)
+                    startQueryingTransaction = true
                     canRedirectToUrl = false
                 }
+
 
 
             }
@@ -400,6 +410,7 @@ fun redirectUrl(context: Context = LocalContext.current, redirectUrl: String) {
 fun HeaderScreenPreview() {
     val viewModel: MerchantDetailsViewModel = viewModel()
     val transactionViewModel: TransactionViewModel = viewModel()
+
     SeerBitApp(viewModel, transactionViewModel)
 }
 
@@ -711,7 +722,7 @@ fun payViaComponentPreview() {
 @Composable
 fun MyAppNavHost(
     modifier: Modifier = Modifier,
-    navController: NavHostController = rememberNavController(),
+    navController: NavHostController,
     startDestination: String = Debit_CreditCard.route,
     currentDestination: NavDestination?,
     merchantDetailsState: MerchantDetailsState,
@@ -732,7 +743,6 @@ fun MyAppNavHost(
         }
 
         composable(route = Debit_CreditCard.route) {
-            viewModel.resetTransactionState()
             CardHomeScreen(
                 onNavigateToPinScreen = { cardDTO ->
                     // if there is an error loading the report
@@ -768,7 +778,6 @@ fun MyAppNavHost(
 
             CardEnterPinScreen(
                 onPayButtonClicked = { cardDTO ->
-                    viewModel.resetTransactionState()
                     viewModel.initiateTransaction(cardDTO)
                 },
                 currentDestination = currentDestination,
@@ -781,8 +790,10 @@ fun MyAppNavHost(
                 cardNumber = cardNumber!!,
                 cardExpiryMonth = cardExpiryMonth!!,
                 cardExpiryYear = cardExpiryYear!!,
-                isEnterPin = isEnterPin!!
-            )
+                isEnterPin = isEnterPin!!,
+            ) {
+
+            }
         }
 
         composable(route = Ussd.route) {
@@ -796,7 +807,6 @@ fun MyAppNavHost(
                 currentDestination = currentDestination,
                 navController = navController,
                 merchantDetailsState = merchantDetailsState,
-                transactionViewModel = viewModel,
                 navigateToLoadingScreen = { navController.navigateSingleTopTo(Route.PIN_SCREEN) },
             )
         }
@@ -851,7 +861,6 @@ fun MyAppNavHost(
                 onOtherPaymentButtonClicked = { navController.navigateSingleTopTo(Route.OTHER_PAYMENT_SCREEN) },
                 onCancelPaymentButtonClicked = { navController.navigateSingleTopTo(Debit_CreditCard.route) },
                 merchantDetailsState = merchantDetailsState,
-                transactionViewModel = viewModel
             )
         }
 
@@ -865,7 +874,7 @@ fun MyAppNavHost(
                 navController = navController,
                 onConfirmPaymentClicked = {
                 },
-                onOtherPaymentButtonClicked = { navController.navigateSingleTopTo(com.example.seerbitsdk.component.Route.OTHER_PAYMENT_SCREEN) },
+                onOtherPaymentButtonClicked = { navController.navigateSingleTopTo(Route.OTHER_PAYMENT_SCREEN) },
                 merchantDetailsState = merchantDetailsState,
                 transactionViewModel = viewModel
             )
