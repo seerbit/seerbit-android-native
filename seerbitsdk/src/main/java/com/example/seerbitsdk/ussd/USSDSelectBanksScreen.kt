@@ -49,10 +49,8 @@ fun USSDSelectBanksScreen(
     var bankCode by remember { mutableStateOf("") }
     var showErrorDialog by remember { mutableStateOf(false) }
     var showCircularProgressBar by remember { mutableStateOf(false) }
-    var merchantBankList : List<MerchantBanksItem?>? = listOf()
-    val availableBanksState = selectBankViewModel.availableBanksState.value
 
-
+    // if there is an error loading the report
     if (merchantDetailsState?.hasError!!) {
         ErrorDialog(message = merchantDetailsState.errorMessage ?: "Something went wrong")
     }
@@ -98,21 +96,28 @@ fun USSDSelectBanksScreen(
                 }
 
 
+                val availableBanksState = selectBankViewModel.availableBanksState.value
 
                 if(availableBanksState.hasError){
                     showCircularProgressBar = false
                     showErrorDialog = true
                 }
+
                 if(availableBanksState.isLoading){
                     showCircularProgressBar = true
                 }
+
+                var merchantBankList : List<MerchantBanksItem?>? = listOf()
                 availableBanksState.data?.availableBankData?.let {
                     showCircularProgressBar = false
                     merchantBankList = it.merchantBanks!!
 
                 }
 
-                UssdSelectBankButton (merchantBankList = merchantBankList){ bankCode = it }
+
+                UssdSelectBankButton (merchantBankList = merchantBankList){
+                    bankCode = it
+                }
 
                 Spacer(modifier = modifier.height(40.dp))
 

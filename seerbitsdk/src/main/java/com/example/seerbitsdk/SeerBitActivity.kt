@@ -357,6 +357,13 @@ fun CardHomeScreen(
                 queryTransactionStateState.data?.data?.let {
                     showCircularProgressBar =
                         queryTransactionStateState.data.data.code == PENDING_CODE
+
+                    if(it.code == FAILED){
+                        showCircularProgressBar = false
+                    }
+                    if(it.code == FAILED){
+                        showCircularProgressBar = false
+                    }
                 }
             }
 
@@ -951,7 +958,7 @@ fun ErrorDialog(message: String) {
 }
 
 @Composable
-fun SuccessDialog(message: String) {
+fun SuccessDialog(message: String, navigateToHome : () -> Unit) {
     val openDialog = remember { mutableStateOf(true) }
     if (openDialog.value) {
         AlertDialog(
@@ -977,7 +984,10 @@ fun SuccessDialog(message: String) {
             },
             confirmButton = {
                 Button(
-                    onClick = { openDialog.value = false },
+
+                    onClick = { navigateToHome()
+                        openDialog.value = false
+                              },
                     colors = ButtonDefaults.buttonColors(
                         backgroundColor = SignalRed
                     )
@@ -989,6 +999,7 @@ fun SuccessDialog(message: String) {
         )
     }
 }
+
 
 
 

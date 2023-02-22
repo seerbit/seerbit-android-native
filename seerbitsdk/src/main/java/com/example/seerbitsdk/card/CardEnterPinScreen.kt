@@ -1,5 +1,6 @@
 package com.example.seerbitsdk.card
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -34,6 +35,7 @@ import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.screenstate.OTPState
 import com.example.seerbitsdk.screenstate.QueryTransactionState
 import com.example.seerbitsdk.ui.theme.SeerBitTheme
+import com.example.seerbitsdk.ui.theme.SignalRed
 import com.example.seerbitsdk.viewmodels.CardEnterPinViewModel
 import com.example.seerbitsdk.viewmodels.TransactionViewModel
 import com.example.seerbitsdk.viewmodels.MerchantDetailsViewModel
@@ -53,6 +55,7 @@ fun showCircularProgress(showProgress: Boolean) {
     }
 }
 
+@SuppressLint("SuspiciousIndentation")
 @Composable
 fun CardEnterPinScreen(
     modifier: Modifier = Modifier,
@@ -95,6 +98,7 @@ fun CardEnterPinScreen(
             ) {
 
 
+
                 var pin by remember { mutableStateOf("") }
                 var isEnterOTP by remember { mutableStateOf(false) }
                 var showErrorDialog by remember { mutableStateOf(false) }
@@ -102,6 +106,18 @@ fun CardEnterPinScreen(
                 var linkingReference: String? by remember { mutableStateOf("") }
                 var paymentReference2 by remember { mutableStateOf("") }
                 var otp by remember { mutableStateOf("") }
+                var startQuerying by remember { mutableStateOf(true) }
+                var alertDialogMessage  by remember { mutableStateOf("") }
+                var alertDialogHeaderMessage  by remember { mutableStateOf("") }
+                //HANDLE ENTER OTP STATE
+                val otpState: OTPState = cardEnterPinViewModel.otpState.value
+                //HANDLE INITIATE TRANSACTION RESPONSE
+                val initiateCardPaymentEnterPinState: InitiateTransactionState =
+                    cardEnterPinViewModel.initiateTransactionState.value
+                //HANDLES initiate query response
+                val queryTransactionStateState: QueryTransactionState =
+                    cardEnterPinViewModel.queryTransactionState.value
+                val openDialog = remember { mutableStateOf(false) }
 
 
                 Spacer(modifier = Modifier.height(21.dp))
@@ -130,11 +146,6 @@ fun CardEnterPinScreen(
                     Spacer(modifier = Modifier.height(40.dp))
                 }
 
-                if (showErrorDialog) {
-                    ErrorDialog(message = "invalid pin")
-                }
-
-
                 val cardDTO = CardDTO(
                     deviceType = "Desktop",
                     country = merchantDetailsData.payload.address?.country!!,
@@ -161,18 +172,11 @@ fun CardEnterPinScreen(
                     cardNumber = cardNumber,
                     retry = false
                 )
+                val cardOTPDTO = CardOTPDTO( transaction = Transaction( linkingReference, otp) )
 
-                val cardOTPDTO = CardOTPDTO(
-                    transaction = Transaction(
-                        linkingReference, otp
-                    )
-                )
+                if (isEnterPin && !isEnterOTP) { PinInputField(onEnterPin = { pin = it }) }
 
-                if (isEnterPin && !isEnterOTP) {
-                    PinInputField(onEnterPin = {
-                        pin = it
-                    })
-                } else {
+                else {
                     Row(
                         horizontalArrangement = Arrangement.Center,
                         modifier = Modifier.fillMaxWidth()
@@ -208,15 +212,16 @@ fun CardEnterPinScreen(
                     }
                     Spacer(modifier = modifier.height(10.dp))
 
+
                     AuthorizeButton(buttonText = "Authorize Payment",
                         onClick = {
                             if (otp.length < 6) {
-                                showErrorDialog = true
+                                openDialog.value = true
+                                alertDialogMessage = "Invalid otp"
+                                alertDialogHeaderMessage = "Error Occured"
                             } else {
-
-
                                 cardEnterPinViewModel.sendOtp(cardOTPDTO)
-                                showErrorDialog = false
+
                             }
                         }
                     )
@@ -227,14 +232,6 @@ fun CardEnterPinScreen(
                     showCircularProgress(showProgress = true)
                 }
 
-                //HANDLE ENTER OTP STATE
-                val otpState: OTPState = cardEnterPinViewModel.otpState.value
-                //HANDLE INITIATE TRANSACTION RESPONSE
-                val initiateCardPaymentEnterPinState: InitiateTransactionState =
-                    cardEnterPinViewModel.initiateTransactionState.value
-                //HANDLES initiate query response
-                val queryTransactionStateState: QueryTransactionState =
-                    cardEnterPinViewModel.queryTransactionState.value
 
 
                 if (otpState.hasError) {
@@ -244,12 +241,41 @@ fun CardEnterPinScreen(
                     showCircularProgressBar = true
                 }
 
+                    otpState.data?.let{ otp ->
 
-                    otpState.data?.let {
-                        if (it.status == "SUCCESS") {
-                            cardEnterPinViewModel.queryTransaction(cardDTO.paymentReference!!)
+                    if (otpState.data.status == "SUCCESS") {
+                        showCircularProgressBar = false
+                            if (queryTransactionStateState.data != null) {
+
+                                if (queryTransactionStateState.data.data?.code == SUCCESS) {
+                                    showCircularProgressBar = false
+                                    openDialog.value = true
+                                    alertDialogMessage = queryTransactionStateState.data.data.payments?.reason!!
+                                    alertDialogHeaderMessage = "Success"
+                                    cardEnterPinViewModel.resetTransactionState()
+                                    return@let
+                                }
+                                do {
+                                    cardEnterPinViewModel.queryTransaction(cardDTO.paymentReference!!)
+                                } while (queryTransactionStateState.data.data?.code == PENDING_CODE)
+
+
+                                if (queryTransactionStateState.data.data?.code == FAILED) {
+                                    showCircularProgressBar = false
+                                    openDialog.value = true
+                                    alertDialogMessage = queryTransactionStateState.data.data.payments?.reason!!
+                                    alertDialogHeaderMessage = "Failed"
+                                    cardEnterPinViewModel.resetTransactionState()
+                                    return@let
+                                }
+
+                            }else cardEnterPinViewModel.queryTransaction(cardDTO.paymentReference!!)
+                        } else if (otpState.data.status == FAILED) {
+                            showErrorDialog = true
                         }
                     }
+
+
 
                 //enter payment states
                 if (initiateCardPaymentEnterPinState.hasError) {
@@ -259,9 +285,7 @@ fun CardEnterPinScreen(
                             ?: "Something went wrong"
                     )
                 }
-                if (initiateCardPaymentEnterPinState.isLoading) {
-                    showCircularProgressBar = true
-                }
+                showCircularProgressBar = initiateCardPaymentEnterPinState.isLoading
 
                 initiateCardPaymentEnterPinState.data?.let {
                     showCircularProgressBar = false
@@ -272,40 +296,78 @@ fun CardEnterPinScreen(
                 }
 
 
-                    //querying transaction happens after otp has been inputted
-                    if (queryTransactionStateState.hasError) {
-                        showCircularProgressBar = false
-                        ErrorDialog(
-                            message = queryTransactionStateState.errorMessage
-                                ?: "Something went wrong"
-                        )
-                    }
-                    if (queryTransactionStateState.isLoading) {
-                        showCircularProgressBar = true
-                    }
-                    queryTransactionStateState.data?.data?.let {
-                        showCircularProgressBar = false
-                        if (queryTransactionStateState.data.data.code != PENDING_CODE) {
+                //querying transaction happens after otp has been inputted
+                if (queryTransactionStateState.hasError) {
+                    showCircularProgressBar = false
+                    ErrorDialog(
+                        message = queryTransactionStateState.errorMessage
+                            ?: "Something went wrong")
+                }
+                showCircularProgressBar = queryTransactionStateState.isLoading
 
-                        } else {
-                        }
-                    }
+
+
                 Spacer(modifier = Modifier.height(16.dp))
                 //payment button
                 if (isEnterPin && !isEnterOTP) {
                     PayButton(
                         amount = "NGN 60,000",
                         onClick = {
-                            showErrorDialog = if (pin.length < 4) {
-                                true
-                            } else {
+                            if(pin.length == 4){
                                 onPayButtonClicked(cardDTO)
-                                false
                             }
+                            else {
+                                openDialog.value = true
+                                alertDialogMessage = "Invalid pin"
+                                alertDialogHeaderMessage = "Error Occurred"
+                            }
+
                         }
                     )
                 }
+
+                //The alert dialog occurs here
+                if (openDialog.value) {
+                    AlertDialog(
+                        onDismissRequest = {
+                            openDialog.value = false
+                        },
+                        title = {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                Text(text = alertDialogHeaderMessage)
+                            }
+
+                        },
+                        text = {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                Text(alertDialogMessage)
+                            }
+                        },
+                        confirmButton = {
+                            Button(
+
+                                onClick = {
+                                    openDialog.value = false
+                                },
+                                colors = ButtonDefaults.buttonColors(
+                                    backgroundColor = SignalRed
+                                )
+                            ) {
+                                Text(text = "Close")
+
+                            }
+                        },
+                    )
+                }
             }
+
+
 
         }
     }
