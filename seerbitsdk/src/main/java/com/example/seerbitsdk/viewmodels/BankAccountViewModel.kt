@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 
 class BankAccountViewModel: ViewModel() {
 
+    //todo not yet in use
     private val initiateTransactionUseCase: InitiateUseCase = InitiateUseCase()
     private val sendOtpUseCase: OtpUseCase = OtpUseCase()
 

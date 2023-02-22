@@ -323,9 +323,22 @@ fun CustomAccountDetailsRow(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = leftHandText)
+        Text(text = leftHandText,
+            style = TextStyle(
+                fontSize = 14.sp,
+                fontFamily = Faktpro,
+                fontWeight = FontWeight.Normal,
+                lineHeight = 10.sp,
+            ))
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(text = rightHandText)
+            Text(text = rightHandText,
+                style = TextStyle(
+                    fontSize = 14.sp,
+                    fontFamily = Faktpro,
+                    fontWeight = FontWeight.Normal,
+                    lineHeight = 10.sp,
+                )
+            )
             Spacer(modifier = Modifier.width(4.dp))
             if (icon != null) {
                 Image(
