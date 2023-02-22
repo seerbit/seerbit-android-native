@@ -59,9 +59,11 @@ import com.example.seerbitsdk.screenstate.QueryTransactionState
 import com.example.seerbitsdk.transfer.TransferHomeScreen
 import com.example.seerbitsdk.ui.theme.*
 import com.example.seerbitsdk.ussd.USSDHomeScreen
+import com.example.seerbitsdk.ussd.USSDSelectBanksScreen
 import com.example.seerbitsdk.viewmodels.CardEnterPinViewModel
 import com.example.seerbitsdk.viewmodels.TransactionViewModel
 import com.example.seerbitsdk.viewmodels.MerchantDetailsViewModel
+import com.example.seerbitsdk.viewmodels.SelectBankViewModel
 
 class SeerBitActivity : ComponentActivity() {
     private val viewModel: MerchantDetailsViewModel by viewModels()
@@ -72,9 +74,10 @@ class SeerBitActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             val viewModel: MerchantDetailsViewModel by viewModels()
+            val cardEnterPinViewModel: CardEnterPinViewModel by viewModels()
             val transactionViewModel: TransactionViewModel by viewModels()
-            transactionViewModel.resetTransactionState()
-            SeerBitApp(viewModel, transactionViewModel)
+            val selectBankViewModel: SelectBankViewModel by viewModels()
+            SeerBitApp(viewModel, transactionViewModel, cardEnterPinViewModel, selectBankViewModel)
 
         }
     }
@@ -97,6 +100,8 @@ fun DefaultPreview() {
 fun SeerBitApp(
     viewModel: MerchantDetailsViewModel,
     transactionViewModel: TransactionViewModel,
+    cardEnterPinViewModel: CardEnterPinViewModel,
+    selectBankViewModel: SelectBankViewModel
 ) {
     SeerBitTheme {
         // A surface container using the 'background' color from the theme
@@ -129,7 +134,9 @@ fun SeerBitApp(
                 modifier = Modifier.padding(8.dp),
                 currentDestination = currentBackStack?.destination,
                 merchantDetailsState = viewModel.merchantState.value,
-                viewModel = transactionViewModel
+                transactionViewModel = transactionViewModel,
+                cardEnterPinViewModel = cardEnterPinViewModel,
+                selectBankViewModel = selectBankViewModel
             )
 
         }
@@ -191,7 +198,6 @@ fun CardHomeScreen(
     transactionViewModel: TransactionViewModel
 ) {
 
-    transactionViewModel.resetTransactionState()
     var cardDetailsData: CardDetails by remember { mutableStateOf(CardDetails("", "", "", "")) }
 
     //card details
@@ -361,7 +367,7 @@ fun CardHomeScreen(
             transactionState.data?.let {
                 paymentRef = transactionState.data.data?.payments?.paymentReference ?: ""
                 val toEnterPinScreen = transactionState.data.data?.message == KINDLY_ENTER_PIN
-                val notEnterPin : Boolean = false
+                val notEnterPin: Boolean = false
                 transactionState.data.data?.payments?.redirectUrl?.let {
                     redirectUrl = it
                     canRedirectToUrl = true
@@ -378,7 +384,6 @@ fun CardHomeScreen(
                     startQueryingTransaction = true
                     canRedirectToUrl = false
                 }
-
 
 
             }
@@ -410,8 +415,9 @@ fun redirectUrl(context: Context = LocalContext.current, redirectUrl: String) {
 fun HeaderScreenPreview() {
     val viewModel: MerchantDetailsViewModel = viewModel()
     val transactionViewModel: TransactionViewModel = viewModel()
-
-    SeerBitApp(viewModel, transactionViewModel)
+    val cardEnterPinViewModel: CardEnterPinViewModel = viewModel()
+    val selectBankViewModel: SelectBankViewModel = viewModel()
+    SeerBitApp(viewModel, transactionViewModel, cardEnterPinViewModel, selectBankViewModel)
 }
 
 
@@ -726,7 +732,9 @@ fun MyAppNavHost(
     startDestination: String = Debit_CreditCard.route,
     currentDestination: NavDestination?,
     merchantDetailsState: MerchantDetailsState,
-    viewModel: TransactionViewModel
+    transactionViewModel: TransactionViewModel,
+    cardEnterPinViewModel: CardEnterPinViewModel,
+    selectBankViewModel: SelectBankViewModel
 ) {
     NavHost(
         modifier = modifier,
@@ -743,21 +751,23 @@ fun MyAppNavHost(
         }
 
         composable(route = Debit_CreditCard.route) {
+            transactionViewModel.resetTransactionState()
             CardHomeScreen(
                 onNavigateToPinScreen = { cardDTO ->
                     // if there is an error loading the report
-                    viewModel.initiateTransaction(cardDTO)
+                    transactionViewModel.initiateTransaction(cardDTO)
                 },
 
                 onOtherPaymentButtonClicked = { navController.navigateSingleTopTo(Route.OTHER_PAYMENT_SCREEN) },
                 currentDestination = currentDestination,
                 navController = navController,
                 merchantDetailsState = merchantDetailsState,
-                transactionViewModel = viewModel
+                transactionViewModel = transactionViewModel
             )
         }
 
         composable(
+
             "${Route.PIN_SCREEN}/{paymentRef}/{cvv}/{cardNumber}/{cardExpiryMonth}/{cardExpiryYear}/{isEnterPin}",
             arguments = listOf(
                 // declaring argument type
@@ -775,15 +785,15 @@ fun MyAppNavHost(
             val cardExpiryMonth = navBackStackEntry.arguments?.getString("cardExpiryMonth")
             val cardExpiryYear = navBackStackEntry.arguments?.getString("cardExpiryYear")
             val isEnterPin = navBackStackEntry.arguments?.getBoolean("isEnterPin")
-
+            cardEnterPinViewModel.resetTransactionState()
             CardEnterPinScreen(
                 onPayButtonClicked = { cardDTO ->
-                    viewModel.initiateTransaction(cardDTO)
+                    cardEnterPinViewModel.initiateTransaction(cardDTO)
                 },
                 currentDestination = currentDestination,
                 navController = navController,
                 merchantDetailsState = merchantDetailsState,
-                transactionViewModel = viewModel,
+                cardEnterPinViewModel = cardEnterPinViewModel,
                 onOtherPaymentButtonClicked = { navController.navigateSingleTopTo(Route.OTHER_PAYMENT_SCREEN) },
                 paymentReference = paymentReference!!,
                 cvv = cvv!!,
@@ -791,23 +801,7 @@ fun MyAppNavHost(
                 cardExpiryMonth = cardExpiryMonth!!,
                 cardExpiryYear = cardExpiryYear!!,
                 isEnterPin = isEnterPin!!,
-            ) {
-
-            }
-        }
-
-        composable(route = Ussd.route) {
-            viewModel.resetTransactionState()
-            USSDHomeScreen(
-                onConfirmPaymentClicked = {
-                    //
-                },
-
-                onOtherPaymentButtonClicked = { navController.navigateSingleTopTo(Route.OTHER_PAYMENT_SCREEN) },
-                currentDestination = currentDestination,
-                navController = navController,
-                merchantDetailsState = merchantDetailsState,
-                navigateToLoadingScreen = { navController.navigateSingleTopTo(Route.PIN_SCREEN) },
+                resetVM = {}
             )
         }
 
@@ -843,7 +837,7 @@ fun MyAppNavHost(
                 onConfirmedButtonClicked = {},
                 navController = navController,
                 merchantDetailsState = merchantDetailsState,
-                transactionViewModel = viewModel,
+                transactionViewModel = transactionViewModel,
                 bankAccountNumber = accountNumber!!,
                 birthday = birthday!!,
                 bvn = bvn!!,
@@ -853,7 +847,7 @@ fun MyAppNavHost(
 
 
         composable(route = Transfer.route) {
-            viewModel.resetTransactionState()
+            transactionViewModel.resetTransactionState()
             TransferHomeScreen(
                 navigateToLoadingScreen = { /*TODO*/ },
                 currentDestination = null,
@@ -867,19 +861,44 @@ fun MyAppNavHost(
         composable(route = PhoneNumber.route) {
 
         }
-        composable(route = Cash.route) {
+
+        composable(
+            "${Route.USSD_HOME_SCREEN}/{bankCode}",
+            arguments = listOf(
+                // declaring argument type
+                navArgument("bankCode") { type = NavType.StringType },
+
+                )
+        ) {
+                navBackStackEntry ->
+
+            val bankCode = navBackStackEntry.arguments?.getString("bankCode")
+            transactionViewModel.resetTransactionState()
             USSDHomeScreen(
                 navigateToLoadingScreen = {},
                 currentDestination = currentDestination,
                 navController = navController,
-                onConfirmPaymentClicked = {
-                },
+                onConfirmPaymentClicked = {},
                 onOtherPaymentButtonClicked = { navController.navigateSingleTopTo(Route.OTHER_PAYMENT_SCREEN) },
                 merchantDetailsState = merchantDetailsState,
-                transactionViewModel = viewModel
+                transactionViewModel = transactionViewModel,
+                bankCode = bankCode
             )
         }
 
+
+        composable(UssdSelectBank.route) {
+
+            USSDSelectBanksScreen(
+                navigateToUssdHomeScreen = { },
+                currentDestination = currentDestination,
+                navController = navController,
+                onConfirmPaymentClicked = { /*TODO*/ },
+                merchantDetailsState = merchantDetailsState,
+                selectBankViewModel = selectBankViewModel
+            )
+
+        }
 
         composable("otpscreen") {
             OTPScreen(

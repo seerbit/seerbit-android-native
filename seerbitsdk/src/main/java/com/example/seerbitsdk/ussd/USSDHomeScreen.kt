@@ -49,13 +49,15 @@ fun USSDHomeScreen(
     onConfirmPaymentClicked: () -> Unit,
     onOtherPaymentButtonClicked: () -> Unit,
     merchantDetailsState: MerchantDetailsState?,
-    transactionViewModel: TransactionViewModel = viewModel()
+    transactionViewModel: TransactionViewModel = viewModel(),
+    bankCode: String?
 
 ) {
     var showLoadingScreen by remember { mutableStateOf(false) }
     var ussdCode by remember { mutableStateOf("") }
     var isSuccesfulResponse by remember { mutableStateOf(false) }
     var retryCount by remember { mutableStateOf(0) }
+    val context = LocalContext.current
 
     // if there is an error loading the report
     if (merchantDetailsState?.hasError!!) {
@@ -99,7 +101,7 @@ fun USSDHomeScreen(
 
                 val ussdDTO = UssdDTO(
                     country = merchantDetailsData.payload.address?.country!!,
-                    bankCode = "044",
+                    bankCode = bankCode,
                     amount = "60000",
                     redirectUrl = "http://localhost:3002/#/",
                     productId = "",
@@ -128,7 +130,7 @@ fun USSDHomeScreen(
                     transactionViewModel.initiateTransactionState.value
                 //enter payment states
 
-                if(initiateUssdPayment.data == null && !isSuccesfulResponse) {
+                if (initiateUssdPayment.data == null && !isSuccesfulResponse) {
                     transactionViewModel.initiateTransaction(ussdDTO)
                 }
 
@@ -144,12 +146,10 @@ fun USSDHomeScreen(
                 }
                 initiateUssdPayment.data?.let {
                     val paymentReference2 = it.data?.payments?.paymentReference
-                    if(!isSuccesfulResponse) {
+                    if (!isSuccesfulResponse) {
                         ussdCode = it.data?.payments?.ussdDailCode.toString()
                     }
                     isSuccesfulResponse = true
-
-
 
 
                 }
@@ -171,7 +171,6 @@ fun USSDHomeScreen(
                         transactionViewModel.queryTransaction(ussdDTO.paymentReference!!)
                     }
                 }
-
 
 
                 // if loadingScreen value is false
@@ -199,7 +198,15 @@ fun USSDHomeScreen(
                             fontWeight = FontWeight.Normal,
                             lineHeight = 10.sp
                         ),
-                        modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
+                        modifier = Modifier
+                            .align(alignment = Alignment.CenterHorizontally)
+                            .clickable {
+                                copyToClipboard(context, ussdCode)
+                                Toast
+                                    .makeText(context, "Ussd code copied!", Toast.LENGTH_SHORT)
+                                    .show()
+                            }
+
                     )
                     Spacer(modifier = Modifier.height(20.dp))
 
@@ -228,7 +235,7 @@ fun USSDHomeScreen(
 }
 
 @Composable
-fun USSDCodeSurfaceView(context : Context?, ussdCodeText: String) {
+fun USSDCodeSurfaceView(context: Context?, ussdCodeText: String) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
@@ -249,8 +256,6 @@ fun USSDCodeSurfaceView(context : Context?, ussdCodeText: String) {
                     .align(alignment = Alignment.CenterVertically)
                     .padding(start = 8.dp, end = 8.dp)
                     .clickable {
-                        copyToClipboard(context!!, ussdCodeText)
-                        Toast.makeText(context, "Ussd code copied" , Toast.LENGTH_SHORT).show()
                     }
             )
         }
@@ -281,7 +286,8 @@ fun HeaderScreenPreview() {
             },
             onOtherPaymentButtonClicked = { },
             merchantDetailsState = MerchantDetailsState(),
-            transactionViewModel = viewModel
+            transactionViewModel = viewModel,
+            bankCode = ""
         )
     }
 }

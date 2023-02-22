@@ -3,6 +3,7 @@ package com.example.seerbitsdk.use_cases
 import android.widget.Toast
 import com.example.seerbitsdk.models.Resource
 import com.example.seerbitsdk.models.TransactionDTO
+import com.example.seerbitsdk.models.bankaccount.BankAccountDTO
 import com.example.seerbitsdk.models.card.CardDTO
 import com.example.seerbitsdk.models.transfer.TransferDTO
 import com.example.seerbitsdk.models.ussd.UssdDTO
@@ -34,8 +35,8 @@ class InitiateUseCase {
                         val jsonObject = JSONObject(
                             Objects.requireNonNull<ResponseBody>(apiResponse.errorBody()).string()
                         )
-                        if(apiResponse.code() == 500)
-                        emit(Resource.Error(jsonObject.getString("error")))
+                        if (apiResponse.code() == 500)
+                            emit(Resource.Error(jsonObject.getString("error")))
                         else
                             emit(Resource.Error(jsonObject.getString("message")))
                     }
@@ -49,7 +50,7 @@ class InitiateUseCase {
                         val jsonObject = JSONObject(
                             Objects.requireNonNull<ResponseBody>(apiResponse.errorBody()).string()
                         )
-                        if(apiResponse.code() == 500)
+                        if (apiResponse.code() == 500)
                             emit(Resource.Error(jsonObject.getString("error")))
                         else
                             emit(Resource.Error(jsonObject.getString("message")))
@@ -65,7 +66,24 @@ class InitiateUseCase {
                         val jsonObject = JSONObject(
                             Objects.requireNonNull<ResponseBody>(apiResponse.errorBody()).string()
                         )
-                        if(apiResponse.code() == 500)
+                        if (apiResponse.code() == 500)
+                            emit(Resource.Error(jsonObject.getString("error")))
+                        else
+                            emit(Resource.Error(jsonObject.getString("message")))
+                    }
+                }
+
+                is BankAccountDTO -> {
+                    val apiResponse =
+                        initiateTransactionRepository.initiateBankAccountMode(transactionDTO)
+                    if (apiResponse.isSuccessful) {
+                        val result = apiResponse.body()
+                        emit(Resource.Success(result))
+                    } else {
+                        val jsonObject = JSONObject(
+                            Objects.requireNonNull<ResponseBody>(apiResponse.errorBody()).string()
+                        )
+                        if (apiResponse.code() == 500)
                             emit(Resource.Error(jsonObject.getString("error")))
                         else
                             emit(Resource.Error(jsonObject.getString("message")))

@@ -1,5 +1,6 @@
 package com.example.seerbitsdk.models.bankaccount
 
+import com.example.seerbitsdk.models.TransactionDTO
 import com.google.gson.annotations.SerializedName
 
 data class BankAccountDTO(
@@ -75,4 +76,4 @@ data class BankAccountDTO(
 
 	@field:SerializedName("retry")
 	val retry: Boolean? = null
-)
+) : TransactionDTO

@@ -28,7 +28,7 @@ object BankAccount : SeerBitDestination {
 
 }
 
-object Ussd : SeerBitDestination {
+object UssdSelectBank : SeerBitDestination {
     override val name = "USSD"
     override val attachedDescription = "*bank ussd code#"
     override val route: String = "USSD"
@@ -53,4 +53,4 @@ object Cash : SeerBitDestination {
 }
 
 // Screens to be displayed in the top RallyTabRow
-val rallyTabRowScreens = listOf(Debit_CreditCard, BankAccount, Ussd, Transfer)
+val rallyTabRowScreens = listOf(Debit_CreditCard, BankAccount, UssdSelectBank, Transfer)

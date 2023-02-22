@@ -8,7 +8,6 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -62,18 +61,17 @@ fun CardEnterPinScreen(
     navController: NavHostController,
     merchantDetailsState: MerchantDetailsState,
     onOtherPaymentButtonClicked: () -> Unit,
-    transactionViewModel: TransactionViewModel,
     paymentReference: String,
     cvv: String,
     cardNumber: String,
     cardExpiryMonth: String,
     cardExpiryYear: String,
     isEnterPin: Boolean,
-    resetVM : () -> Unit,
+    resetVM: () -> Unit,
+    cardEnterPinViewModel: CardEnterPinViewModel,
 
-) {
+    ) {
     Column(modifier = modifier) {
-
 
 
         // if there is an error loading the report
@@ -84,7 +82,7 @@ fun CardEnterPinScreen(
         if (merchantDetailsState.isLoading) {
             showCircularProgress(showProgress = true)
         }
-        
+
 
 
         merchantDetailsState.data?.let { merchantDetailsData ->
@@ -101,10 +99,9 @@ fun CardEnterPinScreen(
                 var isEnterOTP by remember { mutableStateOf(false) }
                 var showErrorDialog by remember { mutableStateOf(false) }
                 var showCircularProgressBar by remember { mutableStateOf(false) }
-                var linkingReference : String? by remember { mutableStateOf("") }
+                var linkingReference: String? by remember { mutableStateOf("") }
                 var paymentReference2 by remember { mutableStateOf("") }
                 var otp by remember { mutableStateOf("") }
-                var startQueryingTransaction by remember { mutableStateOf(false) }
 
 
                 Spacer(modifier = Modifier.height(21.dp))
@@ -218,8 +215,7 @@ fun CardEnterPinScreen(
                             } else {
 
 
-                                transactionViewModel.sendOtp(cardOTPDTO)
-                                startQueryingTransaction = true
+                                cardEnterPinViewModel.sendOtp(cardOTPDTO)
                                 showErrorDialog = false
                             }
                         }
@@ -232,13 +228,13 @@ fun CardEnterPinScreen(
                 }
 
                 //HANDLE ENTER OTP STATE
-                val otpState: OTPState = transactionViewModel.otpState.value
+                val otpState: OTPState = cardEnterPinViewModel.otpState.value
                 //HANDLE INITIATE TRANSACTION RESPONSE
                 val initiateCardPaymentEnterPinState: InitiateTransactionState =
-                    transactionViewModel.initiateTransactionState.value
+                    cardEnterPinViewModel.initiateTransactionState.value
                 //HANDLES initiate query response
                 val queryTransactionStateState: QueryTransactionState =
-                    transactionViewModel.queryTransactionState.value
+                    cardEnterPinViewModel.queryTransactionState.value
 
 
                 if (otpState.hasError) {
@@ -247,16 +243,17 @@ fun CardEnterPinScreen(
                 if (otpState.isLoading) {
                     showCircularProgressBar = true
                 }
-                if(startQueryingTransaction) {
+
+
                     otpState.data?.let {
                         if (it.status == "SUCCESS") {
-                            transactionViewModel.queryTransaction(cardDTO.paymentReference!!)
+                            cardEnterPinViewModel.queryTransaction(cardDTO.paymentReference!!)
                         }
                     }
-                }
 
                 //enter payment states
                 if (initiateCardPaymentEnterPinState.hasError) {
+                    showCircularProgressBar = false
                     ErrorDialog(
                         message = initiateCardPaymentEnterPinState.errorMessage
                             ?: "Something went wrong"
@@ -265,17 +262,19 @@ fun CardEnterPinScreen(
                 if (initiateCardPaymentEnterPinState.isLoading) {
                     showCircularProgressBar = true
                 }
+
                 initiateCardPaymentEnterPinState.data?.let {
-                     paymentReference2 = it.data?.payments?.paymentReference!!
+                    showCircularProgressBar = false
+                    paymentReference2 = it.data?.payments?.paymentReference!!
                     linkingReference = it.data.payments.linkingReference
                     isEnterOTP = it.data.message == KINDLY_ENTER_OTP
 
                 }
 
 
-                if(startQueryingTransaction) {
                     //querying transaction happens after otp has been inputted
                     if (queryTransactionStateState.hasError) {
+                        showCircularProgressBar = false
                         ErrorDialog(
                             message = queryTransactionStateState.errorMessage
                                 ?: "Something went wrong"
@@ -285,12 +284,12 @@ fun CardEnterPinScreen(
                         showCircularProgressBar = true
                     }
                     queryTransactionStateState.data?.data?.let {
+                        showCircularProgressBar = false
                         if (queryTransactionStateState.data.data.code != PENDING_CODE) {
 
                         } else {
                         }
                     }
-                }
                 Spacer(modifier = Modifier.height(16.dp))
                 //payment button
                 if (isEnterPin && !isEnterOTP) {
@@ -320,22 +319,22 @@ fun HeaderScreenPreview() {
     SeerBitTheme {
         val viewModel: MerchantDetailsViewModel = viewModel()
         val viewModel2: TransactionViewModel = viewModel()
+        val cardEnterPinViewModel: CardEnterPinViewModel = viewModel()
         CardEnterPinScreen(
             onPayButtonClicked = {},
             currentDestination = null,
             navController = rememberNavController(),
             merchantDetailsState = viewModel.merchantState.value,
             onOtherPaymentButtonClicked = { /*TODO*/ },
-            transactionViewModel = viewModel2,
             paymentReference = "",
             cvv = "",
+            cardEnterPinViewModel = cardEnterPinViewModel,
             cardNumber = "",
             cardExpiryMonth = "",
             cardExpiryYear = "",
             isEnterPin = false,
-        ){
-
-        }
+            resetVM = {}
+        )
     }
 }
 

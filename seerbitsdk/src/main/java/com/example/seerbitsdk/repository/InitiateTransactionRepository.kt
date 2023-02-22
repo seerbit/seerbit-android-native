@@ -2,6 +2,7 @@ package com.example.seerbitsdk.repository
 
 import com.example.seerbitsdk.api.InitiateTransactionApiService
 import com.example.seerbitsdk.api.MerchantServiceApi
+import com.example.seerbitsdk.models.bankaccount.BankAccountDTO
 import com.example.seerbitsdk.models.card.CardDTO
 import com.example.seerbitsdk.models.card.CardResponse
 import com.example.seerbitsdk.models.query.QueryTransactionResponse
@@ -23,6 +24,9 @@ class InitiateTransactionRepository {
         return MerchantServiceApi.retrofitService.initiateTransfer(transferDTO)
     }
 
+    suspend fun initiateBankAccountMode(bankAccountDTO: BankAccountDTO): Response<CardResponse> {
+        return MerchantServiceApi.retrofitService.initiateBankAccountMode(bankAccountDTO)
+    }
 
     //todo move this later
     suspend fun queryTransaction(paymentReference: String): Response<QueryTransactionResponse> {
