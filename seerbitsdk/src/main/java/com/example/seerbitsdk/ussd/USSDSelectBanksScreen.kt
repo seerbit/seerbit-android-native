@@ -17,10 +17,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.unit.toIntRect
-import androidx.compose.ui.unit.toSize
+import androidx.compose.ui.unit.*
 import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -190,7 +187,7 @@ fun UssdSelectBankButton(modifier: Modifier = Modifier, merchantBankList : List<
                     .height(56.dp)
                     .onGloballyPositioned { layoutCoordinates ->
                         textFieldSize = layoutCoordinates.size.toSize()
-                    },
+                    }.fillMaxHeight(),
                 trailingIcon = {
                     Icon(imageVector = icon, contentDescription = null,
                         Modifier.clickable { expanded = !expanded })
@@ -199,25 +196,28 @@ fun UssdSelectBankButton(modifier: Modifier = Modifier, merchantBankList : List<
             )
         }
 
-    }
+        Spacer(Modifier.height(10.dp))
+        DropdownMenu(
 
-
-    DropdownMenu(
-        expanded = expanded, onDismissRequest = { expanded = false },
-        modifier = Modifier.width(
-            with(LocalDensity.current) { textFieldSize.width.toDp() })
-    ) {
-        merchantBankList?.forEach { label ->
-            DropdownMenuItem(onClick = {
-                selectedText = label?.bankName!!
-                onBankCodeSelected(label.bankCode!!)
-                expanded = false
-            }) {
-                Text(text = label?.bankName!!)
+            expanded = expanded, onDismissRequest = { expanded = false },
+            modifier = Modifier.width(
+                with(LocalDensity.current) { textFieldSize.width.toDp() })
+        ) {
+            merchantBankList?.forEach { label ->
+                DropdownMenuItem(onClick = {
+                    selectedText = label?.bankName!!
+                    onBankCodeSelected(label.bankCode!!)
+                    expanded = false
+                }) {
+                    Text(text = label?.bankName!!)
+                }
             }
+
         }
 
     }
+
+
 }
 
 @Preview(showBackground = true, widthDp = 400)

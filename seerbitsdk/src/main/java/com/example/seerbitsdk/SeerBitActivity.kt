@@ -326,7 +326,7 @@ fun CardHomeScreen(
                         } else {
                             true
                         }
-                    }
+                    }, !showCircularProgressBar
                 )
             }
 
@@ -350,9 +350,7 @@ fun CardHomeScreen(
                         message = queryTransactionStateState.errorMessage ?: "Something went wrong"
                     )
                 }
-                if (queryTransactionStateState.isLoading) {
-                    showCircularProgressBar = true
-                }
+                showCircularProgressBar = queryTransactionStateState.isLoading
 
                 queryTransactionStateState.data?.data?.let {
                     showCircularProgressBar =
@@ -699,12 +697,13 @@ fun PaymentOptionButtons(
 @Composable
 fun PayButton(
     amount: String,
-    onClick: () -> Unit
+    onClick: () -> Unit, enabled : Boolean
 ) {
     Button(
         onClick = onClick,
         colors = ButtonDefaults.buttonColors(backgroundColor = Color.Gray),
         shape = RoundedCornerShape(8.dp),
+        enabled = enabled,
         modifier = Modifier
             .height(56.dp)
             .fillMaxWidth()

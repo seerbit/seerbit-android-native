@@ -142,7 +142,6 @@ fun CardEnterPinScreen(
                             fontWeight = FontWeight.Normal,
                             lineHeight = 14.sp,
                             textAlign = TextAlign.Center
-
                         ),
                         modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
                     )
@@ -240,11 +239,11 @@ fun CardEnterPinScreen(
 
 
                 if (otpState.hasError) {
-                    ErrorDialog(message = otpState.errorMessage ?: "Something went wrong")
+                    alertDialogMessage = otpState.errorMessage?:  "Something went wrong"
+                   openDialog.value = true
+                    alertDialogHeaderMessage = "Error occurred"
                 }
-                if (otpState.isLoading) {
-                    showCircularProgressBar = true
-                }
+                showCircularProgressBar = otpState.isLoading
 
                     otpState.data?.let{ otp ->
 
@@ -327,7 +326,7 @@ fun CardEnterPinScreen(
                                 alertDialogHeaderMessage = "Error Occurred"
                             }
 
-                        }
+                        },!showCircularProgressBar
                     )
                 }
 

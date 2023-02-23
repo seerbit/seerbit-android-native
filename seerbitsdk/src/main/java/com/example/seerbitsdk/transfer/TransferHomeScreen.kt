@@ -33,6 +33,7 @@ import com.example.seerbitsdk.card.AuthorizeButton
 import com.example.seerbitsdk.card.showCircularProgress
 import com.example.seerbitsdk.component.OtherPaymentButtonComponent
 import com.example.seerbitsdk.component.PENDING_CODE
+import com.example.seerbitsdk.component.SUCCESS
 import com.example.seerbitsdk.component.SeerbitPaymentDetailScreen
 import com.example.seerbitsdk.models.transfer.TransferDTO
 import com.example.seerbitsdk.screenstate.InitiateTransactionState
@@ -168,15 +169,29 @@ fun TransferHomeScreen(
             if (queryTransactionStateState.isLoading) {
                 showCircularProgressBar = true
             }
-            if (queryTransactionStateState.data?.data != null) {
 
-                if (queryTransactionStateState.data.data.code != PENDING_CODE) {
-                    showCircularProgressBar = false
-                } else {
-                    showCircularProgressBar = true
+
+            if(queryTransactionStateState.data?.data!= null){
+
+                if (queryTransactionStateState.data.data.code == PENDING_CODE) {
                     transactionViewModel.queryTransaction(transferDTO.paymentReference!!)
                 }
+                if(queryTransactionStateState.data.data.code == SUCCESS){
+                    ErrorDialog(message = queryTransactionStateState.data.data.payments?.reason!!)
+                    showCircularProgressBar = false
+                    showLoadingScreen = false
+                    //alertDialogMessage = queryTransactionStateState.data.data.payments.reason!!
+                    //alertDialogHeaderMessage = "Success"
+                }
+                if(queryTransactionStateState.data.data.code == "SM_X23" || queryTransactionStateState.data.data.code == "S12"){
+                    ErrorDialog(message = queryTransactionStateState.data.data.payments?.reason!!)
+                    showCircularProgressBar = false
+                    //alertDialogMessage = queryTransactionStateState.data.data.payments?.reason!!
+                    //alertDialogHeaderMessage = "Failed"
+
+                }
             }
+
 
             Text(
                 text = "Transfer the exact amount including decimals",

@@ -9,8 +9,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -35,8 +34,10 @@ import com.example.seerbitsdk.models.ussd.UssdDTO
 import com.example.seerbitsdk.screenstate.InitiateTransactionState
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.screenstate.QueryTransactionState
+import com.example.seerbitsdk.ui.theme.Faktpro
 import com.example.seerbitsdk.ui.theme.LighterGray
 import com.example.seerbitsdk.ui.theme.SeerBitTheme
+import com.example.seerbitsdk.ui.theme.SignalRed
 import com.example.seerbitsdk.viewmodels.TransactionViewModel
 
 
@@ -60,11 +61,13 @@ fun USSDHomeScreen(
     var retryCount by remember { mutableStateOf(0) }
     val context = LocalContext.current
     var showCircularProgressBar by rememberSaveable { mutableStateOf(false) }
-
+    val openDialog = remember { mutableStateOf(false) }
     // if there is an error loading the report
     if (merchantDetailsState?.hasError!!) {
         ErrorDialog(message = merchantDetailsState.errorMessage ?: "Something went wrong")
     }
+    var alertDialogMessage  by remember { mutableStateOf("") }
+    var alertDialogHeaderMessage  by remember { mutableStateOf("") }
 
     if (merchantDetailsState.isLoading) {
         showCircularProgress(showProgress = true)
@@ -143,9 +146,8 @@ fun USSDHomeScreen(
                     )
                     retryCount++
                 }
-                if (initiateUssdPayment.isLoading) {
-                    showCircularProgressBar = true
-                }
+                showCircularProgressBar = initiateUssdPayment.isLoading
+
                 initiateUssdPayment.data?.let {
                     val paymentReference2 = it.data?.payments?.paymentReference
                     if (!isSuccesfulResponse) {
@@ -158,20 +160,31 @@ fun USSDHomeScreen(
 
                 //querying transaction happens after otp has been inputted
                 if (queryTransactionStateState.hasError) {
+                    showLoadingScreen= false
                     ErrorDialog(
                         message = queryTransactionStateState.errorMessage ?: "Something went wrong"
                     )
                 }
                 if (queryTransactionStateState.isLoading) {
-                    showCircularProgressBar = true
                 }
 
-                if (queryTransactionStateState.data?.data != null) {
+                if(queryTransactionStateState.data?.data!= null){
 
-                    if (queryTransactionStateState.data.data.code != PENDING_CODE) {
-                        //todo showSuccessScreen
-                    } else {
+                    if (queryTransactionStateState.data.data.code == PENDING_CODE) {
                         transactionViewModel.queryTransaction(ussdDTO.paymentReference!!)
+                    }
+                    if(queryTransactionStateState.data.data.code == SUCCESS){
+                        ErrorDialog(message = queryTransactionStateState.data.data.payments?.reason!!)
+                        showLoadingScreen = false
+                        alertDialogMessage = queryTransactionStateState.data.data.payments.reason!!
+                        alertDialogHeaderMessage = "Success"
+                    }
+                    if(queryTransactionStateState.data.data.code == "SM_X23" || queryTransactionStateState.data.data.code == "S12"){
+                        ErrorDialog(message = queryTransactionStateState.data.data.payments?.reason!!)
+                        showLoadingScreen = false
+                        alertDialogMessage = queryTransactionStateState.data.data.payments?.reason!!
+                        alertDialogHeaderMessage = "Failed"
+
                     }
                 }
 
@@ -184,7 +197,7 @@ fun USSDHomeScreen(
                         text = "Dial the code below to complete this payment.",
                         style = TextStyle(
                             fontSize = 14.sp,
-                            fontFamily = FontFamily.SansSerif,
+                            fontFamily = Faktpro,
                             fontWeight = FontWeight.Normal,
                             lineHeight = 10.sp
                         ),
@@ -199,7 +212,7 @@ fun USSDHomeScreen(
                         text = "Click to copy code.",
                         style = TextStyle(
                             fontSize = 14.sp,
-                            fontFamily = FontFamily.SansSerif,
+                            fontFamily = Faktpro,
                             fontWeight = FontWeight.Normal,
                             lineHeight = 10.sp
                         ),
@@ -232,13 +245,53 @@ fun USSDHomeScreen(
                     showLoaderLayout()
                 }
 
-
             }
+            //The alert dialog occurs here
+            if (openDialog.value) {
+                AlertDialog(
+                    onDismissRequest = {
+                        openDialog.value = false
+                    },
+                    title = {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Text(text = alertDialogHeaderMessage)
+                        }
+
+                    },
+                    text = {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Text(alertDialogMessage)
+                        }
+                    },
+                    confirmButton = {
+                        Button(
+
+                            onClick = {
+                                openDialog.value = false
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                backgroundColor = SignalRed
+                            )
+                        ) {
+                            Text(text = "Close")
+
+                        }
+                    },
+                )
+            }
+
+        }
 
 
         }
     }
-}
+
 
 @Composable
 fun USSDCodeSurfaceView(context: Context?, ussdCodeText: String) {
