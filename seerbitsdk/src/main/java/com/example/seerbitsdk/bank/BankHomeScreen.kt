@@ -70,7 +70,7 @@ fun BankScreen(
             Spacer(modifier = modifier.height(10.dp))
             AuthorizeButton(
                 buttonText = "Pay $50",
-                onClick = onNavigateToBankAccountNumberScreen
+                onClick = onNavigateToBankAccountNumberScreen,true
             )
 
 

@@ -24,56 +24,58 @@ import com.example.seerbitsdk.ui.theme.SignalRed
 @Composable
 fun OtherPaymentButtonComponent(
     modifier: Modifier = Modifier,
-    onOtherPaymentButtonClicked : () -> Unit,
-    onCancelButtonClicked : () -> Unit
-){
-Row(modifier = Modifier.fillMaxWidth()) {
-    Button(
-        onClick = onOtherPaymentButtonClicked,
-        colors = ButtonDefaults.buttonColors(backgroundColor = LighterGray),
-        shape = RoundedCornerShape(4.dp),
+    onOtherPaymentButtonClicked: () -> Unit,
+    onCancelButtonClicked: () -> Unit
+) {
+    Row(modifier = Modifier.fillMaxWidth()) {
+        Button(
+            onClick = onOtherPaymentButtonClicked,
+            colors = ButtonDefaults.buttonColors(backgroundColor = LighterGray),
+            shape = RoundedCornerShape(4.dp),
 
-        modifier = Modifier
-            .height(50.dp)
-            .weight(2.0f)
-            .padding(end = 8.dp)
+            modifier = Modifier
+                .height(50.dp)
+                .weight(1.7f)
+                .padding(end = 8.dp)
 
-    ) {
-        Text(
-            text = "Change Payment Method",
-            textAlign = TextAlign.Center,
-            style = TextStyle(
-                fontSize = 14.sp,
-                fontFamily = Faktpro,
-                fontWeight = FontWeight.Normal,
-                lineHeight = 10.sp
+        ) {
+            Text(
+                text = "Change Payment Method",
+                textAlign = TextAlign.Center,
+                style = TextStyle(
+                    fontSize = 14.sp,
+                    fontFamily = Faktpro,
+                    fontWeight = FontWeight.Normal,
+                    lineHeight = 10.sp,
+                    textAlign = TextAlign.Center
+                ),
+                modifier = Modifier.align(alignment = Alignment.CenterVertically)
             )
-        )
+        }
+
+        Button(
+            onClick = onCancelButtonClicked,
+            colors = ButtonDefaults.buttonColors(backgroundColor = SignalRed),
+            shape = RoundedCornerShape(4.dp),
+            modifier = Modifier
+                .height(50.dp)
+                .weight(1f)
+
+        ) {
+            Text(
+                text = "Cancel Payment",
+
+                style = TextStyle(
+                    fontSize = 14.sp,
+                    fontFamily = Faktpro,
+                    fontWeight = FontWeight.Normal,
+                    lineHeight = 10.sp,
+                    color = DeepRed,
+                    textAlign = TextAlign.Center
+                ),
+                modifier = Modifier.align(alignment = Alignment.CenterVertically)
+            )
+        }
+
     }
-
-    Button(
-        onClick = onCancelButtonClicked,
-        colors = ButtonDefaults.buttonColors(backgroundColor = SignalRed),
-        shape = RoundedCornerShape(4.dp),
-        modifier = Modifier
-            .height(50.dp)
-            .weight(1f)
-
-    ) {
-        Text(
-            text = "Cancel Payment",
-
-            style = TextStyle(
-                fontSize = 14.sp,
-                fontFamily = Faktpro,
-                fontWeight = FontWeight.Normal,
-                lineHeight = 10.sp,
-                color = DeepRed,
-                textAlign = TextAlign.Center
-            ),
-            modifier = Modifier.align(alignment = Alignment.CenterVertically)
-        )
-    }
-
-}
 }

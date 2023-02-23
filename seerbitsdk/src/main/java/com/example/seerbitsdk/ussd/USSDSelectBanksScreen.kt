@@ -19,6 +19,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.toIntRect
 import androidx.compose.ui.unit.toSize
 import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
@@ -131,7 +132,7 @@ fun USSDSelectBanksScreen(
                         else {
                             showErrorDialog = true
                         }
-                    }
+                    }, !showCircularProgressBar
                 )
 
             }

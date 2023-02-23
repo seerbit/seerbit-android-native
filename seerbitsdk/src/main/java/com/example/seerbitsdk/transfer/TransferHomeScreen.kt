@@ -19,6 +19,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -184,10 +185,15 @@ fun TransferHomeScreen(
                     fontFamily = Faktpro,
                     fontWeight = FontWeight.Normal,
                     lineHeight = 10.sp,
-                    color = DeepRed
+                    color = DeepRed,
+                    textAlign = TextAlign.Center
+
                 ),
-                modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
+                modifier = Modifier
+                    .align(alignment = Alignment.CenterHorizontally)
+                    .padding(10.dp)
             )
+
 
             Spacer(modifier = Modifier.height(20.dp))
             USSDCodeSurfaceView(null, ussdCodeText = transferAmount)
@@ -217,7 +223,8 @@ fun TransferHomeScreen(
                     fontFamily = Faktpro,
                     fontWeight = FontWeight.Normal,
                     lineHeight = 10.sp,
-                    color = DeepRed
+                    color = DeepRed,
+                    textAlign = TextAlign.Center
                 ),
                 modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
             )
@@ -237,7 +244,7 @@ fun TransferHomeScreen(
                     if (isSuccesfulResponse) {
                         transactionViewModel.queryTransaction(transferDTO.paymentReference!!)
                     }
-                }
+                }, !showCircularProgressBar
             )
             Spacer(modifier = Modifier.height(50.dp))
 
@@ -323,15 +330,18 @@ fun CustomAccountDetailsRow(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = leftHandText,
+        Text(
+            text = leftHandText,
             style = TextStyle(
                 fontSize = 14.sp,
                 fontFamily = Faktpro,
                 fontWeight = FontWeight.Normal,
                 lineHeight = 10.sp,
-            ))
+            )
+        )
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(text = rightHandText,
+            Text(
+                text = rightHandText,
                 style = TextStyle(
                     fontSize = 14.sp,
                     fontFamily = Faktpro,

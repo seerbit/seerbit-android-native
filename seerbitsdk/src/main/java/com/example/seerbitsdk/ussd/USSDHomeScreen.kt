@@ -12,6 +12,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -58,6 +59,7 @@ fun USSDHomeScreen(
     var isSuccesfulResponse by remember { mutableStateOf(false) }
     var retryCount by remember { mutableStateOf(0) }
     val context = LocalContext.current
+    var showCircularProgressBar by rememberSaveable { mutableStateOf(false) }
 
     // if there is an error loading the report
     if (merchantDetailsState?.hasError!!) {
@@ -142,7 +144,7 @@ fun USSDHomeScreen(
                     retryCount++
                 }
                 if (initiateUssdPayment.isLoading) {
-                    showCircularProgress(showProgress = true)
+                    showCircularProgressBar = true
                 }
                 initiateUssdPayment.data?.let {
                     val paymentReference2 = it.data?.payments?.paymentReference
@@ -161,6 +163,7 @@ fun USSDHomeScreen(
                     )
                 }
                 if (queryTransactionStateState.isLoading) {
+                    showCircularProgressBar = true
                 }
 
                 if (queryTransactionStateState.data?.data != null) {
@@ -172,7 +175,9 @@ fun USSDHomeScreen(
                     }
                 }
 
-
+                if (showCircularProgressBar) {
+                    showCircularProgress(showProgress = true)
+                }
                 // if loadingScreen value is false
                 if (!showLoadingScreen) {
                     Text(
@@ -219,7 +224,8 @@ fun USSDHomeScreen(
 
                             }
 
-                        }
+                        },
+                        !showCircularProgressBar
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                 } else {
@@ -239,7 +245,7 @@ fun USSDCodeSurfaceView(context: Context?, ussdCodeText: String) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .height(56.dp),
+            .height(50.dp),
         shape = RoundedCornerShape(8.dp),
         color = LighterGray
     ) {

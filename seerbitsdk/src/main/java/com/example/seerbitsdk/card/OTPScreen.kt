@@ -28,6 +28,7 @@ import com.example.seerbitsdk.R
 import com.example.seerbitsdk.component.OtherPaymentButtonComponent
 import com.example.seerbitsdk.component.PayViaComponent
 import com.example.seerbitsdk.component.SeerbitPaymentDetailScreen
+import com.example.seerbitsdk.ui.theme.Faktpro
 import com.example.seerbitsdk.ui.theme.SeerBitTheme
 
 
@@ -88,7 +89,7 @@ fun OTPScreen(
             }
             Spacer(modifier = modifier.height(10.dp))
             AuthorizeButton(buttonText = "Authorize Payment",
-                onClick = { showPinScreen = true }
+                onClick = { showPinScreen = true }, true
             )
             Spacer(modifier = Modifier.height(16.dp))
             Spacer(modifier = Modifier.height(60.dp))
@@ -170,18 +171,25 @@ fun OTPInputField(
 @Composable
 fun AuthorizeButton(
     buttonText: String,
-    onClick: () -> Unit
+    onClick: () -> Unit, enableButton : Boolean
 ) {
     Button(
         onClick = onClick,
         colors = ButtonDefaults.buttonColors(backgroundColor = Color.Black),
         shape = RoundedCornerShape(8.dp),
+        enabled = enableButton,
         modifier = Modifier
             .height(56.dp)
             .fillMaxWidth()
 
     ) {
-        Text(text = buttonText, color = Color.White)
+        Text(text = buttonText, color = Color.White,
+            style = TextStyle(
+            fontSize = 12.sp,
+            fontFamily = Faktpro,
+            fontWeight = FontWeight.Normal,
+            lineHeight = 10.sp
+        ))
     }
 
 }

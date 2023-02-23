@@ -472,13 +472,13 @@ fun CardDetailsScreen(
                 placeholder = {
                     Text(
                         text = "Card Number",
-                        style = TextStyle(fontSize = 14.sp),
+                        style = TextStyle(fontSize = 12.sp),
                         color = Color.Black
                     )
                 },
                 modifier = modifier
                     .fillMaxWidth()
-                    .height(56.dp)
+                    .height(54.dp)
             )
         }
 
@@ -520,13 +520,13 @@ fun CardDetailsScreen(
                     placeholder = {
                         Text(
                             text = "MM/YY",
-                            style = TextStyle(fontSize = 14.sp),
+                            style = TextStyle(fontSize = 12.sp),
                             color = Color.Black
                         )
                     },
                     modifier = modifier
                         .fillMaxWidth()
-                        .height(56.dp)
+                        .height(54.dp)
                 )
             }
 
@@ -562,13 +562,13 @@ fun CardDetailsScreen(
                     placeholder = {
                         Text(
                             text = "CVV",
-                            style = TextStyle(fontSize = 14.sp),
+                            style = TextStyle(fontSize = 12.sp),
                             color = Color.Black
                         )
                     },
                     modifier = modifier
                         .fillMaxWidth()
-                        .height(56.dp)
+                        .height(54.dp)
                 )
             }
 
@@ -713,7 +713,7 @@ fun PayButton(
         Text(
             text = "Pay $amount",
             style = TextStyle(
-                fontSize = 14.sp,
+                fontSize = 12.sp,
                 fontFamily = Faktpro,
                 fontWeight = FontWeight.Normal,
                 lineHeight = 10.sp

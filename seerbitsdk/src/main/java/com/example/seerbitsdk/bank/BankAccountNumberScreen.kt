@@ -85,7 +85,7 @@ fun BankAccountNumberScreen(
 
                 Spacer(modifier = modifier.height(10.dp))
                 AuthorizeButton(buttonText = "Pay $50",
-                    onClick = { showPinScreen = true }
+                    onClick = { showPinScreen = true }, true
                 )
 
             }
@@ -99,7 +99,7 @@ fun BankAccountNumberScreen(
 
                 Spacer(modifier = modifier.height(10.dp))
                 AuthorizeButton(buttonText = "Pay $50",
-                    onClick = { showPinScreen = true }
+                    onClick = { showPinScreen = true }, true
                 )
             }
             //Show Birthday
@@ -110,7 +110,7 @@ fun BankAccountNumberScreen(
 
                 Spacer(modifier = modifier.height(10.dp))
                 AuthorizeButton(buttonText = "Pay $50",
-                    onClick = { showPinScreen = true }
+                    onClick = { showPinScreen = true }, true
                 )
             }
 
@@ -157,7 +157,7 @@ fun BankAccountNumberScreen(
                         //   transactionViewModel.sendOtp(cardOTPDTO)
                         //   showErrorDialog = false
                         // }
-                    }
+                    }, true
                 )
             }
         }
@@ -232,7 +232,7 @@ fun BirthDayInputField(
                 },
                 modifier = modifier
                     .fillMaxWidth()
-                    .height(56.dp)
+                    .height(50.dp)
             )
         }
     }
@@ -286,7 +286,7 @@ fun BVNInputField(
                 },
                 modifier = modifier
                     .fillMaxWidth()
-                    .height(56.dp)
+                    .height(50.dp)
             )
         }
     }
@@ -338,7 +338,7 @@ fun BankAccountNumberField(
                 },
                 modifier = modifier
                     .fillMaxWidth()
-                    .height(56.dp)
+                    .height(50.dp)
             )
         }
     }

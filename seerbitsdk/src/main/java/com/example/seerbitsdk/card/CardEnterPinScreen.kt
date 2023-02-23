@@ -34,6 +34,7 @@ import com.example.seerbitsdk.screenstate.InitiateTransactionState
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.screenstate.OTPState
 import com.example.seerbitsdk.screenstate.QueryTransactionState
+import com.example.seerbitsdk.ui.theme.Faktpro
 import com.example.seerbitsdk.ui.theme.SeerBitTheme
 import com.example.seerbitsdk.ui.theme.SignalRed
 import com.example.seerbitsdk.viewmodels.CardEnterPinViewModel
@@ -137,9 +138,11 @@ fun CardEnterPinScreen(
                         text = "Enter your four digit card pin to authorize the payment",
                         style = TextStyle(
                             fontSize = 14.sp,
-                            fontFamily = FontFamily.SansSerif,
+                            fontFamily = Faktpro,
                             fontWeight = FontWeight.Normal,
-                            lineHeight = 10.sp
+                            lineHeight = 14.sp,
+                            textAlign = TextAlign.Center
+
                         ),
                         modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
                     )
@@ -174,7 +177,9 @@ fun CardEnterPinScreen(
                 )
                 val cardOTPDTO = CardOTPDTO( transaction = Transaction( linkingReference, otp) )
 
-                if (isEnterPin && !isEnterOTP) { PinInputField(onEnterPin = { pin = it }) }
+                if (isEnterPin && !isEnterOTP) {
+                    PinInputField(onEnterPin = { pin = it })
+                }
 
                 else {
                     Row(
@@ -223,7 +228,7 @@ fun CardEnterPinScreen(
                                 cardEnterPinViewModel.sendOtp(cardOTPDTO)
 
                             }
-                        }
+                        }, !showCircularProgressBar
                     )
                 }
 
