@@ -1,6 +1,6 @@
 package com.example.seerbitsdk.component
 
-import java.time.Month
+import java.text.DecimalFormat
 
 fun String.isValidCardNumber() : Boolean{
     return this.length == 16
@@ -10,10 +10,11 @@ fun String.isValidCvv() : Boolean{
     return this.length == 3
 }
 fun String.isValidCardExpiryMonth() : Boolean{
-    return if(this == "")
-        false
-    else
-        this.length ==2 && this.toInt()<= 12
+     if(this == "")
+         return  false
+    return if(this.length >=2)
+         this.substring(0,2).toInt()<= 12
+    else false
 }
 fun String.isValidCardExpiryYear() : Boolean{
     return if(this == "")
@@ -33,3 +34,17 @@ fun generateRandomReference() : String {
     }
     return password
 }
+
+fun String.maskedPhoneNumber (): String {
+    if(this.length >= 5){
+
+    }
+    return ""
+}
+
+fun formatAmount(amount: Double?): String {
+    return AmountDecimalFormat.format(amount)
+}
+
+private val AccountDecimalFormat = DecimalFormat("####")
+private val AmountDecimalFormat = DecimalFormat("#,###.##")

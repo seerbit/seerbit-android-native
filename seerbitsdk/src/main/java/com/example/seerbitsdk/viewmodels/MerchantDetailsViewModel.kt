@@ -8,9 +8,11 @@ import kotlinx.coroutines.launch
 import androidx.compose.runtime.State
 import androidx.lifecycle.ViewModel
 import com.example.seerbitsdk.models.Resource
+import com.example.seerbitsdk.screenstate.CardBinState
 import com.example.seerbitsdk.use_cases.GetMerchantDetailUseCase
 import com.example.seerbitsdk.use_cases.InitiateUseCase
 import com.example.seerbitsdk.screenstate.InitiateTransactionState
+import com.example.seerbitsdk.use_cases.CardBinUseCase
 
 class MerchantDetailsViewModel : ViewModel() {
 
@@ -23,6 +25,13 @@ class MerchantDetailsViewModel : ViewModel() {
 
     private val merchantDetailsUseCase: GetMerchantDetailUseCase = GetMerchantDetailUseCase()
 
+    private var _cardBinState = mutableStateOf(CardBinState())
+    val cardBinState: State<CardBinState>
+        get() = _cardBinState
+
+
+
+    private val cardBinUseCase: CardBinUseCase = CardBinUseCase()
 
     init {
         fetchMerchantDetails()
@@ -58,6 +67,36 @@ class MerchantDetailsViewModel : ViewModel() {
             }
 
     }
+
+
+     fun fetchCardBin(firstSixDigits : String) {
+        _cardBinState.value = CardBinState(isLoading = true)
+        viewModelScope.launch (Dispatchers.Main){
+
+           cardBinUseCase(firstSixDigits).collect { resource ->
+                when (resource) {
+                    is Resource.Success -> {
+                        _cardBinState.value = CardBinState(data = resource.data)
+                    }
+
+                    is Resource.Error -> {
+                        _cardBinState.value = CardBinState(
+                            hasError = true,
+                            errorMessage = resource.message
+                        )
+                    }
+                    is Resource.Loading -> {
+                        _cardBinState.value = CardBinState(
+                            isLoading = true
+                        )
+                    }
+                }
+            }
+        }
+
+    }
+
+
 
 
 }

@@ -1,6 +1,7 @@
 package com.example.seerbitsdk.api
 
 import com.example.seerbitsdk.BuildConfig
+import com.example.seerbitsdk.models.CardBinResponse
 import com.example.seerbitsdk.models.GetBanksResponse
 import com.example.seerbitsdk.models.bankaccount.BankAccountDTO
 import com.example.seerbitsdk.models.card.CardResponse
@@ -34,15 +35,20 @@ interface SeerBitService {
     // using this here because the url points to live
     @POST("initiates")
     suspend fun initiateUssd(@Body ussdDTO: UssdDTO): Response<CardResponse>
+
     // using this here because the url points to live
     @POST("initiates")
     suspend fun initiateTransfer(@Body transferDTO: TransferDTO): Response<CardResponse>
+
     // using this here because the url points to live
     @POST("initiates")
-    suspend fun  initiateBankAccountMode(@Body bankAccountDTO: BankAccountDTO): Response<CardResponse>
+    suspend fun initiateBankAccountMode(@Body bankAccountDTO: BankAccountDTO): Response<CardResponse>
 
     @GET("banks")
-    suspend fun  getBanks(): Response<GetBanksResponse>
+    suspend fun getBanks(): Response<GetBanksResponse>
+
+    @GET("bin/{firstSixDigit}")
+    suspend fun getCardBin(@Path("firstSixDigit") firstSixDigit: String): Response<CardBinResponse>
 
 }
 

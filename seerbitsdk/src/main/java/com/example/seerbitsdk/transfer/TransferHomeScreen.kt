@@ -8,13 +8,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -31,18 +29,12 @@ import com.example.seerbitsdk.ErrorDialog
 import com.example.seerbitsdk.R
 import com.example.seerbitsdk.card.AuthorizeButton
 import com.example.seerbitsdk.card.showCircularProgress
-import com.example.seerbitsdk.component.OtherPaymentButtonComponent
-import com.example.seerbitsdk.component.PENDING_CODE
-import com.example.seerbitsdk.component.SUCCESS
-import com.example.seerbitsdk.component.SeerbitPaymentDetailScreen
+import com.example.seerbitsdk.component.*
 import com.example.seerbitsdk.models.transfer.TransferDTO
 import com.example.seerbitsdk.screenstate.InitiateTransactionState
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.screenstate.QueryTransactionState
-import com.example.seerbitsdk.ui.theme.DeepRed
-import com.example.seerbitsdk.ui.theme.Faktpro
-import com.example.seerbitsdk.ui.theme.LighterGray
-import com.example.seerbitsdk.ui.theme.SeerBitTheme
+import com.example.seerbitsdk.ui.theme.*
 import com.example.seerbitsdk.ussd.USSDCodeSurfaceView
 import com.example.seerbitsdk.ussd.copyToClipboard
 import com.example.seerbitsdk.viewmodels.TransactionViewModel
@@ -71,6 +63,9 @@ fun TransferHomeScreen(
     var isSuccesfulResponse by remember { mutableStateOf(false) }
     var retryCount by remember { mutableStateOf(0) }
     var showCircularProgressBar by rememberSaveable { mutableStateOf(false) }
+    val openDialog = remember { mutableStateOf(false) }
+    var alertDialogMessage by remember { mutableStateOf("") }
+    var alertDialogHeaderMessage by remember { mutableStateOf("") }
 
 
     // if there is an error loading the report
@@ -79,7 +74,7 @@ fun TransferHomeScreen(
     }
 
     if (merchantDetailsState.isLoading) {
-        showCircularProgress(showProgress = true)
+        showCircularProgressBar = true
     }
 
     merchantDetailsState.data?.let { merchantDetailsData ->
@@ -94,25 +89,15 @@ fun TransferHomeScreen(
                 .verticalScroll(rememberScrollState())
                 .fillMaxWidth()
         ) {
-            Spacer(modifier = Modifier.height(21.dp))
-
-            SeerbitPaymentDetailScreen(
-                charges = merchantDetailsData.payload?.cardFee?.visa!!.toDouble(),
-                amount = "60000",
-                currencyText = merchantDetailsData.payload.defaultCurrency!!,
-                "",
-                merchantDetailsData.payload.businessName!!,
-                merchantDetailsData.payload.supportEmail!!
-            )
 
             val transferDTO = TransferDTO(
-                country = merchantDetailsData.payload.address?.country!!,
+                country = merchantDetailsData.payload?.address?.country!!,
                 bankCode = "044",
                 amount = "60000",
                 productId = "",
                 mobileNumber = "404",
                 paymentReference = "SBT-T54367073117",
-                fee = merchantDetailsData.payload.cardFee.mc,
+                fee = merchantDetailsData.payload.cardFee?.mc,
                 fullName = "Amos Oruaroghene",
                 channelType = "Transfer",
                 publicKey = merchantDetailsData.payload.testPublicKey,
@@ -127,7 +112,6 @@ fun TransferHomeScreen(
                 amountControl = "FIXEDAMOUNT",
                 walletDaysActive = "1"
             )
-            transferAmount = transferDTO.amount.toString()
 
             //HANDLES initiate query response
             val queryTransactionStateState: QueryTransactionState =
@@ -136,6 +120,22 @@ fun TransferHomeScreen(
             val initiateTransferPayment: InitiateTransactionState =
                 transactionViewModel.initiateTransactionState.value
             //enter payment states
+            transferAmount = formatAmount(transferDTO.amount?.toDouble()!!)
+            val defaultCurrency : String = merchantDetailsData.payload.defaultCurrency?: ""
+
+            Spacer(modifier = Modifier.height(21.dp))
+
+            SeerbitPaymentDetailScreen(
+                charges = merchantDetailsData.payload.cardFee?.visa!!.toDouble(),
+                amount = transferAmount,
+                currencyText = defaultCurrency,
+                "",
+                merchantDetailsData.payload.businessName!!,
+                merchantDetailsData.payload.supportEmail!!
+            )
+
+
+
 
             if (initiateTransferPayment.data == null && !isSuccesfulResponse) {
                 transactionViewModel.initiateTransaction(transferDTO)
@@ -147,9 +147,8 @@ fun TransferHomeScreen(
                         ?: "Something went wrong"
                 )
             }
-            if (initiateTransferPayment.isLoading) {
-                showCircularProgress(showProgress = true)
-            }
+            showCircularProgressBar = initiateTransferPayment.isLoading
+
             initiateTransferPayment.data?.let {
                 if (!isSuccesfulResponse) {
                     wallet = it.data?.payments?.wallet!!
@@ -171,24 +170,22 @@ fun TransferHomeScreen(
             }
 
 
-            if(queryTransactionStateState.data?.data!= null){
+            if (queryTransactionStateState.data?.data != null) {
 
                 if (queryTransactionStateState.data.data.code == PENDING_CODE) {
+                    showCircularProgressBar = true
                     transactionViewModel.queryTransaction(transferDTO.paymentReference!!)
                 }
-                if(queryTransactionStateState.data.data.code == SUCCESS){
-                    ErrorDialog(message = queryTransactionStateState.data.data.payments?.reason!!)
+                if (queryTransactionStateState.data.data.code == SUCCESS) {
+                    alertDialogHeaderMessage = "Successful"
+                    alertDialogMessage = queryTransactionStateState.data.data.payments?.reason!!
                     showCircularProgressBar = false
-                    showLoadingScreen = false
-                    //alertDialogMessage = queryTransactionStateState.data.data.payments.reason!!
-                    //alertDialogHeaderMessage = "Success"
                 }
-                if(queryTransactionStateState.data.data.code == "SM_X23" || queryTransactionStateState.data.data.code == "S12"){
-                    ErrorDialog(message = queryTransactionStateState.data.data.payments?.reason!!)
-                    showCircularProgressBar = false
-                    //alertDialogMessage = queryTransactionStateState.data.data.payments?.reason!!
-                    //alertDialogHeaderMessage = "Failed"
 
+                if (queryTransactionStateState.data.data.code == "SM_X23" || queryTransactionStateState.data.data.code == "S12") {
+                    alertDialogHeaderMessage = "Failed"
+                    alertDialogMessage = queryTransactionStateState.data.data.payments?.reason!!
+                    showCircularProgressBar = false
                 }
             }
 
@@ -199,7 +196,7 @@ fun TransferHomeScreen(
                     fontSize = 16.sp,
                     fontFamily = Faktpro,
                     fontWeight = FontWeight.Normal,
-                    lineHeight = 10.sp,
+                    lineHeight = 14.sp,
                     color = DeepRed,
                     textAlign = TextAlign.Center
 
@@ -211,7 +208,7 @@ fun TransferHomeScreen(
 
 
             Spacer(modifier = Modifier.height(20.dp))
-            USSDCodeSurfaceView(null, ussdCodeText = transferAmount)
+            USSDCodeSurfaceView(null, ussdCodeText = "$defaultCurrency$transferAmount")
             Spacer(modifier = modifier.height(20.dp))
 
             Text(
@@ -237,7 +234,7 @@ fun TransferHomeScreen(
                     fontSize = 16.sp,
                     fontFamily = Faktpro,
                     fontWeight = FontWeight.Normal,
-                    lineHeight = 10.sp,
+                    lineHeight = 14.sp,
                     color = DeepRed,
                     textAlign = TextAlign.Center
                 ),
@@ -263,8 +260,51 @@ fun TransferHomeScreen(
             )
             Spacer(modifier = Modifier.height(50.dp))
 
-        }
 
+            //put your alert dialog here
+            //The alert dialog occurs here
+            if (openDialog.value) {
+                AlertDialog(
+                    onDismissRequest = {
+                        openDialog.value = false
+                    },
+                    title = {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Text(text = alertDialogHeaderMessage)
+                        }
+
+                    },
+                    text = {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Text(alertDialogMessage)
+                        }
+                    },
+                    confirmButton = {
+                        Button(
+
+                            onClick = {
+                                openDialog.value = false
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                backgroundColor = SignalRed
+                            )
+                        ) {
+                            Text(text = "Close")
+
+                        }
+                    },
+                )
+            }
+
+
+
+        }
 
     }
 }

@@ -62,13 +62,15 @@ fun USSDHomeScreen(
     val context = LocalContext.current
     var showCircularProgressBar by rememberSaveable { mutableStateOf(false) }
     val openDialog = remember { mutableStateOf(false) }
+    var alertDialogMessage  by remember { mutableStateOf("") }
+    var alertDialogHeaderMessage  by remember { mutableStateOf("") }
+
+
+
     // if there is an error loading the report
     if (merchantDetailsState?.hasError!!) {
         ErrorDialog(message = merchantDetailsState.errorMessage ?: "Something went wrong")
     }
-    var alertDialogMessage  by remember { mutableStateOf("") }
-    var alertDialogHeaderMessage  by remember { mutableStateOf("") }
-
     if (merchantDetailsState.isLoading) {
         showCircularProgress(showProgress = true)
     }
@@ -174,15 +176,13 @@ fun USSDHomeScreen(
                         transactionViewModel.queryTransaction(ussdDTO.paymentReference!!)
                     }
                     if(queryTransactionStateState.data.data.code == SUCCESS){
-                        ErrorDialog(message = queryTransactionStateState.data.data.payments?.reason!!)
                         showLoadingScreen = false
-                        alertDialogMessage = queryTransactionStateState.data.data.payments.reason!!
+                        alertDialogMessage = queryTransactionStateState.data.data.message!!
                         alertDialogHeaderMessage = "Success"
                     }
                     if(queryTransactionStateState.data.data.code == "SM_X23" || queryTransactionStateState.data.data.code == "S12"){
-                        ErrorDialog(message = queryTransactionStateState.data.data.payments?.reason!!)
                         showLoadingScreen = false
-                        alertDialogMessage = queryTransactionStateState.data.data.payments?.reason!!
+                        alertDialogMessage = queryTransactionStateState.data.data.message!!
                         alertDialogHeaderMessage = "Failed"
 
                     }

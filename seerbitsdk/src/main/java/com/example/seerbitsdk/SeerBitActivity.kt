@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
+import android.media.Image
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -136,7 +137,8 @@ fun SeerBitApp(
                 merchantDetailsState = viewModel.merchantState.value,
                 transactionViewModel = transactionViewModel,
                 cardEnterPinViewModel = cardEnterPinViewModel,
-                selectBankViewModel = selectBankViewModel
+                selectBankViewModel = selectBankViewModel,
+                merchantDetailsViewModel = viewModel
             )
 
         }
@@ -176,7 +178,7 @@ fun SeerBitWaterMarkPreview() {
 @Composable
 fun showCircularProgress(showProgress: Boolean) {
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -195,7 +197,8 @@ fun CardHomeScreen(
     navController: NavHostController,
     merchantDetailsState: MerchantDetailsState,
     onOtherPaymentButtonClicked: () -> Unit,
-    transactionViewModel: TransactionViewModel
+    transactionViewModel: TransactionViewModel,
+    merchantDetailsViewModel: MerchantDetailsViewModel
 ) {
 
     var cardDetailsData: CardDetails by remember { mutableStateOf(CardDetails("", "", "", "")) }
@@ -222,7 +225,7 @@ fun CardHomeScreen(
     }
 
     if (merchantDetailsState.isLoading) {
-        showCircularProgress(showProgress = true)
+        showCircularProgressBar = true
     }
 
     merchantDetailsState.data?.let { merchantDetailsData ->
@@ -235,12 +238,39 @@ fun CardHomeScreen(
                 .fillMaxWidth(),
 
             ) {
+
+            val cardDTO = CardDTO(
+                deviceType = "Desktop",
+                country = merchantDetailsData.payload?.address?.country!!,
+                60000.0,
+                cvv = cvv,
+                redirectUrl = "http://localhost:3002/#/",
+                productId = "",
+                mobileNumber = merchantDetailsData.payload.number,
+                paymentReference = transactionViewModel.generateRandomReference(),
+                fee = merchantDetailsData.payload.cardFee?.mc,
+                expiryMonth = cardExpiryMonth,
+                fullName = "Amos Aorme",
+                "MASTERCARD",
+                publicKey = merchantDetailsData.payload.testPublicKey,
+                expiryYear = cardExpiryYear,
+                source = "",
+                paymentType = "CARD",
+                sourceIP = "0.0.0.1",
+                pin = "",
+                currency = merchantDetailsData.payload.defaultCurrency,
+                "LOCAL",
+                false,
+                email = "inspiron.amos@gmail.com",
+                cardNumber = cardNumber,
+                retry = false
+            )
             Spacer(modifier = Modifier.height(25.dp))
 
             //SeerBit Header
             SeerbitPaymentDetailScreen(
-                charges = merchantDetailsData.payload?.cardFee?.visa!!.toDouble(),
-                amount = "60,000.00",
+                charges = merchantDetailsData.payload.cardFee?.visa!!.toDouble(),
+                amount = formatAmount(cardDTO.amount),
                 currencyText = merchantDetailsData.payload.defaultCurrency!!,
                 "Debit/Credit Card Details",
                 merchantDetailsData.payload.businessName!!,
@@ -267,39 +297,10 @@ fun CardHomeScreen(
                 },
                 onChangeCardNumber = {
                     cardNumber = it
-                }
+                }, merchantDetailsViewModel = merchantDetailsViewModel
             )
 
             Spacer(modifier = Modifier.height(16.dp))
-
-
-            val cardDTO = CardDTO(
-                deviceType = "Desktop",
-                country = merchantDetailsData.payload.address?.country!!,
-                60000.0,
-                cvv = cvv,
-                redirectUrl = "http://localhost:3002/#/",
-                productId = "",
-                mobileNumber = merchantDetailsData.payload.number,
-                paymentReference = transactionViewModel.generateRandomReference(),
-                fee = merchantDetailsData.payload.cardFee.mc,
-                expiryMonth = cardExpiryMonth,
-                fullName = "Amos Aorme",
-                "MASTERCARD",
-                publicKey = merchantDetailsData.payload.testPublicKey,
-                expiryYear = cardExpiryYear,
-                source = "",
-                paymentType = "CARD",
-                sourceIP = "0.0.0.1",
-                pin = "",
-                currency = merchantDetailsData.payload.defaultCurrency,
-                "LOCAL",
-                false,
-                email = "inspiron.amos@gmail.com",
-                cardNumber = cardNumber,
-                retry = false
-            )
-
 
             if (showCircularProgressBar) {
                 showCircularProgress(showProgress = true)
@@ -358,9 +359,11 @@ fun CardHomeScreen(
 
                     if(it.code == FAILED){
                         showCircularProgressBar = false
+                        return@let
                     }
                     if(it.code == FAILED){
                         showCircularProgressBar = false
+                        return@let
                     }
                 }
             }
@@ -372,7 +375,6 @@ fun CardHomeScreen(
             transactionState.data?.let {
                 paymentRef = transactionState.data.data?.payments?.paymentReference ?: ""
                 val toEnterPinScreen = transactionState.data.data?.message == KINDLY_ENTER_PIN
-                val notEnterPin: Boolean = false
                 transactionState.data.data?.payments?.redirectUrl?.let {
                     redirectUrl = it
                     canRedirectToUrl = true
@@ -434,6 +436,7 @@ fun CardDetailsScreen(
     onChangeCardExpiryMonth: (String) -> Unit,
     onChangeCardExpiryYear: (String) -> Unit,
     onChangeCardCvv: (String) -> Unit,
+    merchantDetailsViewModel: MerchantDetailsViewModel
 ) {
     Column(
         modifier = modifier,
@@ -443,6 +446,7 @@ fun CardDetailsScreen(
 
         Card(modifier = modifier, elevation = 4.dp) {
             var value by rememberSaveable { mutableStateOf(cardNumber) }
+            var trailngIconView = @Composable{value}
 
             OutlinedTextField(
                 value = value,
@@ -454,7 +458,7 @@ fun CardDetailsScreen(
                     }
                 },
                 keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.NumberPassword,
+                    keyboardType = KeyboardType.Number,
                     imeAction = ImeAction.Send
                 ),
                 colors = TextFieldDefaults.textFieldColors(
@@ -466,11 +470,15 @@ fun CardDetailsScreen(
                     cursorColor = Color.Gray
 
                 ),
-                shape = RoundedCornerShape(8.dp),
+                trailingIcon = @Composable { Image(
+                    painter = painterResource(id = returnCardIcon("453777", merchantDetailsViewModel)!!),
+                    contentDescription = ""
+                )},
+                shape = RoundedCornerShape(4.dp),
                 placeholder = {
                     Text(
                         text = "Card Number",
-                        style = TextStyle(fontSize = 12.sp),
+                        style = TextStyle(fontSize = 12.sp, fontFamily = Faktpro),
                         color = Color.Black
                     )
                 },
@@ -502,7 +510,7 @@ fun CardDetailsScreen(
                         }
 
                     }, keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.NumberPassword,
+                        keyboardType = KeyboardType.Number,
                         imeAction = ImeAction.Send
                     ),
                     colors = TextFieldDefaults.textFieldColors(
@@ -514,11 +522,11 @@ fun CardDetailsScreen(
                         cursorColor = Color.Gray
 
                     ),
-                    shape = RoundedCornerShape(topStart = 8.dp, bottomStart = 8.dp),
+                    shape = RoundedCornerShape(4.dp),
                     placeholder = {
                         Text(
                             text = "MM/YY",
-                            style = TextStyle(fontSize = 12.sp),
+                            style = TextStyle(fontSize = 12.sp,fontFamily = Faktpro),
                             color = Color.Black
                         )
                     },
@@ -527,12 +535,7 @@ fun CardDetailsScreen(
                         .height(54.dp)
                 )
             }
-
-            Image(
-                painter = painterResource(id = R.drawable.vertical_divider_line),
-                contentDescription = "dividing line"
-            )
-            //CVV Card
+            Spacer(modifier = Modifier.width(4.dp))
             Card(modifier = modifier.weight(1f), elevation = 4.dp) {
                 var value by rememberSaveable { mutableStateOf("") }
 
@@ -544,7 +547,7 @@ fun CardDetailsScreen(
                             onChangeCardCvv(newText)
                         }
                     }, keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.NumberPassword,
+                        keyboardType = KeyboardType.Number,
                         imeAction = ImeAction.Send
                     ),
                     colors = TextFieldDefaults.textFieldColors(
@@ -556,11 +559,11 @@ fun CardDetailsScreen(
                         cursorColor = Color.Gray
 
                     ),
-                    shape = RoundedCornerShape(topEnd = 8.dp, bottomEnd = 8.dp),
+                    shape = RoundedCornerShape(4.dp),
                     placeholder = {
                         Text(
                             text = "CVV",
-                            style = TextStyle(fontSize = 12.sp),
+                            style = TextStyle(fontSize = 12.sp, fontFamily = Faktpro),
                             color = Color.Black
                         )
                     },
@@ -647,13 +650,15 @@ fun cardNumberFormatting(text: AnnotatedString): TransformedText {
 @Preview(showBackground = true, widthDp = 518)
 @Composable
 fun CardDetailsPreview() {
+    val merchantDetailsViewModel : MerchantDetailsViewModel by viewModel()
     SeerBitTheme {
         CardDetailsScreen(
             cardNumber = "",
             onChangeCardNumber = {},
             onChangeCardExpiryMonth = {},
             onChangeCardExpiryYear = {},
-            onChangeCardCvv = {}
+            onChangeCardCvv = {},
+            merchantDetailsViewModel = merchantDetailsViewModel
         )
     }
 }
@@ -691,6 +696,23 @@ fun PaymentOptionButtons(
         }
     }
 
+}
+
+
+fun returnCardIcon(firstSixDigit : String, merchantDetailsViewModel: MerchantDetailsViewModel) : Int {
+
+    merchantDetailsViewModel.fetchCardBin(firstSixDigit)
+    var id = R.drawable.mastercard
+
+    val cardBinState = merchantDetailsViewModel.cardBinState
+    if(cardBinState.value.data != null){
+        if(cardBinState.value.data!!.cardName?.contains("MASTERCARD") == true)
+            id = R.drawable.mastercard
+        else if (cardBinState.value.data!!.cardName?.contains("VISA") == true)
+            id = R.drawable.verve_logo
+    }
+    else return id
+    return id
 }
 
 
@@ -740,7 +762,8 @@ fun MyAppNavHost(
     merchantDetailsState: MerchantDetailsState,
     transactionViewModel: TransactionViewModel,
     cardEnterPinViewModel: CardEnterPinViewModel,
-    selectBankViewModel: SelectBankViewModel
+    selectBankViewModel: SelectBankViewModel,
+    merchantDetailsViewModel: MerchantDetailsViewModel
 ) {
     NavHost(
         modifier = modifier,
@@ -768,7 +791,8 @@ fun MyAppNavHost(
                 currentDestination = currentDestination,
                 navController = navController,
                 merchantDetailsState = merchantDetailsState,
-                transactionViewModel = transactionViewModel
+                transactionViewModel = transactionViewModel,
+                merchantDetailsViewModel = merchantDetailsViewModel
             )
         }
 

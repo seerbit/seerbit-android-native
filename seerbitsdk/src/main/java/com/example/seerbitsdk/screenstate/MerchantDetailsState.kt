@@ -1,5 +1,6 @@
 package com.example.seerbitsdk.screenstate
 
+import com.example.seerbitsdk.models.CardBinResponse
 import com.example.seerbitsdk.models.GetBanksResponse
 import com.example.seerbitsdk.models.card.CardResponse
 import com.example.seerbitsdk.models.home.MerchantDetailsResponse
@@ -46,3 +47,12 @@ data class AvailableBanksState(
     val errorMessage: String? = null
 
 )
+
+data class CardBinState(
+    val data: CardBinResponse? = null,
+    val isLoading: Boolean = false,
+    val hasError: Boolean = false,
+    val errorMessage: String? = null
+
+)
+

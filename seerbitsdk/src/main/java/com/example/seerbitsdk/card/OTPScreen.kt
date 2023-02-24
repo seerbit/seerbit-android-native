@@ -122,8 +122,6 @@ fun OTPInputField(
     onEnterOTP: (String) -> Unit
 ) {
     Column {
-
-
         Card(modifier = modifier, elevation = 4.dp) {
             var value by remember { mutableStateOf("") }
             Image(
