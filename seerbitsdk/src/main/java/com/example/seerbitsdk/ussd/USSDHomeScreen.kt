@@ -62,9 +62,8 @@ fun USSDHomeScreen(
     val context = LocalContext.current
     var showCircularProgressBar by rememberSaveable { mutableStateOf(false) }
     val openDialog = remember { mutableStateOf(false) }
-    var alertDialogMessage  by remember { mutableStateOf("") }
-    var alertDialogHeaderMessage  by remember { mutableStateOf("") }
-
+    var alertDialogMessage by remember { mutableStateOf("") }
+    var alertDialogHeaderMessage by remember { mutableStateOf("") }
 
 
     // if there is an error loading the report
@@ -162,26 +161,29 @@ fun USSDHomeScreen(
 
                 //querying transaction happens after otp has been inputted
                 if (queryTransactionStateState.hasError) {
-                    showLoadingScreen= false
-                    ErrorDialog(
-                        message = queryTransactionStateState.errorMessage ?: "Something went wrong"
-                    )
+                    showLoadingScreen = false
+                    openDialog.value = true
+                    alertDialogMessage =
+                        queryTransactionStateState.errorMessage ?: "Something went wrong"
+                    alertDialogHeaderMessage = "Success"
                 }
                 if (queryTransactionStateState.isLoading) {
                 }
 
-                if(queryTransactionStateState.data?.data!= null){
+                if (queryTransactionStateState.data?.data != null) {
 
                     if (queryTransactionStateState.data.data.code == PENDING_CODE) {
                         transactionViewModel.queryTransaction(ussdDTO.paymentReference!!)
                     }
-                    if(queryTransactionStateState.data.data.code == SUCCESS){
+                    if (queryTransactionStateState.data.data.code == SUCCESS) {
                         showLoadingScreen = false
+                        openDialog.value = true
                         alertDialogMessage = queryTransactionStateState.data.data.message!!
                         alertDialogHeaderMessage = "Success"
                     }
-                    if(queryTransactionStateState.data.data.code == "SM_X23" || queryTransactionStateState.data.data.code == "S12"){
+                    if (queryTransactionStateState.data.data.code == "SM_X23" || queryTransactionStateState.data.data.code == "S12") {
                         showLoadingScreen = false
+                        openDialog.value = true
                         alertDialogMessage = queryTransactionStateState.data.data.message!!
                         alertDialogHeaderMessage = "Failed"
 
@@ -245,52 +247,53 @@ fun USSDHomeScreen(
                     showLoaderLayout()
                 }
 
+                //The alert dialog occurs here
+                if (openDialog.value) {
+                    AlertDialog(
+                        onDismissRequest = {
+                            openDialog.value = false
+                        },
+                        title = {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                Text(text = alertDialogHeaderMessage)
+                            }
+
+                        },
+                        text = {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                Text(alertDialogMessage)
+                            }
+                        },
+                        confirmButton = {
+                            Button(
+
+                                onClick = {
+                                    openDialog.value = false
+                                },
+                                colors = ButtonDefaults.buttonColors(
+                                    backgroundColor = SignalRed
+                                )
+                            ) {
+                                Text(text = "Close")
+
+                            }
+                        },
+                    )
+                }
+
+
             }
-            //The alert dialog occurs here
-            if (openDialog.value) {
-                AlertDialog(
-                    onDismissRequest = {
-                        openDialog.value = false
-                    },
-                    title = {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            Text(text = alertDialogHeaderMessage)
-                        }
-
-                    },
-                    text = {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            Text(alertDialogMessage)
-                        }
-                    },
-                    confirmButton = {
-                        Button(
-
-                            onClick = {
-                                openDialog.value = false
-                            },
-                            colors = ButtonDefaults.buttonColors(
-                                backgroundColor = SignalRed
-                            )
-                        ) {
-                            Text(text = "Close")
-
-                        }
-                    },
-                )
-            }
-
         }
 
 
-        }
     }
+}
 
 
 @Composable
