@@ -29,6 +29,8 @@ import com.example.seerbitsdk.card.showCircularProgress
 import com.example.seerbitsdk.component.Route
 import com.example.seerbitsdk.component.SeerbitPaymentDetailScreen
 import com.example.seerbitsdk.models.MerchantBanksItem
+import com.example.seerbitsdk.models.ussd.UssdBankData
+import com.example.seerbitsdk.navigateSingleTopNoPopUpToHome
 import com.example.seerbitsdk.navigateSingleTopTo
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.ui.theme.SeerBitTheme
@@ -113,7 +115,7 @@ fun USSDSelectBanksScreen(
                 }
 
 
-                UssdSelectBankButton (merchantBankList = merchantBankList){
+                UssdSelectBankButton(merchantBankList = merchantBankList) {
                     bankCode = it
                 }
 
@@ -187,7 +189,8 @@ fun UssdSelectBankButton(modifier: Modifier = Modifier, merchantBankList : List<
                     .height(56.dp)
                     .onGloballyPositioned { layoutCoordinates ->
                         textFieldSize = layoutCoordinates.size.toSize()
-                    }.fillMaxHeight(),
+                    }
+                    .fillMaxHeight(),
                 trailingIcon = {
                     Icon(imageVector = icon, contentDescription = null,
                         Modifier.clickable { expanded = !expanded })
@@ -203,13 +206,13 @@ fun UssdSelectBankButton(modifier: Modifier = Modifier, merchantBankList : List<
             modifier = Modifier.width(
                 with(LocalDensity.current) { textFieldSize.width.toDp() })
         ) {
-            merchantBankList?.forEach { label ->
+            UssdBankData.ussdBank.forEach { label ->
                 DropdownMenuItem(onClick = {
-                    selectedText = label?.bankName!!
-                    onBankCodeSelected(label.bankCode!!)
+                    selectedText = label.bankName
+                    onBankCodeSelected(label.bankCode)
                     expanded = false
                 }) {
-                    Text(text = label?.bankName!!)
+                    Text(text = label.bankName)
                 }
             }
 
@@ -224,11 +227,7 @@ fun UssdSelectBankButton(modifier: Modifier = Modifier, merchantBankList : List<
 @Composable
 fun USSDSelectBankButtonPreview() {
     SeerBitTheme {
-        BankScreen(
-            onNavigateToBankAccountNumberScreen = {},
-            currentDestination = null,
-            navController = rememberNavController()
-        )
+        UssdSelectBankButton(merchantBankList = null, onBankCodeSelected = {})
     }
 }
 

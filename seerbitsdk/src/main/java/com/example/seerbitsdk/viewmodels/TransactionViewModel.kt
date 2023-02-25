@@ -7,10 +7,12 @@ import androidx.lifecycle.viewModelScope
 import com.example.seerbitsdk.models.CardOTPDTO
 import com.example.seerbitsdk.models.Resource
 import com.example.seerbitsdk.models.TransactionDTO
+import com.example.seerbitsdk.screenstate.CardBinState
 import com.example.seerbitsdk.use_cases.InitiateUseCase
 import com.example.seerbitsdk.screenstate.InitiateTransactionState
 import com.example.seerbitsdk.screenstate.OTPState
 import com.example.seerbitsdk.screenstate.QueryTransactionState
+import com.example.seerbitsdk.use_cases.CardBinUseCase
 import com.example.seerbitsdk.use_cases.OtpUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -20,6 +22,7 @@ class TransactionViewModel : ViewModel() {
 
     private val initiateTransactionUseCase: InitiateUseCase = InitiateUseCase()
     private val sendOtpUseCase: OtpUseCase= OtpUseCase()
+    private val cardBinUseCase: CardBinUseCase = CardBinUseCase()
 
     private var _initiateTransactionState = mutableStateOf(InitiateTransactionState())
     val initiateTransactionState: State<InitiateTransactionState>
@@ -41,8 +44,15 @@ class TransactionViewModel : ViewModel() {
     val otpState: State<OTPState>
         get() = _otpState
 
+    private var _cardBinState = mutableStateOf(CardBinState())
+    val cardBinState: State<CardBinState>
+        get() = _cardBinState
+
+
+
 
     init {
+        clearCardBinState()
         resetTransactionState()
     }
     fun resetTransactionState(){
@@ -53,6 +63,9 @@ class TransactionViewModel : ViewModel() {
     }
 
 
+    fun clearCardBinState(){
+        _cardBinState.value = CardBinState()
+    }
     fun initiateTransaction(transactionDTO: TransactionDTO) {
         _initiateTransactionState.value = InitiateTransactionState(isLoading = true)
         viewModelScope.launch(Dispatchers.Main) {
@@ -188,6 +201,32 @@ class TransactionViewModel : ViewModel() {
     }
 
 
+    fun fetchCardBin(firstSixDigits : String) {
+        _cardBinState.value = CardBinState(isLoading = true)
+        viewModelScope.launch (Dispatchers.Main){
+
+            cardBinUseCase(firstSixDigits).collect { resource ->
+                when (resource) {
+                    is Resource.Success -> {
+                        _cardBinState.value = CardBinState(data = resource.data)
+                    }
+
+                    is Resource.Error -> {
+                        _cardBinState.value = CardBinState(
+                            hasError = true,
+                            errorMessage = resource.message
+                        )
+                    }
+                    is Resource.Loading -> {
+                        _cardBinState.value = CardBinState(
+                            isLoading = true
+                        )
+                    }
+                }
+            }
+        }
+
+    }
 
     fun generateRandomReference() : String {
 

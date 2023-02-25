@@ -17,70 +17,131 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.unit.toSize
+import androidx.compose.ui.unit.*
 import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.seerbitsdk.component.PayViaComponent
+import com.example.seerbitsdk.ErrorDialog
 import com.example.seerbitsdk.R
 import com.example.seerbitsdk.card.AuthorizeButton
-import com.example.seerbitsdk.component.OtherPaymentButtonComponent
+import com.example.seerbitsdk.card.showCircularProgress
+import com.example.seerbitsdk.component.Route
 import com.example.seerbitsdk.component.SeerbitPaymentDetailScreen
+import com.example.seerbitsdk.models.MerchantBanksItem
+import com.example.seerbitsdk.models.ussd.UssdBankData
+import com.example.seerbitsdk.navigateSingleTopNoPopUpToHome
+import com.example.seerbitsdk.navigateSingleTopTo
+import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.ui.theme.SeerBitTheme
+import com.example.seerbitsdk.viewmodels.SelectBankViewModel
 
 @Composable
 fun BankScreen(
     modifier: Modifier = Modifier,
-    onNavigateToBankAccountNumberScreen: () -> Unit,
+    navigateToUssdHomeScreen: () -> Unit,
     currentDestination: NavDestination?,
-    navController: NavHostController
+    navController: NavHostController,
+    onConfirmPaymentClicked: () -> Unit,
+    merchantDetailsState: MerchantDetailsState?,
+    selectBankViewModel: SelectBankViewModel
 ) {
-    var showPinScreen by remember { mutableStateOf(false) }
-    Column(modifier = modifier) {
+    var bankCode by remember { mutableStateOf("") }
+    var showErrorDialog by remember { mutableStateOf(false) }
+    var showCircularProgressBar by remember { mutableStateOf(false) }
+
+    // if there is an error loading the report
+    if (merchantDetailsState?.hasError!!) {
+        ErrorDialog(message = merchantDetailsState.errorMessage ?: "Something went wrong")
+    }
+
+    if (merchantDetailsState.isLoading) {
+        showCircularProgress(showProgress = true)
+    }
 
 
-        Column(
-            modifier = modifier
-                .padding(
-                    start = 21.dp,
-                    end = 21.dp
+
+    merchantDetailsState.data?.let { merchantDetailsData ->
+
+        Column(modifier = modifier) {
+
+
+            Column(
+                modifier = modifier
+                    .padding(
+                        start = 21.dp,
+                        end = 21.dp
+                    )
+                    .fillMaxWidth()
+                    .weight(1f)
+            ) {
+                Spacer(modifier = Modifier.height(25.dp))
+
+                SeerbitPaymentDetailScreen(
+
+                    charges = merchantDetailsData.payload?.cardFee?.visa!!.toDouble(),
+                    amount = "60,000.00",
+                    currencyText = merchantDetailsData.payload.defaultCurrency!!,
+                    "Choose your bank to start this payment",
+                    merchantDetailsData.payload.businessName!!,
+                    merchantDetailsData.payload.supportEmail!!
                 )
-                .fillMaxWidth()
-                .weight(1f)
-        ) {
-            Spacer(modifier = Modifier.height(25.dp))
+                Spacer(modifier = Modifier.height(41.dp))
 
-            SeerbitPaymentDetailScreen(
-                charges = 0.45,
-                amount = "60,000.00",
-                currencyText = "NGN",
-                "Choose your bank to start this payment",
-                "",
-                ""
-            )
-
-            Spacer(modifier = Modifier.height(21.dp))
-
-            Spacer(modifier = Modifier.height(20.dp))
-            SelectBankButton()
-            Spacer(modifier = modifier.height(20.dp))
-
-            Spacer(modifier = modifier.height(10.dp))
-            AuthorizeButton(
-                buttonText = "Pay $50",
-                onClick = onNavigateToBankAccountNumberScreen,true
-            )
+                if (showErrorDialog) {
+                    ErrorDialog(message = "Kindly Select a bank")
+                }
+                if(showCircularProgressBar){
+                    showCircularProgress(showProgress = true)
+                }
 
 
+                val availableBanksState = selectBankViewModel.availableBanksState.value
+
+                if(availableBanksState.hasError){
+                    showCircularProgressBar = false
+                    showErrorDialog = true
+                }
+
+                if(availableBanksState.isLoading){
+                    showCircularProgressBar = true
+                }
+
+                var merchantBankList : List<MerchantBanksItem?>? = listOf()
+                availableBanksState.data?.availableBankData?.let {
+                    showCircularProgressBar = false
+                    merchantBankList = it.merchantBanks!!
+
+                }
+
+
+                BankSelectBankButton (merchantBankList = merchantBankList){
+                    bankCode = it
+                }
+
+                Spacer(modifier = modifier.height(40.dp))
+
+                AuthorizeButton(
+                    buttonText = "Pay NGN60,000",
+                    onClick = {
+                        if(bankCode.isNotEmpty()) {
+                            navController.navigateSingleTopTo(
+                                "${Route.BANK_ACCOUNT_NUMBER_SCREEN}/eaadd/sdfjk/skfkj/sjfoj"
+                            )
+                        }
+                        else {
+                            showErrorDialog = true
+                        }
+                    }, !showCircularProgressBar
+                )
+
+            }
         }
     }
 }
 
 
 @Composable
-fun SelectBankButton(modifier: Modifier = Modifier) {
+fun BankSelectBankButton(modifier: Modifier = Modifier, merchantBankList : List<MerchantBanksItem?>?, onBankCodeSelected: (String) -> Unit) {
 
     var selectedText by remember { mutableStateOf("") }
 
@@ -105,7 +166,7 @@ fun SelectBankButton(modifier: Modifier = Modifier) {
             OutlinedTextField(
                 value = selectedText,
                 onValueChange = { selectedText = it },
-
+                readOnly = true,
                 colors = TextFieldDefaults.textFieldColors(
                     backgroundColor = MaterialTheme.colors.surface,
                     disabledIndicatorColor = Color.Transparent,
@@ -128,7 +189,8 @@ fun SelectBankButton(modifier: Modifier = Modifier) {
                     .height(56.dp)
                     .onGloballyPositioned { layoutCoordinates ->
                         textFieldSize = layoutCoordinates.size.toSize()
-                    },
+                    }
+                    .fillMaxHeight(),
                 trailingIcon = {
                     Icon(imageVector = icon, contentDescription = null,
                         Modifier.clickable { expanded = !expanded })
@@ -136,52 +198,44 @@ fun SelectBankButton(modifier: Modifier = Modifier) {
 
             )
         }
-    }
 
-    // Create a list of cities
-    val banks = listOf(
-        "Guaramtee Trust Bank",
-        "Uba",
-        "Union Bank",
-        "First Bank",
-        "Hyderabad",
-        "Bengaluru",
-        "Pune",
-        "Delhi",
-        "Mumbai",
-        "Chennai",
-        "Kolkata",
-        "Hyderabad",
-        "Bengaluru",
-        "Pune"
-    )
+        Spacer(Modifier.height(10.dp))
+        DropdownMenu(
 
-    DropdownMenu(
-        expanded = expanded, onDismissRequest = { expanded = false },
-        modifier = Modifier.width(
-            with(LocalDensity.current) { textFieldSize.width.toDp() })
-    ) {
-        banks.forEach { label ->
-            DropdownMenuItem(onClick = {
-                selectedText = label
-                expanded = false
-            }) {
-                Text(text = label)
+            expanded = expanded, onDismissRequest = { expanded = false },
+            modifier = Modifier.width(
+                with(LocalDensity.current) { textFieldSize.width.toDp() })
+        ) {
+            merchantBankList?.forEach { label ->
+                DropdownMenuItem(onClick = {
+                    selectedText = label?.bankName!!
+                    onBankCodeSelected(label.bankCode!!)
+                    expanded = false
+                }) {
+                    Text(text = label?.bankName!!)
+                }
             }
+
         }
 
     }
+
+
 }
 
 @Preview(showBackground = true, widthDp = 400)
 @Composable
-fun SelectBankButtonPreview() {
+fun USSDSelectBankButtonPreview() {
     SeerBitTheme {
-        BankScreen(
-            onNavigateToBankAccountNumberScreen = {},
-            currentDestination = null,
-            navController = rememberNavController()
-        )
+        val selectBankViewModel : SelectBankViewModel = SelectBankViewModel()
+       BankScreen(
+           navigateToUssdHomeScreen = { /*TODO*/ },
+           currentDestination = null,
+           navController = rememberNavController(),
+           onConfirmPaymentClicked = { /*TODO*/ },
+           merchantDetailsState = null,
+           selectBankViewModel = selectBankViewModel
+       )
     }
 }
 

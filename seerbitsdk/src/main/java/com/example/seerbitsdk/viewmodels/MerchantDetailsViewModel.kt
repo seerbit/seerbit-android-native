@@ -39,6 +39,9 @@ class MerchantDetailsViewModel : ViewModel() {
     fun clearMerchantDetails(){
         _merchantState.value = MerchantDetailsState()
     }
+    fun clearCardBinState(){
+        _cardBinState.value = CardBinState()
+    }
 
 
     private fun fetchMerchantDetails() {

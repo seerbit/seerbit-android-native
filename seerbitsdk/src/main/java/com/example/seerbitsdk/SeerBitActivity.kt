@@ -54,6 +54,7 @@ import com.example.seerbitsdk.component.*
 import com.example.seerbitsdk.models.card.CardDTO
 import com.example.seerbitsdk.models.CardDetails
 import com.example.seerbitsdk.navigationpage.OtherPaymentScreen
+import com.example.seerbitsdk.screenstate.CardBinState
 import com.example.seerbitsdk.screenstate.InitiateTransactionState
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.screenstate.QueryTransactionState
@@ -205,12 +206,13 @@ fun CardHomeScreen(
 
     //card details
     var cvv by rememberSaveable { mutableStateOf("") }
-    var cardNumber by rememberSaveable { mutableStateOf("") }
+    var cardNumber by remember { mutableStateOf("") }
     var cardExpiryMonth by rememberSaveable { mutableStateOf("") }
     var cardExpiryYear by rememberSaveable { mutableStateOf("") }
     var isSuccessfulResponse by rememberSaveable { mutableStateOf(false) }
     var redirectUrl by rememberSaveable { mutableStateOf("") }
     var canRedirectToUrl by remember { mutableStateOf(false) }
+    var trailingIcon by rememberSaveable { mutableStateOf(0) }
 
 
     var showErrorDialog by remember { mutableStateOf(false) }
@@ -225,7 +227,9 @@ fun CardHomeScreen(
     }
 
     if (merchantDetailsState.isLoading) {
-        showCircularProgressBar = true
+        showCircularProgress(
+            showProgress = true
+        )
     }
 
     merchantDetailsState.data?.let { merchantDetailsData ->
@@ -284,6 +288,18 @@ fun CardHomeScreen(
                 ErrorDialog(message = "Please input a valid card details")
             }
 
+            val cardBinState: CardBinState =
+                transactionViewModel.cardBinState.value
+
+
+            if (cardBinState.hasError) {
+
+            }
+            if (cardBinState.isLoading) {
+
+            }
+
+
             //Card Details Screen
             CardDetailsScreen(
                 cardNumber = cardDetailsData.cardNumber,
@@ -297,7 +313,35 @@ fun CardHomeScreen(
                 },
                 onChangeCardNumber = {
                     cardNumber = it
-                }, merchantDetailsViewModel = merchantDetailsViewModel
+                    transactionViewModel.clearCardBinState()
+                    if (it.length == 16 || it.length >= 6 ) {
+
+                        transactionViewModel.fetchCardBin(it)
+
+                        if (cardBinState.data != null) {
+                            var split: List<String?>
+                            if (cardBinState.data.responseMessage != "BIN not Found") {
+                                split = cardBinState.data.cardName?.split(" ")!!
+
+                                trailingIcon = if (split[0].equals("MASTERCARD")) {
+                                    R.drawable.mastercard
+                                } else if (split[0].equals("VISA")) {
+                                    R.drawable.visa
+                                } else if (split[0].equals("Interswitch", ignoreCase = true)) {
+                                    0
+                                } else if (split[0].equals("VERVE")) {
+                                    R.drawable.verve_logo
+                                } else 0
+                            }
+                            else trailingIcon = 0
+                        }
+                    } else if (it.length < 6) {
+                        transactionViewModel.clearCardBinState()
+                        trailingIcon = 0
+                    }
+
+
+                }, trailingIcon = trailingIcon
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -357,16 +401,17 @@ fun CardHomeScreen(
                     showCircularProgressBar =
                         queryTransactionStateState.data.data.code == PENDING_CODE
 
-                    if(it.code == FAILED){
+                    if (it.code == FAILED) {
                         showCircularProgressBar = false
                         return@let
                     }
-                    if(it.code == FAILED){
+                    if (it.code == FAILED) {
                         showCircularProgressBar = false
                         return@let
                     }
                 }
             }
+
 
 
 
@@ -436,7 +481,7 @@ fun CardDetailsScreen(
     onChangeCardExpiryMonth: (String) -> Unit,
     onChangeCardExpiryYear: (String) -> Unit,
     onChangeCardCvv: (String) -> Unit,
-    merchantDetailsViewModel: MerchantDetailsViewModel
+    trailingIcon: Int
 ) {
     Column(
         modifier = modifier,
@@ -446,7 +491,6 @@ fun CardDetailsScreen(
 
         Card(modifier = modifier, elevation = 4.dp) {
             var value by rememberSaveable { mutableStateOf(cardNumber) }
-            var trailngIconView = @Composable{value}
 
             OutlinedTextField(
                 value = value,
@@ -456,6 +500,8 @@ fun CardDetailsScreen(
                         value = newText
                         onChangeCardNumber(newText)
                     }
+
+
                 },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Number,
@@ -470,10 +516,19 @@ fun CardDetailsScreen(
                     cursorColor = Color.Gray
 
                 ),
-                trailingIcon = @Composable { Image(
-                    painter = painterResource(id = returnCardIcon("453777", merchantDetailsViewModel)!!),
-                    contentDescription = ""
-                )},
+                trailingIcon = {
+                    if (trailingIcon != 0) {
+                        Image(
+                            painter = painterResource(id = trailingIcon),
+                            contentDescription = ""
+                        )
+                    } else CircularProgressIndicator(
+                        Modifier.size(15.dp),
+                        strokeWidth = 1.dp,
+                        color = Color.Black
+                    )
+                },
+
                 shape = RoundedCornerShape(4.dp),
                 placeholder = {
                     Text(
@@ -526,7 +581,7 @@ fun CardDetailsScreen(
                     placeholder = {
                         Text(
                             text = "MM/YY",
-                            style = TextStyle(fontSize = 12.sp,fontFamily = Faktpro),
+                            style = TextStyle(fontSize = 12.sp, fontFamily = Faktpro),
                             color = Color.Black
                         )
                     },
@@ -650,7 +705,6 @@ fun cardNumberFormatting(text: AnnotatedString): TransformedText {
 @Preview(showBackground = true, widthDp = 518)
 @Composable
 fun CardDetailsPreview() {
-    val merchantDetailsViewModel : MerchantDetailsViewModel by viewModel()
     SeerBitTheme {
         CardDetailsScreen(
             cardNumber = "",
@@ -658,7 +712,7 @@ fun CardDetailsPreview() {
             onChangeCardExpiryMonth = {},
             onChangeCardExpiryYear = {},
             onChangeCardCvv = {},
-            merchantDetailsViewModel = merchantDetailsViewModel
+            trailingIcon = 0
         )
     }
 }
@@ -699,27 +753,10 @@ fun PaymentOptionButtons(
 }
 
 
-fun returnCardIcon(firstSixDigit : String, merchantDetailsViewModel: MerchantDetailsViewModel) : Int {
-
-    merchantDetailsViewModel.fetchCardBin(firstSixDigit)
-    var id = R.drawable.mastercard
-
-    val cardBinState = merchantDetailsViewModel.cardBinState
-    if(cardBinState.value.data != null){
-        if(cardBinState.value.data!!.cardName?.contains("MASTERCARD") == true)
-            id = R.drawable.mastercard
-        else if (cardBinState.value.data!!.cardName?.contains("VISA") == true)
-            id = R.drawable.verve_logo
-    }
-    else return id
-    return id
-}
-
-
 @Composable
 fun PayButton(
     amount: String,
-    onClick: () -> Unit, enabled : Boolean
+    onClick: () -> Unit, enabled: Boolean
 ) {
     Button(
         onClick = onClick,
@@ -837,13 +874,12 @@ fun MyAppNavHost(
 
         composable(route = BankAccount.route) {
             BankScreen(
-                onNavigateToBankAccountNumberScreen = {
-                    navController.navigateSingleTopNoPopUpToHome(
-                        Route.BANK_ACCOUNT_NUMBER_SCREEN
-                    )
-                },
+                navigateToUssdHomeScreen = { /*TODO*/ },
                 currentDestination = currentDestination,
-                navController = navController
+                navController = navController,
+                onConfirmPaymentClicked = { /*TODO*/ },
+                merchantDetailsState = merchantDetailsState,
+                selectBankViewModel = selectBankViewModel
             )
         }
         composable(
@@ -899,8 +935,7 @@ fun MyAppNavHost(
                 navArgument("bankCode") { type = NavType.StringType },
 
                 )
-        ) {
-                navBackStackEntry ->
+        ) { navBackStackEntry ->
 
             val bankCode = navBackStackEntry.arguments?.getString("bankCode")
             transactionViewModel.resetTransactionState()
@@ -981,7 +1016,7 @@ fun ErrorDialog(message: String) {
 }
 
 @Composable
-fun SuccessDialog(message: String, navigateToHome : () -> Unit) {
+fun SuccessDialog(message: String, navigateToHome: () -> Unit) {
     val openDialog = remember { mutableStateOf(true) }
     if (openDialog.value) {
         AlertDialog(
@@ -1008,9 +1043,10 @@ fun SuccessDialog(message: String, navigateToHome : () -> Unit) {
             confirmButton = {
                 Button(
 
-                    onClick = { navigateToHome()
+                    onClick = {
+                        navigateToHome()
                         openDialog.value = false
-                              },
+                    },
                     colors = ButtonDefaults.buttonColors(
                         backgroundColor = SignalRed
                     )
