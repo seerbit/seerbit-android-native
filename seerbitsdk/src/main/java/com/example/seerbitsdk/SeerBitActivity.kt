@@ -53,10 +53,7 @@ import com.example.seerbitsdk.component.*
 import com.example.seerbitsdk.models.card.CardDTO
 import com.example.seerbitsdk.models.CardDetails
 import com.example.seerbitsdk.navigationpage.OtherPaymentScreen
-import com.example.seerbitsdk.screenstate.CardBinState
-import com.example.seerbitsdk.screenstate.InitiateTransactionState
-import com.example.seerbitsdk.screenstate.MerchantDetailsState
-import com.example.seerbitsdk.screenstate.QueryTransactionState
+import com.example.seerbitsdk.screenstate.*
 import com.example.seerbitsdk.transfer.TransferHomeScreen
 import com.example.seerbitsdk.ui.theme.*
 import com.example.seerbitsdk.ussd.USSDHomeScreen
@@ -205,7 +202,7 @@ fun CardHomeScreen(
 
     //card details
     var cvv by rememberSaveable { mutableStateOf("") }
-    var cardNumber by remember { mutableStateOf("") }
+    var cardNumber by rememberSaveable { mutableStateOf("") }
     var cardExpiryMonth by rememberSaveable { mutableStateOf("") }
     var cardExpiryYear by rememberSaveable { mutableStateOf("") }
     var isSuccessfulResponse by rememberSaveable { mutableStateOf(false) }
@@ -221,14 +218,23 @@ fun CardHomeScreen(
     var showCircularProgressBar by remember { mutableStateOf(false) }
     var paymentRef by remember { mutableStateOf("") }
 
+    var alertDialogMessage by remember { mutableStateOf("") }
+    var alertDialogHeaderMessage by remember { mutableStateOf("") }
+    val openDialog = remember { mutableStateOf(false) }
+
     if (merchantDetailsState.hasError) {
         ErrorDialog(message = merchantDetailsState.errorMessage ?: "Something went wrong")
     }
 
     if (merchantDetailsState.isLoading) {
-        showCircularProgress(
-            showProgress = true
-        )
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            CircularProgressIndicator(color = Color.Black)
+        }
+
     }
 
     merchantDetailsState.data?.let { merchantDetailsData ->
@@ -283,16 +289,15 @@ fun CardHomeScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
 
-            if (showErrorDialog) {
-                ErrorDialog(message = "Please input a valid card details")
-            }
 
             val cardBinState: CardBinState =
                 transactionViewModel.cardBinState.value
 
 
             if (cardBinState.hasError) {
-
+                openDialog.value = true
+                alertDialogMessage = "Invalid Card Details"
+                alertDialogHeaderMessage = "Error Occurred"
             }
             if (cardBinState.isLoading) {
 
@@ -313,7 +318,7 @@ fun CardHomeScreen(
                 onChangeCardNumber = {
                     cardNumber = it
                     transactionViewModel.clearCardBinState()
-                    if (it.length == 16 || it.length >= 6 ) {
+                    if (it.length == 16 || it.length >= 6) {
 
                         transactionViewModel.fetchCardBin(it)
 
@@ -331,8 +336,11 @@ fun CardHomeScreen(
                                 } else if (split[0].equals("VERVE")) {
                                     R.drawable.verve_logo
                                 } else 0
+                            } else {
+                                trailingIcon = 0
+
                             }
-                            else trailingIcon = 0
+
                         }
                     } else if (it.length < 6) {
                         transactionViewModel.clearCardBinState()
@@ -359,16 +367,17 @@ fun CardHomeScreen(
                     amount = "NGN 60,000",
                     onClick = {
 
-                        showErrorDialog = if (validateCardDetails(
+                        if (validateCardDetails(
                                 cvv.isValidCvv(),
                                 cardNumber.isValidCardNumber(),
                                 cardExpiryMonth.isValidCardExpiryMonth()
                             )
                         ) {
                             onNavigateToPinScreen(cardDTO)
-                            false
                         } else {
-                            true
+                            openDialog.value = true
+                            alertDialogMessage = "Invalid Card Details"
+                            alertDialogHeaderMessage = "Error Occurred"
                         }
                     }, !showCircularProgressBar
                 )
@@ -380,7 +389,9 @@ fun CardHomeScreen(
 
             if (transactionState.hasError) {
                 showCircularProgressBar = false
-                ErrorDialog(message = transactionState.errorMessage ?: "Something went wrong")
+                openDialog.value = true
+                alertDialogMessage = "Invalid Card Details"
+                alertDialogHeaderMessage = "Error Occurred"
             }
             showCircularProgressBar = transactionState.isLoading
 
@@ -390,9 +401,10 @@ fun CardHomeScreen(
             //querying transaction happens after otp has been inputted
             if (startQueryingTransaction) {
                 if (queryTransactionStateState.hasError) {
-                    ErrorDialog(
-                        message = queryTransactionStateState.errorMessage ?: "Something went wrong"
-                    )
+                    openDialog.value = true
+                    alertDialogMessage = "Invalid Card Details"
+                    alertDialogHeaderMessage = queryTransactionStateState.errorMessage ?: "Something went wrong"
+
                 }
                 showCircularProgressBar = queryTransactionStateState.isLoading
 
@@ -446,9 +458,51 @@ fun CardHomeScreen(
 
             Spacer(modifier = Modifier.height(100.dp))
             BottomSeerBitWaterMark(modifier = Modifier.align(alignment = Alignment.CenterHorizontally))
+
+            //The alert dialog occurs here
+            if (openDialog.value) {
+                AlertDialog(
+                    onDismissRequest = {
+                        openDialog.value = false
+                    },
+                    title = {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Text(text = alertDialogHeaderMessage)
+                        }
+
+                    },
+                    text = {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Text(alertDialogMessage)
+                        }
+                    },
+                    confirmButton = {
+                        Button(
+
+                            onClick = {
+                                openDialog.value = false
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                backgroundColor = SignalRed
+                            )
+                        ) {
+                            Text(text = "Close")
+
+                        }
+                    },
+                )
+            }
         }
 
+
     }
+
 }
 
 

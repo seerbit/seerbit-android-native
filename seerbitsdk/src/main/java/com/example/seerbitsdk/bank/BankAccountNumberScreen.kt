@@ -78,7 +78,7 @@ fun BankAccountNumberScreen(
                 ""
             )
             showBankAccountField = bankCode?.isNotEmpty()!!
-            showBVNField = bankCode.isNotEmpty() && accountNum != "-1"
+            showBVNField = bankCode.isNotEmpty() && bankAccountNumber!= "-1"
 
             //show
             if (showBankAccountField && !showBVNField) {

@@ -130,7 +130,7 @@ fun BankScreen(
                     onClick = {
                         if (bankCode.isNotEmpty()) {
                             navController.navigateSingleTopTo(
-                                "${Route.BANK_ACCOUNT_NUMBER_SCREEN}/$bankCode/-1/$-1/-1/-1"
+                                "${Route.BANK_ACCOUNT_NUMBER_SCREEN}/$bankCode/-1/-1/-1/-1"
                             )
                         } else {
                             showErrorDialog = true
