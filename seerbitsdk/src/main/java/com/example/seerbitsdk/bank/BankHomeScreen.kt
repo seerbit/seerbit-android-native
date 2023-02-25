@@ -46,6 +46,11 @@ fun BankScreen(
     selectBankViewModel: SelectBankViewModel
 ) {
     var bankCode by remember { mutableStateOf("") }
+    var dob = ""
+    var accountNumber = ""
+    var bvn = ""
+    var otp = ""
+
     var showErrorDialog by remember { mutableStateOf(false) }
     var showCircularProgressBar by remember { mutableStateOf(false) }
 
@@ -90,23 +95,23 @@ fun BankScreen(
                 if (showErrorDialog) {
                     ErrorDialog(message = "Kindly Select a bank")
                 }
-                if(showCircularProgressBar){
+                if (showCircularProgressBar) {
                     showCircularProgress(showProgress = true)
                 }
 
 
                 val availableBanksState = selectBankViewModel.availableBanksState.value
 
-                if(availableBanksState.hasError){
+                if (availableBanksState.hasError) {
                     showCircularProgressBar = false
                     showErrorDialog = true
                 }
 
-                if(availableBanksState.isLoading){
+                if (availableBanksState.isLoading) {
                     showCircularProgressBar = true
                 }
 
-                var merchantBankList : List<MerchantBanksItem?>? = listOf()
+                var merchantBankList: List<MerchantBanksItem?>? = listOf()
                 availableBanksState.data?.availableBankData?.let {
                     showCircularProgressBar = false
                     merchantBankList = it.merchantBanks!!
@@ -114,7 +119,7 @@ fun BankScreen(
                 }
 
 
-                BankSelectBankButton (merchantBankList = merchantBankList){
+                BankSelectBankButton(merchantBankList = merchantBankList) {
                     bankCode = it
                 }
 
@@ -123,12 +128,11 @@ fun BankScreen(
                 AuthorizeButton(
                     buttonText = "Pay NGN60,000",
                     onClick = {
-                        if(bankCode.isNotEmpty()) {
+                        if (bankCode.isNotEmpty()) {
                             navController.navigateSingleTopTo(
-                                "${Route.BANK_ACCOUNT_NUMBER_SCREEN}/eaadd/sdfjk/skfkj/sjfoj"
+                                "${Route.BANK_ACCOUNT_NUMBER_SCREEN}/$bankCode/-1/$-1/-1/-1"
                             )
-                        }
-                        else {
+                        } else {
                             showErrorDialog = true
                         }
                     }, !showCircularProgressBar
@@ -141,7 +145,11 @@ fun BankScreen(
 
 
 @Composable
-fun BankSelectBankButton(modifier: Modifier = Modifier, merchantBankList : List<MerchantBanksItem?>?, onBankCodeSelected: (String) -> Unit) {
+fun BankSelectBankButton(
+    modifier: Modifier = Modifier,
+    merchantBankList: List<MerchantBanksItem?>?,
+    onBankCodeSelected: (String) -> Unit
+) {
 
     var selectedText by remember { mutableStateOf("") }
 
@@ -227,15 +235,15 @@ fun BankSelectBankButton(modifier: Modifier = Modifier, merchantBankList : List<
 @Composable
 fun USSDSelectBankButtonPreview() {
     SeerBitTheme {
-        val selectBankViewModel : SelectBankViewModel = SelectBankViewModel()
-       BankScreen(
-           navigateToUssdHomeScreen = { /*TODO*/ },
-           currentDestination = null,
-           navController = rememberNavController(),
-           onConfirmPaymentClicked = { /*TODO*/ },
-           merchantDetailsState = null,
-           selectBankViewModel = selectBankViewModel
-       )
+        val selectBankViewModel: SelectBankViewModel = SelectBankViewModel()
+        BankScreen(
+            navigateToUssdHomeScreen = { /*TODO*/ },
+            currentDestination = null,
+            navController = rememberNavController(),
+            onConfirmPaymentClicked = { /*TODO*/ },
+            merchantDetailsState = null,
+            selectBankViewModel = selectBankViewModel
+        )
     }
 }
 

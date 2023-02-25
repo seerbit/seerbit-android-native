@@ -20,15 +20,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.seerbitsdk.R
 
 import com.example.seerbitsdk.card.AuthorizeButton
 import com.example.seerbitsdk.card.OTPInputField
+import com.example.seerbitsdk.component.Route
 import com.example.seerbitsdk.component.SeerbitPaymentDetailScreen
 import com.example.seerbitsdk.models.card.CardDTO
+import com.example.seerbitsdk.navigateSingleTopTo
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.ui.theme.SeerBitTheme
 import com.example.seerbitsdk.viewmodels.TransactionViewModel
@@ -46,13 +47,15 @@ fun BankAccountNumberScreen(
     birthday: String,
     bvn: String,
     otp: String,
+    bankCode: String?,
 
-) {
+    ) {
     var showPinScreen by remember { mutableStateOf(false) }
     var showBankAccountField by remember { mutableStateOf(false) }
-    var showBirthdayField by remember { mutableStateOf(true) }
+    var showBirthdayField by remember { mutableStateOf(false) }
     var showBVNField by remember { mutableStateOf(false) }
     var showOTPScreen by remember { mutableStateOf(false) }
+    var accountNum by remember { mutableStateOf(bankAccountNumber) }
     Column(modifier = modifier) {
 
         Column(
@@ -74,18 +77,26 @@ fun BankAccountNumberScreen(
                 "",
                 ""
             )
+            showBankAccountField = bankCode?.isNotEmpty()!!
+            showBVNField = bankCode.isNotEmpty() && accountNum != "-1"
 
             //show
-            if (showBankAccountField) {
+            if (showBankAccountField && !showBVNField) {
+
                 Spacer(modifier = Modifier.height(21.dp))
                 BankAccountNumberField(Modifier, "10 Digit Bank Account Number") {
+                    accountNum = it
                 }
 
                 Spacer(modifier = modifier.height(20.dp))
 
                 Spacer(modifier = modifier.height(10.dp))
                 AuthorizeButton(buttonText = "Pay $50",
-                    onClick = { showPinScreen = true }, true
+                    onClick = { if(accountNum.isNotEmpty()){
+                        navController.navigateSingleTopTo(
+                            "${Route.BANK_ACCOUNT_NUMBER_SCREEN}/$bankCode/$accountNum/$bvn/$birthday/$otp"
+                        )
+                    } }, true
                 )
 
             }
@@ -181,7 +192,8 @@ fun BankAccountNumberScreenPreview() {
             bankAccountNumber = "",
             birthday = "",
             bvn = "",
-            otp = ""
+            otp = "",
+            bankCode = ""
         )
     }
 }

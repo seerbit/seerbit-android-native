@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
-import android.media.Image
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -883,15 +882,17 @@ fun MyAppNavHost(
             )
         }
         composable(
-            "${Route.BANK_ACCOUNT_NUMBER_SCREEN}/{accountNumber}/{bvn}/{birthday}/{otp}",
+            "${Route.BANK_ACCOUNT_NUMBER_SCREEN}/{bankCode}/{accountNumber}/{bvn}/{birthday}/{otp}",
             arguments = listOf(
                 // declaring argument type
+                navArgument("bankCode") { type = NavType.StringType },
                 navArgument("accountNumber") { type = NavType.StringType },
                 navArgument("bvn") { type = NavType.StringType },
                 navArgument("birthday") { type = NavType.StringType },
                 navArgument("otp") { type = NavType.StringType },
             )
         ) { navBackStackEntry ->
+            val bankCode = navBackStackEntry.arguments?.getString("bankCode")
             val accountNumber = navBackStackEntry.arguments?.getString("accountNumber")
             val bvn = navBackStackEntry.arguments?.getString("bvn")
             val birthday = navBackStackEntry.arguments?.getString("birthday")
@@ -904,6 +905,7 @@ fun MyAppNavHost(
                 navController = navController,
                 merchantDetailsState = merchantDetailsState,
                 transactionViewModel = transactionViewModel,
+                bankCode = bankCode,
                 bankAccountNumber = accountNumber!!,
                 birthday = birthday!!,
                 bvn = bvn!!,
