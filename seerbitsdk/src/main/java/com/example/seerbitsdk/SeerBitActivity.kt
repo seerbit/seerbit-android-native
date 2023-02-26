@@ -149,6 +149,7 @@ fun NavHostController.navigateSingleTopTo(route: String) =
     this.navigate(route) {
         popUpTo(this@navigateSingleTopTo.graph.findStartDestination().id) {
             saveState = true
+            inclusive = false
         }
         launchSingleTop = true
         restoreState = true
@@ -357,6 +358,7 @@ fun CardHomeScreen(
                 showCircularProgress(showProgress = true)
             }
 
+            Spacer(modifier = Modifier.height(16.dp))
             //Payment Button Login
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -454,7 +456,8 @@ fun CardHomeScreen(
 
             OtherPaymentButtonComponent(
                 onOtherPaymentButtonClicked = onOtherPaymentButtonClicked,
-                onCancelButtonClicked = {})
+                onCancelButtonClicked = {}, enable = !showCircularProgressBar
+            )
 
             Spacer(modifier = Modifier.height(100.dp))
             BottomSeerBitWaterMark(modifier = Modifier.align(alignment = Alignment.CenterHorizontally))

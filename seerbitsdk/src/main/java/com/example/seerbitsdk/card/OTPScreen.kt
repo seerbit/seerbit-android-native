@@ -96,7 +96,7 @@ fun OTPScreen(
 
             OtherPaymentButtonComponent(
                 onOtherPaymentButtonClicked = { /*TODO*/ },
-                onCancelButtonClicked = {})
+                onCancelButtonClicked = {}, enable = true)
 
         }
 

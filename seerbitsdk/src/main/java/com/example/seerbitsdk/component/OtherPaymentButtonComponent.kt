@@ -25,13 +25,15 @@ import com.example.seerbitsdk.ui.theme.SignalRed
 fun OtherPaymentButtonComponent(
     modifier: Modifier = Modifier,
     onOtherPaymentButtonClicked: () -> Unit,
-    onCancelButtonClicked: () -> Unit
+    onCancelButtonClicked: () -> Unit,
+    enable : Boolean
 ) {
     Row(modifier = Modifier.fillMaxWidth()) {
         Button(
             onClick = onOtherPaymentButtonClicked,
-            colors = ButtonDefaults.buttonColors(backgroundColor = LighterGray),
+            colors = ButtonDefaults.buttonColors(   backgroundColor = LighterGray),
             shape = RoundedCornerShape(4.dp),
+            enabled = enable,
 
             modifier = Modifier
                 .height(50.dp)

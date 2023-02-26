@@ -66,27 +66,22 @@ fun USSDHomeScreen(
     var alertDialogHeaderMessage by remember { mutableStateOf("") }
 
 
-    // if there is an error loading the report
-    if (merchantDetailsState?.hasError!!) {
-        ErrorDialog(message = merchantDetailsState.errorMessage ?: "Something went wrong")
-    }
-    if (merchantDetailsState.isLoading) {
-        showCircularProgress(showProgress = true)
-    }
+    Column(modifier = modifier) {
+        // if there is an error loading the report
+        if (merchantDetailsState?.hasError!!) {
+            ErrorDialog(message = merchantDetailsState.errorMessage ?: "Something went wrong")
+        }
+        if (merchantDetailsState.isLoading) {
+            showCircularProgress(showProgress = true)
+        }
 
 
-    merchantDetailsState.data?.let { merchantDetailsData ->
-
-
-        Column(
-            modifier = modifier
-                .fillMaxHeight()
-                .verticalScroll(rememberScrollState())
-        ) {
-
+        merchantDetailsState.data?.let { merchantDetailsData ->
 
             Column(
                 modifier = modifier
+                    .fillMaxHeight()
+                    .verticalScroll(rememberScrollState())
                     .padding(
                         start = 21.dp,
                         end = 21.dp
@@ -94,6 +89,9 @@ fun USSDHomeScreen(
                     .fillMaxWidth()
 
             ) {
+
+
+
                 Spacer(modifier = Modifier.height(21.dp))
                 SeerbitPaymentDetailScreen(
 
@@ -170,22 +168,29 @@ fun USSDHomeScreen(
                 if (queryTransactionStateState.isLoading) {
                 }
 
-                if (queryTransactionStateState.data?.data != null) {
+                queryTransactionStateState.data?.data?.let {
 
                     if (queryTransactionStateState.data.data.code == PENDING_CODE) {
                         transactionViewModel.queryTransaction(ussdDTO.paymentReference!!)
                     }
                     if (queryTransactionStateState.data.data.code == SUCCESS) {
-                        showLoadingScreen = false
+
                         openDialog.value = true
                         alertDialogMessage = queryTransactionStateState.data.data.message!!
                         alertDialogHeaderMessage = "Success"
+                        showLoadingScreen = false
+                        transactionViewModel.resetTransactionState()
+                        return@let
+
                     }
                     if (queryTransactionStateState.data.data.code == "SM_X23" || queryTransactionStateState.data.data.code == "S12") {
-                        showLoadingScreen = false
+
                         openDialog.value = true
                         alertDialogMessage = queryTransactionStateState.data.data.message!!
                         alertDialogHeaderMessage = "Failed"
+                        showLoadingScreen = false
+                        transactionViewModel.resetTransactionState()
+                        return@let
 
                     }
                 }
@@ -288,10 +293,11 @@ fun USSDHomeScreen(
                 }
 
 
+
+
+
             }
         }
-
-
     }
 }
 
