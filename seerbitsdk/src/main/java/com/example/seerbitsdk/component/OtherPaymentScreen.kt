@@ -20,10 +20,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.seerbitsdk.*
 import com.example.seerbitsdk.component.SeerBitNavButtonsColumn
-import com.example.seerbitsdk.component.SeerbitPaymentDetailScreen
+import com.example.seerbitsdk.component.SeerbitPaymentDetailHeader
 import com.example.seerbitsdk.ui.theme.DeepRed
 import com.example.seerbitsdk.ui.theme.Faktpro
-import com.example.seerbitsdk.ui.theme.LighterGray
 import com.example.seerbitsdk.ui.theme.SignalRed
 
 
@@ -52,7 +51,7 @@ fun OtherPaymentScreen(
 
         ) {
             Spacer(modifier = Modifier.height(25.dp))
-            SeerbitPaymentDetailScreen(
+            SeerbitPaymentDetailHeader(
                 charges = 0.45,
                 amount = "60,000.00",
                 currencyText = "",

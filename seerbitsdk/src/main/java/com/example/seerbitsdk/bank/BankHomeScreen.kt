@@ -26,10 +26,8 @@ import com.example.seerbitsdk.R
 import com.example.seerbitsdk.card.AuthorizeButton
 import com.example.seerbitsdk.card.showCircularProgress
 import com.example.seerbitsdk.component.Route
-import com.example.seerbitsdk.component.SeerbitPaymentDetailScreen
+import com.example.seerbitsdk.component.SeerbitPaymentDetailHeader
 import com.example.seerbitsdk.models.MerchantBanksItem
-import com.example.seerbitsdk.models.ussd.UssdBankData
-import com.example.seerbitsdk.navigateSingleTopNoPopUpToHome
 import com.example.seerbitsdk.navigateSingleTopTo
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.ui.theme.SeerBitTheme
@@ -46,10 +44,6 @@ fun BankScreen(
     selectBankViewModel: SelectBankViewModel
 ) {
     var bankCode by remember { mutableStateOf("") }
-    var dob = ""
-    var accountNumber = ""
-    var bvn = ""
-    var otp = ""
 
     var showErrorDialog by remember { mutableStateOf(false) }
     var showCircularProgressBar by remember { mutableStateOf(false) }
@@ -81,8 +75,7 @@ fun BankScreen(
             ) {
                 Spacer(modifier = Modifier.height(25.dp))
 
-                SeerbitPaymentDetailScreen(
-
+                SeerbitPaymentDetailHeader(
                     charges = merchantDetailsData.payload?.cardFee?.visa!!.toDouble(),
                     amount = "60,000.00",
                     currencyText = merchantDetailsData.payload.defaultCurrency!!,
@@ -90,7 +83,8 @@ fun BankScreen(
                     merchantDetailsData.payload.businessName!!,
                     merchantDetailsData.payload.supportEmail!!
                 )
-                Spacer(modifier = Modifier.height(41.dp))
+
+                Spacer(modifier = Modifier.height(10.dp))
 
                 if (showErrorDialog) {
                     ErrorDialog(message = "Kindly Select a bank")
@@ -130,7 +124,7 @@ fun BankScreen(
                     onClick = {
                         if (bankCode.isNotEmpty()) {
                             navController.navigateSingleTopTo(
-                                "${Route.BANK_ACCOUNT_NUMBER_SCREEN}/$bankCode/-1/-1/-1/-1"
+                                "${Route.BANK_ACCOUNT_NUMBER_SCREEN}/$bankCode"
                             )
                         } else {
                             showErrorDialog = true
@@ -153,16 +147,13 @@ fun BankSelectBankButton(
 
     var selectedText by remember { mutableStateOf("") }
 
-    // Declaring a boolean value to store
-    // the expanded state of the Text Field
     var expanded by remember { mutableStateOf(false) }
-
-    // Up Icon when expanded and down icon when collapsed
     val icon = if (expanded)
         Icons.Filled.KeyboardArrowUp
     else
         Icons.Filled.KeyboardArrowDown
     var textFieldSize by remember { mutableStateOf(Size.Zero) }
+
 
     Column {
         Card(modifier = modifier, elevation = 4.dp) {

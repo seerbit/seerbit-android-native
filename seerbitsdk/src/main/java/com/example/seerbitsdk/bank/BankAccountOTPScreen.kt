@@ -24,12 +24,12 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.seerbitsdk.ErrorDialog
 import com.example.seerbitsdk.R
-
 import com.example.seerbitsdk.card.AuthorizeButton
 import com.example.seerbitsdk.card.OTPInputField
 import com.example.seerbitsdk.card.showCircularProgress
 import com.example.seerbitsdk.component.Route
 import com.example.seerbitsdk.component.SeerbitPaymentDetailHeader
+import com.example.seerbitsdk.component.SeerbitPaymentDetailHeaderTwo
 import com.example.seerbitsdk.models.card.CardDTO
 import com.example.seerbitsdk.navigateSingleTopTo
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
@@ -38,19 +38,21 @@ import com.example.seerbitsdk.viewmodels.TransactionViewModel
 
 
 @Composable
-fun BankAccountNumberScreen(
+fun BankAccountOTPScreen(
     modifier: Modifier = Modifier,
     navController: NavHostController,
     merchantDetailsState: MerchantDetailsState,
     transactionViewModel: TransactionViewModel,
+    bankAccountNumber: String,
+    dob: String,
+    bvn: String,
     bankCode: String?,
-) {
 
+    ) {
 
-    var accountNumber by remember {
-        mutableStateOf("")
-    }
-    // if there is an error loading the report
+    var otp by remember { mutableStateOf("") }
+
+// if there is an error loading the report
     if (merchantDetailsState?.hasError!!) {
         ErrorDialog(message = merchantDetailsState.errorMessage ?: "Something went wrong")
     }
@@ -62,6 +64,8 @@ fun BankAccountNumberScreen(
 
 
     merchantDetailsState.data?.let { merchantDetailsData ->
+
+
         Column(modifier = modifier) {
 
             Column(
@@ -75,32 +79,59 @@ fun BankAccountNumberScreen(
             ) {
                 Spacer(modifier = Modifier.height(25.dp))
 
-                SeerbitPaymentDetailHeader(
 
+                SeerbitPaymentDetailHeaderTwo(
                     charges = merchantDetailsData.payload?.cardFee?.visa!!.toDouble(),
                     amount = "60,000.00",
                     currencyText = merchantDetailsData.payload.defaultCurrency!!,
-                    "Please Enter your Account Number",
                     merchantDetailsData.payload.businessName!!,
                     merchantDetailsData.payload.supportEmail!!
                 )
 
 
-                Spacer(modifier = Modifier.height(21.dp))
-                BankAccountNumberField(Modifier, "10 Digit Bank Account Number") {
-                    accountNumber = it
-                }
+                Spacer(modifier = Modifier.height(10.dp))
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = "Kindly enter the OTP sent to *******9502 and\n" +
+                                "o***********@gmail.com or enter the OTP generates on your hardware token device",
+                        style = TextStyle(
+                            fontSize = 14.sp,
+                            fontFamily = FontFamily.SansSerif,
+                            fontWeight = FontWeight.Normal,
+                            lineHeight = 14.sp,
+                            textAlign = TextAlign.Center
 
+                        ),
+                        modifier = Modifier
+                            .align(alignment = Alignment.CenterVertically)
+                            .padding(10.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.height(20.dp))
+                OTPInputField(Modifier, "Enter OTP") {
+                    //otp = it
+                }
                 Spacer(modifier = modifier.height(20.dp))
 
+                Row(
+                    horizontalArrangement = Arrangement.End,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(text = "Resend OTP")
+                }
                 Spacer(modifier = modifier.height(10.dp))
+
                 AuthorizeButton(
-                    buttonText = "Pay $50",
+                    buttonText = "Authorize Payment",
                     onClick = {
-                        if (accountNumber.isNotEmpty() && accountNumber.length == 10) {
-                            navController.navigateSingleTopTo(
-                                "${Route.BANK_ACCOUNT_BVN_SCREEN}/$bankCode/$accountNumber"
-                            )
+                        if (otp.length < 6) {
+
+                        } else {
+                            //transactionViewModel.sendOtp(cardOTPDTO)
+
                         }
                     }, true
                 )
@@ -109,70 +140,16 @@ fun BankAccountNumberScreen(
 
 
         }
-    }
 
+    }
 }
 
 @Preview(showBackground = true, widthDp = 400)
 @Composable
-fun BankAccountNumberScreenPreview() {
+fun OTPScreenPreview() {
     val viewModel: TransactionViewModel by viewModel()
     SeerBitTheme {
 
     }
 }
-
-
-@Composable
-fun BankAccountNumberField(
-    modifier: Modifier = Modifier, placeholder: String,
-    onEnterBVN: (String) -> Unit
-) {
-    Column {
-
-
-        Card(modifier = modifier, elevation = 4.dp) {
-            var value by remember { mutableStateOf("") }
-            Image(
-                painter = painterResource(id = R.drawable.filled_bg_white),
-                contentDescription = null
-            )
-            OutlinedTextField(
-                value = value,
-                onValueChange = { newText ->
-                    if (newText.length <= 10)
-                        value = newText
-                    onEnterBVN(newText)
-                },
-
-                colors = TextFieldDefaults.textFieldColors(
-                    backgroundColor = MaterialTheme.colors.surface,
-                    disabledIndicatorColor = Color.Transparent,
-                    disabledLabelColor = Color.Transparent,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    cursorColor = Color.Gray
-
-                ),
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.NumberPassword,
-                    imeAction = ImeAction.Send
-                ),
-                shape = RoundedCornerShape(8.dp),
-                placeholder = {
-                    Text(
-                        text = placeholder,
-                        style = TextStyle(fontSize = 14.sp),
-                        color = Color.LightGray
-                    )
-                },
-                modifier = modifier
-                    .fillMaxWidth()
-                    .height(50.dp)
-            )
-        }
-    }
-}
-
-
 

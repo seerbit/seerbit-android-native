@@ -125,13 +125,12 @@ fun TransferHomeScreen(
 
             Spacer(modifier = Modifier.height(21.dp))
 
-            SeerbitPaymentDetailScreen(
+            SeerbitPaymentDetailHeaderTwo(
                 charges = merchantDetailsData.payload.cardFee?.visa!!.toDouble(),
                 amount = transferAmount,
                 currencyText = defaultCurrency,
-                "",
-                merchantDetailsData.payload.businessName!!,
-                merchantDetailsData.payload.supportEmail!!
+                businessName = merchantDetailsData.payload.businessName!!,
+                email = merchantDetailsData.payload.supportEmail!!
             )
 
 

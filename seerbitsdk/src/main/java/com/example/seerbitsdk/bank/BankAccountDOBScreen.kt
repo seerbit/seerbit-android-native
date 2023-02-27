@@ -6,27 +6,20 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.example.seerbitsdk.ErrorDialog
 import com.example.seerbitsdk.R
-
 import com.example.seerbitsdk.card.AuthorizeButton
-import com.example.seerbitsdk.card.OTPInputField
 import com.example.seerbitsdk.card.showCircularProgress
 import com.example.seerbitsdk.component.Route
 import com.example.seerbitsdk.component.SeerbitPaymentDetailHeader
@@ -36,20 +29,19 @@ import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.ui.theme.SeerBitTheme
 import com.example.seerbitsdk.viewmodels.TransactionViewModel
 
-
 @Composable
-fun BankAccountNumberScreen(
+fun BankAccountDOBScreen(
     modifier: Modifier = Modifier,
     navController: NavHostController,
     merchantDetailsState: MerchantDetailsState,
     transactionViewModel: TransactionViewModel,
-    bankCode: String?,
-) {
+    bankAccountNumber: String,
+    bvn: String,
+    bankCode : String
 
+    ) {
 
-    var accountNumber by remember {
-        mutableStateOf("")
-    }
+    var dob by remember { mutableStateOf(bankAccountNumber) }
     // if there is an error loading the report
     if (merchantDetailsState?.hasError!!) {
         ErrorDialog(message = merchantDetailsState.errorMessage ?: "Something went wrong")
@@ -58,8 +50,6 @@ fun BankAccountNumberScreen(
     if (merchantDetailsState.isLoading) {
         showCircularProgress(showProgress = true)
     }
-
-
 
     merchantDetailsState.data?.let { merchantDetailsData ->
         Column(modifier = modifier) {
@@ -76,34 +66,33 @@ fun BankAccountNumberScreen(
                 Spacer(modifier = Modifier.height(25.dp))
 
                 SeerbitPaymentDetailHeader(
-
                     charges = merchantDetailsData.payload?.cardFee?.visa!!.toDouble(),
                     amount = "60,000.00",
                     currencyText = merchantDetailsData.payload.defaultCurrency!!,
-                    "Please Enter your Account Number",
+                    "Please Enter your birthday",
                     merchantDetailsData.payload.businessName!!,
                     merchantDetailsData.payload.supportEmail!!
                 )
 
-
-                Spacer(modifier = Modifier.height(21.dp))
-                BankAccountNumberField(Modifier, "10 Digit Bank Account Number") {
-                    accountNumber = it
+                Spacer(modifier = modifier.height(10.dp))
+                //Show Birthday
+                BirthDayInputField(Modifier, "DD / MM / YYYY ") {
+                    dob = it
                 }
 
-                Spacer(modifier = modifier.height(20.dp))
+                Spacer(modifier = modifier.height(30.dp))
 
-                Spacer(modifier = modifier.height(10.dp))
                 AuthorizeButton(
                     buttonText = "Pay $50",
                     onClick = {
-                        if (accountNumber.isNotEmpty() && accountNumber.length == 10) {
+                        if (dob.isNotEmpty()) {
                             navController.navigateSingleTopTo(
-                                "${Route.BANK_ACCOUNT_BVN_SCREEN}/$bankCode/$accountNumber"
+                                "${Route.BANK_ACCOUNT_OTP_SCREEN}/$bankCode/$bankAccountNumber/$bvn/$dob"
                             )
                         }
                     }, true
                 )
+
 
             }
 
@@ -115,8 +104,8 @@ fun BankAccountNumberScreen(
 
 @Preview(showBackground = true, widthDp = 400)
 @Composable
-fun BankAccountNumberScreenPreview() {
-    val viewModel: TransactionViewModel by viewModel()
+fun BankAccountDOBScreenPreview() {
+    val viewModel : TransactionViewModel by viewModel()
     SeerBitTheme {
 
     }
@@ -124,9 +113,9 @@ fun BankAccountNumberScreenPreview() {
 
 
 @Composable
-fun BankAccountNumberField(
+fun BirthDayInputField(
     modifier: Modifier = Modifier, placeholder: String,
-    onEnterBVN: (String) -> Unit
+    onEnterBirthday: (String) -> Unit
 ) {
     Column {
 
@@ -140,9 +129,9 @@ fun BankAccountNumberField(
             OutlinedTextField(
                 value = value,
                 onValueChange = { newText ->
-                    if (newText.length <= 10)
+                    if (newText.length <= 8)
                         value = newText
-                    onEnterBVN(newText)
+                    onEnterBirthday(newText)
                 },
 
                 colors = TextFieldDefaults.textFieldColors(
@@ -173,6 +162,5 @@ fun BankAccountNumberField(
         }
     }
 }
-
 
 

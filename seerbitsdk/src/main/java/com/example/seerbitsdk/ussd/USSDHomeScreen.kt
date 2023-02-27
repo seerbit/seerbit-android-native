@@ -93,7 +93,7 @@ fun USSDHomeScreen(
 
 
                 Spacer(modifier = Modifier.height(21.dp))
-                SeerbitPaymentDetailScreen(
+                SeerbitPaymentDetailHeader(
 
                     charges = merchantDetailsData.payload?.cardFee?.visa!!.toDouble(),
                     amount = "60,000.00",

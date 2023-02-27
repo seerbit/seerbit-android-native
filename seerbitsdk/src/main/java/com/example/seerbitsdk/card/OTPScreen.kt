@@ -2,8 +2,6 @@ package com.example.seerbitsdk.card
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
@@ -13,21 +11,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.seerbitsdk.*
 import com.example.seerbitsdk.R
 import com.example.seerbitsdk.component.OtherPaymentButtonComponent
-import com.example.seerbitsdk.component.PayViaComponent
-import com.example.seerbitsdk.component.SeerbitPaymentDetailScreen
+import com.example.seerbitsdk.component.SeerbitPaymentDetailHeader
 import com.example.seerbitsdk.ui.theme.Faktpro
 import com.example.seerbitsdk.ui.theme.SeerBitTheme
 
@@ -52,7 +46,7 @@ fun OTPScreen(
         ) {
             Spacer(modifier = Modifier.height(25.dp))
 
-            SeerbitPaymentDetailScreen(
+            SeerbitPaymentDetailHeader(
                 charges = 0.45,
                 amount = "60,000.00",
                 currencyText = "NGN",

@@ -24,7 +24,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.seerbitsdk.ErrorDialog
 import com.example.seerbitsdk.R
-
 import com.example.seerbitsdk.card.AuthorizeButton
 import com.example.seerbitsdk.card.OTPInputField
 import com.example.seerbitsdk.card.showCircularProgress
@@ -36,20 +35,19 @@ import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.ui.theme.SeerBitTheme
 import com.example.seerbitsdk.viewmodels.TransactionViewModel
 
-
 @Composable
-fun BankAccountNumberScreen(
+fun BankAccountBVNScreen(
     modifier: Modifier = Modifier,
     navController: NavHostController,
     merchantDetailsState: MerchantDetailsState,
     transactionViewModel: TransactionViewModel,
+    bankAccountNumber: String,
     bankCode: String?,
-) {
 
+    ) {
 
-    var accountNumber by remember {
-        mutableStateOf("")
-    }
+    var bvn by remember { mutableStateOf("") }
+
     // if there is an error loading the report
     if (merchantDetailsState?.hasError!!) {
         ErrorDialog(message = merchantDetailsState.errorMessage ?: "Something went wrong")
@@ -58,8 +56,6 @@ fun BankAccountNumberScreen(
     if (merchantDetailsState.isLoading) {
         showCircularProgress(showProgress = true)
     }
-
-
 
     merchantDetailsState.data?.let { merchantDetailsData ->
         Column(modifier = modifier) {
@@ -80,15 +76,15 @@ fun BankAccountNumberScreen(
                     charges = merchantDetailsData.payload?.cardFee?.visa!!.toDouble(),
                     amount = "60,000.00",
                     currencyText = merchantDetailsData.payload.defaultCurrency!!,
-                    "Please Enter your Account Number",
+                    "Kindly Enter your BVN",
                     merchantDetailsData.payload.businessName!!,
                     merchantDetailsData.payload.supportEmail!!
                 )
 
+                Spacer(modifier = modifier.height(10.dp))
 
-                Spacer(modifier = Modifier.height(21.dp))
-                BankAccountNumberField(Modifier, "10 Digit Bank Account Number") {
-                    accountNumber = it
+                BVNInputField(Modifier, "Enter your BVN Number") {
+                    bvn = it
                 }
 
                 Spacer(modifier = modifier.height(20.dp))
@@ -97,25 +93,25 @@ fun BankAccountNumberScreen(
                 AuthorizeButton(
                     buttonText = "Pay $50",
                     onClick = {
-                        if (accountNumber.isNotEmpty() && accountNumber.length == 10) {
+                        if (bvn.isNotEmpty()) {
+
                             navController.navigateSingleTopTo(
-                                "${Route.BANK_ACCOUNT_BVN_SCREEN}/$bankCode/$accountNumber"
+                                "${Route.BANK_ACCOUNT_DOB_SCREEN}/$bankCode/$bankAccountNumber/$bvn"
                             )
                         }
                     }, true
                 )
-
             }
-
 
         }
     }
 
 }
 
+
 @Preview(showBackground = true, widthDp = 400)
 @Composable
-fun BankAccountNumberScreenPreview() {
+fun BankAccountBVNScreenPreview() {
     val viewModel: TransactionViewModel by viewModel()
     SeerBitTheme {
 
@@ -124,7 +120,7 @@ fun BankAccountNumberScreenPreview() {
 
 
 @Composable
-fun BankAccountNumberField(
+fun BVNInputField(
     modifier: Modifier = Modifier, placeholder: String,
     onEnterBVN: (String) -> Unit
 ) {

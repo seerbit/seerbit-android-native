@@ -20,17 +20,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.*
 import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.example.seerbitsdk.ErrorDialog
 import com.example.seerbitsdk.R
-import com.example.seerbitsdk.bank.BankScreen
 import com.example.seerbitsdk.card.AuthorizeButton
 import com.example.seerbitsdk.card.showCircularProgress
 import com.example.seerbitsdk.component.Route
-import com.example.seerbitsdk.component.SeerbitPaymentDetailScreen
+import com.example.seerbitsdk.component.SeerbitPaymentDetailHeader
 import com.example.seerbitsdk.models.MerchantBanksItem
 import com.example.seerbitsdk.models.ussd.UssdBankData
-import com.example.seerbitsdk.navigateSingleTopNoPopUpToHome
 import com.example.seerbitsdk.navigateSingleTopTo
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.ui.theme.SeerBitTheme
@@ -77,7 +74,7 @@ fun USSDSelectBanksScreen(
             ) {
                 Spacer(modifier = Modifier.height(25.dp))
 
-                SeerbitPaymentDetailScreen(
+                SeerbitPaymentDetailHeader(
 
                     charges = merchantDetailsData.payload?.cardFee?.visa!!.toDouble(),
                     amount = "60,000.00",

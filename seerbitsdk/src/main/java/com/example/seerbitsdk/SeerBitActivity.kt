@@ -32,6 +32,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -45,8 +46,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.seerbitsdk.bank.BankAccountNumberScreen
-import com.example.seerbitsdk.bank.BankScreen
+import com.example.seerbitsdk.bank.*
 import com.example.seerbitsdk.card.CardEnterPinScreen
 import com.example.seerbitsdk.card.OTPScreen
 import com.example.seerbitsdk.component.*
@@ -278,7 +278,7 @@ fun CardHomeScreen(
             Spacer(modifier = Modifier.height(25.dp))
 
             //SeerBit Header
-            SeerbitPaymentDetailScreen(
+            SeerbitPaymentDetailHeader(
                 charges = merchantDetailsData.payload.cardFee?.visa!!.toDouble(),
                 amount = formatAmount(cardDTO.amount),
                 currencyText = merchantDetailsData.payload.defaultCurrency!!,
@@ -288,7 +288,6 @@ fun CardHomeScreen(
             )
 
             Spacer(modifier = Modifier.height(8.dp))
-
 
 
             val cardBinState: CardBinState =
@@ -392,7 +391,7 @@ fun CardHomeScreen(
             if (transactionState.hasError) {
                 showCircularProgressBar = false
                 openDialog.value = true
-                alertDialogMessage = "Invalid Card Details"
+                alertDialogMessage = transactionState.errorMessage ?: "Something went wrong"
                 alertDialogHeaderMessage = "Error Occurred"
             }
             showCircularProgressBar = transactionState.isLoading
@@ -405,7 +404,8 @@ fun CardHomeScreen(
                 if (queryTransactionStateState.hasError) {
                     openDialog.value = true
                     alertDialogMessage = "Invalid Card Details"
-                    alertDialogHeaderMessage = queryTransactionStateState.errorMessage ?: "Something went wrong"
+                    alertDialogHeaderMessage =
+                        queryTransactionStateState.errorMessage ?: "Something went wrong"
 
                 }
                 showCircularProgressBar = queryTransactionStateState.isLoading
@@ -414,8 +414,9 @@ fun CardHomeScreen(
                     showCircularProgressBar =
                         queryTransactionStateState.data.data.code == PENDING_CODE
 
-                    if (it.code == FAILED) {
+                    if (it.code == SUCCESS) {
                         showCircularProgressBar = false
+
                         return@let
                     }
                     if (it.code == FAILED) {
@@ -449,6 +450,12 @@ fun CardHomeScreen(
                     startQueryingTransaction = true
                     canRedirectToUrl = false
                 }
+                if (it.data?.code == "S100") {
+                    openDialog.value = true
+                    alertDialogHeaderMessage = "Invalid Card Details"
+                    alertDialogMessage = it.data.message ?: "Something went wrong"
+                    transactionViewModel.resetTransactionState()
+                }
 
 
             }
@@ -473,7 +480,11 @@ fun CardHomeScreen(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.Center
                         ) {
-                            Text(text = alertDialogHeaderMessage)
+                            Text(
+                                text = alertDialogHeaderMessage,
+                                style = TextStyle(),
+                                textAlign = TextAlign.Center
+                            )
                         }
 
                     },
@@ -482,7 +493,10 @@ fun CardHomeScreen(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.Center
                         ) {
-                            Text(alertDialogMessage)
+                            Text(
+                                text = alertDialogMessage,
+                                textAlign = TextAlign.Center
+                            )
                         }
                     },
                     confirmButton = {
@@ -928,6 +942,7 @@ fun MyAppNavHost(
             )
         }
 
+        //BANK ACCOUUT HOME SCREEN
         composable(route = BankAccount.route) {
             BankScreen(
                 navigateToUssdHomeScreen = { /*TODO*/ },
@@ -938,37 +953,108 @@ fun MyAppNavHost(
                 selectBankViewModel = selectBankViewModel
             )
         }
+
+        //BANK ACCOUNT NUMBER SCREEN
         composable(
-            "${Route.BANK_ACCOUNT_NUMBER_SCREEN}/{bankCode}/{accountNumber}/{bvn}/{birthday}/{otp}",
+            "${Route.BANK_ACCOUNT_NUMBER_SCREEN}/{bankCode}",
+            arguments = listOf(
+                // declaring argument type
+                navArgument("bankCode") { type = NavType.StringType },
+
+            )
+        ) { navBackStackEntry ->
+            val bankCode = navBackStackEntry.arguments?.getString("bankCode")
+            BankAccountNumberScreen(
+                navController = navController,
+                merchantDetailsState = merchantDetailsState,
+                transactionViewModel = transactionViewModel,
+                bankCode = bankCode,
+            )
+        }
+
+
+        //BANK ACCOUNT BVN SCREEN
+        composable(
+            "${Route.BANK_ACCOUNT_BVN_SCREEN}/{bankCode}/{accountNumber}",
+            arguments = listOf(
+                // declaring argument type
+                navArgument("bankCode") { type = NavType.StringType },
+                navArgument("accountNumber") { type = NavType.StringType },
+
+            )
+        ) { navBackStackEntry ->
+            val bankCode = navBackStackEntry.arguments?.getString("bankCode")
+            val accountNumber = navBackStackEntry.arguments?.getString("accountNumber")
+
+
+
+            BankAccountBVNScreen(
+                navController = navController,
+                merchantDetailsState = merchantDetailsState,
+                transactionViewModel = transactionViewModel,
+                bankCode = bankCode,
+                bankAccountNumber = accountNumber!!,
+
+            )
+        }
+
+        //BANK ACCOUNT DOB SCREEN
+        composable(
+            "${Route.BANK_ACCOUNT_DOB_SCREEN}/{bankCode}/{accountNumber}/{bvn}",
+            arguments = listOf(
+                // declaring argument type
+                navArgument("bankCode") { type = NavType.StringType },
+                navArgument("accountNumber") { type = NavType.StringType },
+                navArgument("bvn") { type = NavType.StringType },
+            )
+        ) { navBackStackEntry ->
+            val bankCode = navBackStackEntry.arguments?.getString("bankCode")
+            val accountNumber = navBackStackEntry.arguments?.getString("accountNumber")
+            val bvn = navBackStackEntry.arguments?.getString("bvn")
+
+
+            BankAccountDOBScreen(
+                navController = navController,
+                merchantDetailsState = merchantDetailsState,
+                transactionViewModel = transactionViewModel,
+                bankCode = bankCode!!,
+                bankAccountNumber = accountNumber!!,
+                bvn = bvn!!,
+            )
+        }
+
+        //BANK ACCOUNT OTP SCREEN
+        composable(
+            "${Route.BANK_ACCOUNT_OTP_SCREEN}/{bankCode}/{accountNumber}/{bvn}/{birthday}",
             arguments = listOf(
                 // declaring argument type
                 navArgument("bankCode") { type = NavType.StringType },
                 navArgument("accountNumber") { type = NavType.StringType },
                 navArgument("bvn") { type = NavType.StringType },
                 navArgument("birthday") { type = NavType.StringType },
-                navArgument("otp") { type = NavType.StringType },
+
             )
         ) { navBackStackEntry ->
             val bankCode = navBackStackEntry.arguments?.getString("bankCode")
             val accountNumber = navBackStackEntry.arguments?.getString("accountNumber")
             val bvn = navBackStackEntry.arguments?.getString("bvn")
             val birthday = navBackStackEntry.arguments?.getString("birthday")
-            val otp = navBackStackEntry.arguments?.getString("otp")
 
 
-            BankAccountNumberScreen(
-                onPaymentMethodClick = {},
-                onConfirmedButtonClicked = {},
+
+            BankAccountOTPScreen(
                 navController = navController,
                 merchantDetailsState = merchantDetailsState,
                 transactionViewModel = transactionViewModel,
                 bankCode = bankCode,
                 bankAccountNumber = accountNumber!!,
-                birthday = birthday!!,
+                dob = birthday!!,
                 bvn = bvn!!,
-                otp = otp!!
             )
         }
+
+
+
 
 
         composable(route = Transfer.route) {
