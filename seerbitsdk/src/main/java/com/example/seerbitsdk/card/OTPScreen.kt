@@ -116,7 +116,7 @@ fun OTPInputField(
     onEnterOTP: (String) -> Unit
 ) {
     Column {
-        Card(modifier = modifier, elevation = 4.dp) {
+        Card(modifier = modifier, elevation = 1.dp) {
             var value by remember { mutableStateOf("") }
             Image(
                 painter = painterResource(id = R.drawable.filled_bg_white),

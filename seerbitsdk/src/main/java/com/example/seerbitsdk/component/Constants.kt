@@ -6,3 +6,6 @@ const val SUCCESS : String = "00"
 const val KINDLY_ENTER_OTP : String = "Kindly Enter OTP"
 const val KINDLY_ENTER_PIN : String = "Kindly enter your PIN"
 const val FAILED : String  = "SMV_N"
+
+const val YES : String = "YES"
+const val Dummy = "-2234"

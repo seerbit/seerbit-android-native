@@ -1,6 +1,10 @@
 package com.example.seerbitsdk.models
 
+import android.net.Uri
+import android.os.Parcelable
+import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
+
 
 data class GetBanksResponse(
 
@@ -38,8 +42,15 @@ data class MerchantBanksItem(
 	val logo: String? = null,
 
 	@field:SerializedName("url")
-	val url: String? = null
-)
+	val url: String? = null,
+
+
+
+){
+	fun requiredFieldJson() : String = Uri.encode(Gson().toJson(requiredFields))
+
+
+}
 
 data class AvailableBankData(
 
@@ -52,6 +63,8 @@ data class AvailableBankData(
 	@field:SerializedName("message")
 	val message: String? = null
 )
+
+
 
 data class RequiredFields(
 
@@ -71,5 +84,7 @@ data class RequiredFields(
 	val bvn: String? = null,
 
 	@field:SerializedName("accountNumber")
-	val accountNumber: String? = null
+	val accountNumber: String? = null,
+
 )
+

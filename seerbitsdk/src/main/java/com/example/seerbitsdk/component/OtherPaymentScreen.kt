@@ -64,7 +64,7 @@ fun OtherPaymentScreen(
             SeerBitNavButtonsColumn(
                 allButtons = rallyTabRowScreens.filterNot { it.route == currentDestination?.route },
                 onButtonSelected = { newScreen ->
-                    navController.navigateSingleTopTo(newScreen.route)
+                    navController.navigateSingleTopNoSavedState(newScreen.route)
                 },
                 currentButtonSelected = Transfer
             )

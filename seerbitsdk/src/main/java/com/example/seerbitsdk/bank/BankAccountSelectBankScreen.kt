@@ -1,5 +1,8 @@
 package com.example.seerbitsdk.bank
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -28,13 +31,15 @@ import com.example.seerbitsdk.card.showCircularProgress
 import com.example.seerbitsdk.component.Route
 import com.example.seerbitsdk.component.SeerbitPaymentDetailHeader
 import com.example.seerbitsdk.models.MerchantBanksItem
+import com.example.seerbitsdk.models.RequiredFields
+import com.example.seerbitsdk.navigateSingleTopNoSavedState
 import com.example.seerbitsdk.navigateSingleTopTo
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.ui.theme.SeerBitTheme
 import com.example.seerbitsdk.viewmodels.SelectBankViewModel
 
 @Composable
-fun BankScreen(
+fun BankAccountSelectBankScreen(
     modifier: Modifier = Modifier,
     navigateToUssdHomeScreen: () -> Unit,
     currentDestination: NavDestination?,
@@ -44,10 +49,14 @@ fun BankScreen(
     selectBankViewModel: SelectBankViewModel
 ) {
     var bankCode by remember { mutableStateOf("") }
+    var bankName by remember { mutableStateOf("") }
 
+    var json : String = ""
     var showErrorDialog by remember { mutableStateOf(false) }
     var showCircularProgressBar by remember { mutableStateOf(false) }
+    var requiredFields : RequiredFields = RequiredFields()
 
+    var amount : String = "60,000"
     // if there is an error loading the report
     if (merchantDetailsState?.hasError!!) {
         ErrorDialog(message = merchantDetailsState.errorMessage ?: "Something went wrong")
@@ -56,7 +65,6 @@ fun BankScreen(
     if (merchantDetailsState.isLoading) {
         showCircularProgress(showProgress = true)
     }
-
 
 
     merchantDetailsState.data?.let { merchantDetailsData ->
@@ -92,18 +100,20 @@ fun BankScreen(
                 if (showCircularProgressBar) {
                     showCircularProgress(showProgress = true)
                 }
-
-
                 val availableBanksState = selectBankViewModel.availableBanksState.value
+
+                if(availableBanksState.data == null){
+                    selectBankViewModel.getBanks()
+                }
+
 
                 if (availableBanksState.hasError) {
                     showCircularProgressBar = false
                     showErrorDialog = true
                 }
 
-                if (availableBanksState.isLoading) {
-                    showCircularProgressBar = true
-                }
+                showCircularProgressBar = availableBanksState.isLoading
+
 
                 var merchantBankList: List<MerchantBanksItem?>? = listOf()
                 availableBanksState.data?.availableBankData?.let {
@@ -114,18 +124,29 @@ fun BankScreen(
 
 
                 BankSelectBankButton(merchantBankList = merchantBankList) {
-                    bankCode = it
+                    requiredFields = RequiredFields()
+                    it?.let {
+                        requiredFields = it.requiredFields!!
+                        bankCode = it.bankCode.toString()
+                        bankName = it.bankName.toString()
+                        json = it.requiredFieldJson()
+                    }
+
                 }
 
                 Spacer(modifier = modifier.height(40.dp))
 
                 AuthorizeButton(
-                    buttonText = "Pay NGN60,000",
+                    buttonText = "Pay NGN$amount",
                     onClick = {
                         if (bankCode.isNotEmpty()) {
-                            navController.navigateSingleTopTo(
-                                "${Route.BANK_ACCOUNT_NUMBER_SCREEN}/$bankCode"
-                            )
+                            if(requiredFields.accountNumber == "YES") {
+
+                                navController.navigateSingleTopNoSavedState(
+                                    "${Route.BANK_ACCOUNT_NUMBER_SCREEN}/$bankName/$json/$bankCode"
+                                )
+                                selectBankViewModel.resetTransactionState()
+                            }
                         } else {
                             showErrorDialog = true
                         }
@@ -142,9 +163,8 @@ fun BankScreen(
 fun BankSelectBankButton(
     modifier: Modifier = Modifier,
     merchantBankList: List<MerchantBanksItem?>?,
-    onBankCodeSelected: (String) -> Unit
+    onMerchantBankSelected: (MerchantBanksItem?) -> Unit
 ) {
-
     var selectedText by remember { mutableStateOf("") }
 
     var expanded by remember { mutableStateOf(false) }
@@ -155,8 +175,9 @@ fun BankSelectBankButton(
     var textFieldSize by remember { mutableStateOf(Size.Zero) }
 
 
+
     Column {
-        Card(modifier = modifier, elevation = 4.dp) {
+        Card(modifier = modifier, elevation = 1.dp) {
 
             Image(
                 painter = painterResource(id = R.drawable.filled_bg_white),
@@ -199,23 +220,28 @@ fun BankSelectBankButton(
         }
 
         Spacer(Modifier.height(10.dp))
-        DropdownMenu(
 
-            expanded = expanded, onDismissRequest = { expanded = false },
-            modifier = Modifier.width(
-                with(LocalDensity.current) { textFieldSize.width.toDp() })
-        ) {
-            merchantBankList?.forEach { label ->
-                DropdownMenuItem(onClick = {
-                    selectedText = label?.bankName!!
-                    onBankCodeSelected(label.bankCode!!)
-                    expanded = false
-                }) {
-                    Text(text = label?.bankName!!)
+        AnimatedVisibility(visible = expanded, enter = fadeIn(), exit = fadeOut()) {
+            DropdownMenu(
+
+                expanded = expanded, onDismissRequest = { expanded = false },
+                modifier = Modifier.width(
+                    with(LocalDensity.current) { textFieldSize.width.toDp() })
+            ) {
+                merchantBankList?.forEach { merchantBanksItem ->
+                    DropdownMenuItem(onClick = {
+                      onMerchantBankSelected(merchantBanksItem)
+                        selectedText = merchantBanksItem?.bankName!!
+                        expanded = false
+                    }) {
+                        Text(text = merchantBanksItem?.bankName!!)
+                    }
                 }
-            }
 
+
+            }
         }
+
 
     }
 
@@ -227,7 +253,7 @@ fun BankSelectBankButton(
 fun USSDSelectBankButtonPreview() {
     SeerBitTheme {
         val selectBankViewModel: SelectBankViewModel = SelectBankViewModel()
-        BankScreen(
+        BankAccountSelectBankScreen(
             navigateToUssdHomeScreen = { /*TODO*/ },
             currentDestination = null,
             navController = rememberNavController(),

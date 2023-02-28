@@ -28,6 +28,7 @@ import com.example.seerbitsdk.component.Route
 import com.example.seerbitsdk.component.SeerbitPaymentDetailHeader
 import com.example.seerbitsdk.models.MerchantBanksItem
 import com.example.seerbitsdk.models.ussd.UssdBankData
+import com.example.seerbitsdk.navigateSingleTopNoSavedState
 import com.example.seerbitsdk.navigateSingleTopTo
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.ui.theme.SeerBitTheme
@@ -93,26 +94,8 @@ fun USSDSelectBanksScreen(
                 }
 
 
-                val availableBanksState = selectBankViewModel.availableBanksState.value
 
-                if(availableBanksState.hasError){
-                    showCircularProgressBar = false
-                    showErrorDialog = true
-                }
-
-                if(availableBanksState.isLoading){
-                    showCircularProgressBar = true
-                }
-
-                var merchantBankList : List<MerchantBanksItem?>? = listOf()
-                availableBanksState.data?.availableBankData?.let {
-                    showCircularProgressBar = false
-                    merchantBankList = it.merchantBanks!!
-
-                }
-
-
-                UssdSelectBankButton(merchantBankList = merchantBankList) {
+                UssdSelectBankButton {
                     bankCode = it
                 }
 
@@ -122,7 +105,7 @@ fun USSDSelectBanksScreen(
                     buttonText = "Pay NGN60,000",
                     onClick = {
                         if(bankCode.isNotEmpty()) {
-                            navController.navigateSingleTopTo(
+                            navController.navigateSingleTopNoSavedState(
                                 "${Route.USSD_HOME_SCREEN}/$bankCode")
                         }
                         else {
@@ -138,7 +121,7 @@ fun USSDSelectBanksScreen(
 
 
 @Composable
-fun UssdSelectBankButton(modifier: Modifier = Modifier, merchantBankList : List<MerchantBanksItem?>?, onBankCodeSelected: (String) -> Unit) {
+fun UssdSelectBankButton(modifier: Modifier = Modifier, onBankCodeSelected: (String) -> Unit) {
 
     var selectedText by remember { mutableStateOf("") }
 
@@ -154,7 +137,7 @@ fun UssdSelectBankButton(modifier: Modifier = Modifier, merchantBankList : List<
     var textFieldSize by remember { mutableStateOf(Size.Zero) }
 
     Column {
-        Card(modifier = modifier, elevation = 4.dp) {
+        Card(modifier = modifier, elevation = 1.dp) {
 
             Image(
                 painter = painterResource(id = R.drawable.filled_bg_white),
@@ -224,7 +207,7 @@ fun UssdSelectBankButton(modifier: Modifier = Modifier, merchantBankList : List<
 @Composable
 fun USSDSelectBankButtonPreview() {
     SeerBitTheme {
-        UssdSelectBankButton(merchantBankList = null, onBankCodeSelected = {})
+        UssdSelectBankButton {}
     }
 }
 

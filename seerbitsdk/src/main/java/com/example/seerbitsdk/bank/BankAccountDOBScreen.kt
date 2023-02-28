@@ -1,5 +1,6 @@
 package com.example.seerbitsdk.bank
 
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -9,9 +10,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.OffsetMapping
+import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -21,13 +25,18 @@ import com.example.seerbitsdk.ErrorDialog
 import com.example.seerbitsdk.R
 import com.example.seerbitsdk.card.AuthorizeButton
 import com.example.seerbitsdk.card.showCircularProgress
+import com.example.seerbitsdk.component.Dummy
 import com.example.seerbitsdk.component.Route
 import com.example.seerbitsdk.component.SeerbitPaymentDetailHeader
+import com.example.seerbitsdk.component.YES
+import com.example.seerbitsdk.models.RequiredFields
 import com.example.seerbitsdk.models.card.CardDTO
+import com.example.seerbitsdk.navigateSingleTopNoSavedState
 import com.example.seerbitsdk.navigateSingleTopTo
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.ui.theme.SeerBitTheme
 import com.example.seerbitsdk.viewmodels.TransactionViewModel
+import com.google.gson.Gson
 
 @Composable
 fun BankAccountDOBScreen(
@@ -37,11 +46,15 @@ fun BankAccountDOBScreen(
     transactionViewModel: TransactionViewModel,
     bankAccountNumber: String,
     bvn: String,
-    bankCode : String
+    bankCode: String,
+    requiredFields: RequiredFields?,
+    bankName : String?,
 
-    ) {
+) {
 
-    var dob by remember { mutableStateOf(bankAccountNumber) }
+    var dob by remember { mutableStateOf("") }
+    var json by remember { mutableStateOf(Uri.encode(Gson().toJson(requiredFields))) }
+    var amount : String = "60,000"
     // if there is an error loading the report
     if (merchantDetailsState?.hasError!!) {
         ErrorDialog(message = merchantDetailsState.errorMessage ?: "Something went wrong")
@@ -83,12 +96,15 @@ fun BankAccountDOBScreen(
                 Spacer(modifier = modifier.height(30.dp))
 
                 AuthorizeButton(
-                    buttonText = "Pay $50",
+                    buttonText = "Pay NGN$amount",
                     onClick = {
+
                         if (dob.isNotEmpty()) {
-                            navController.navigateSingleTopTo(
-                                "${Route.BANK_ACCOUNT_OTP_SCREEN}/$bankCode/$bankAccountNumber/$bvn/$dob"
+
+                            navController.navigateSingleTopNoSavedState(
+                                "${Route.BANK_ACCOUNT_OTP_SCREEN}/$bankName/$json/$bankCode/$bankAccountNumber/$bvn/$dob"
                             )
+
                         }
                     }, true
                 )
@@ -105,7 +121,7 @@ fun BankAccountDOBScreen(
 @Preview(showBackground = true, widthDp = 400)
 @Composable
 fun BankAccountDOBScreenPreview() {
-    val viewModel : TransactionViewModel by viewModel()
+    val viewModel: TransactionViewModel by viewModel()
     SeerBitTheme {
 
     }
@@ -120,7 +136,7 @@ fun BirthDayInputField(
     Column {
 
 
-        Card(modifier = modifier, elevation = 4.dp) {
+        Card(modifier = modifier, elevation = 1.dp) {
             var value by remember { mutableStateOf("") }
             Image(
                 painter = painterResource(id = R.drawable.filled_bg_white),
@@ -133,7 +149,7 @@ fun BirthDayInputField(
                         value = newText
                     onEnterBirthday(newText)
                 },
-
+                visualTransformation = { birthdayInputFormat(it) },
                 colors = TextFieldDefaults.textFieldColors(
                     backgroundColor = MaterialTheme.colors.surface,
                     disabledIndicatorColor = Color.Transparent,
@@ -144,7 +160,7 @@ fun BirthDayInputField(
 
                 ),
                 keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.NumberPassword,
+                    keyboardType = KeyboardType.Number,
                     imeAction = ImeAction.Send
                 ),
                 shape = RoundedCornerShape(8.dp),
@@ -161,6 +177,39 @@ fun BirthDayInputField(
             )
         }
     }
+}
+
+
+fun birthdayInputFormat(text: AnnotatedString): TransformedText {
+
+    // change the length
+    val annotatedString = AnnotatedString.Builder().run {
+        for (i in text.indices) {
+            append(text[i])
+            if (i == 1 || i == 3) {
+                append("/")
+            }
+        }
+        toAnnotatedString()
+    }
+
+
+    val phoneNumberOffsetTranslator = object : OffsetMapping {
+        override fun originalToTransformed(offset: Int): Int {
+            if (offset <= 1) return offset
+            if (offset <= 3) return offset + 1
+            if (offset <= 7) return offset + 2
+            return 10
+        }
+
+        override fun transformedToOriginal(offset: Int): Int {
+            if (offset <= 1) return offset
+            if (offset <= 3) return offset - 1
+            if (offset <= 7) return offset -2
+            return 8
+        }
+    }
+    return TransformedText(annotatedString, phoneNumberOffsetTranslator)
 }
 
 

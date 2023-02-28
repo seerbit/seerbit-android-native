@@ -1,63 +1,48 @@
 package com.example.seerbitsdk.bank
 
-import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.example.seerbitsdk.ErrorDialog
 import com.example.seerbitsdk.R
+
 import com.example.seerbitsdk.card.AuthorizeButton
-import com.example.seerbitsdk.card.OTPInputField
 import com.example.seerbitsdk.card.showCircularProgress
-import com.example.seerbitsdk.component.Dummy
 import com.example.seerbitsdk.component.Route
 import com.example.seerbitsdk.component.SeerbitPaymentDetailHeader
-import com.example.seerbitsdk.component.YES
-import com.example.seerbitsdk.models.RequiredFields
-import com.example.seerbitsdk.models.card.CardDTO
-import com.example.seerbitsdk.navigateSingleTopNoSavedState
 import com.example.seerbitsdk.navigateSingleTopTo
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.ui.theme.SeerBitTheme
 import com.example.seerbitsdk.viewmodels.TransactionViewModel
-import com.google.gson.Gson
+
 
 @Composable
-fun BankAccountBVNScreen(
+fun BankAccountNameScreen(
     modifier: Modifier = Modifier,
     navController: NavHostController,
     merchantDetailsState: MerchantDetailsState,
     transactionViewModel: TransactionViewModel,
-    bankAccountNumber: String,
     bankCode: String?,
-    requiredFields : RequiredFields?,
-    bankName: String?
+) {
 
-    ) {
 
-    var bvn by remember { mutableStateOf("") }
-    var json by remember { mutableStateOf(Uri.encode(Gson().toJson(requiredFields))) }
-    var amount : String = "60,000"
-
+    var accountName by remember {
+        mutableStateOf("")
+    }
     // if there is an error loading the report
     if (merchantDetailsState?.hasError!!) {
         ErrorDialog(message = merchantDetailsState.errorMessage ?: "Something went wrong")
@@ -66,6 +51,8 @@ fun BankAccountBVNScreen(
     if (merchantDetailsState.isLoading) {
         showCircularProgress(showProgress = true)
     }
+
+
 
     merchantDetailsState.data?.let { merchantDetailsData ->
         Column(modifier = modifier) {
@@ -86,52 +73,42 @@ fun BankAccountBVNScreen(
                     charges = merchantDetailsData.payload?.cardFee?.visa!!.toDouble(),
                     amount = "60,000.00",
                     currencyText = merchantDetailsData.payload.defaultCurrency!!,
-                    "Kindly Enter your BVN",
+                    "Please Enter your Account Number",
                     merchantDetailsData.payload.businessName!!,
                     merchantDetailsData.payload.supportEmail!!
                 )
 
-                Spacer(modifier = modifier.height(10.dp))
 
-                BVNInputField(Modifier, "Enter your BVN Number") {
-                    bvn = it
+                Spacer(modifier = Modifier.height(21.dp))
+                BankAccountNumberField(Modifier, "10 Digit Bank Account Number") {
+                    accountName = it
                 }
 
                 Spacer(modifier = modifier.height(20.dp))
 
                 Spacer(modifier = modifier.height(10.dp))
                 AuthorizeButton(
-                    buttonText = "Pay NGN$amount",
+                    buttonText = "Pay $50",
                     onClick = {
-                        if (bvn.isNotEmpty()) {
-
-                            requiredFields?.let {
-
-                                if (it.dateOfBirth == YES){
-                                    navController.navigateSingleTopNoSavedState(
-                                        "${Route.BANK_ACCOUNT_DOB_SCREEN}/$bankName/$json/$bankCode/$bankAccountNumber/$bvn"
-                                    )
-                                }
-                                else{
-                                    navController.navigateSingleTopNoSavedState(
-                                        "${Route.BANK_ACCOUNT_OTP_SCREEN}/$bankName/$json/$bankCode/$bankAccountNumber/$bvn/$Dummy"
-                                    )
-                                }
-                            }
+                        if (accountName.isNotEmpty()) {
+                            navController.navigateSingleTopTo(
+                                "${Route.BANK_ACCOUNT_NUMBER_SCREEN}/$bankCode/$accountName"
+                            )
                         }
                     }, true
                 )
+
             }
+
 
         }
     }
 
 }
 
-
 @Preview(showBackground = true, widthDp = 400)
 @Composable
-fun BankAccountBVNScreenPreview() {
+fun BankAccountNameScreenPreview() {
     val viewModel: TransactionViewModel by viewModel()
     SeerBitTheme {
 
@@ -140,14 +117,14 @@ fun BankAccountBVNScreenPreview() {
 
 
 @Composable
-fun BVNInputField(
+fun BankAccountNameField(
     modifier: Modifier = Modifier, placeholder: String,
     onEnterBVN: (String) -> Unit
 ) {
     Column {
 
 
-        Card(modifier = modifier, elevation = 1.dp) {
+        Card(modifier = modifier, elevation = 4.dp) {
             var value by remember { mutableStateOf("") }
             Image(
                 painter = painterResource(id = R.drawable.filled_bg_white),
@@ -156,7 +133,6 @@ fun BVNInputField(
             OutlinedTextField(
                 value = value,
                 onValueChange = { newText ->
-                    if (newText.length <= 10)
                         value = newText
                     onEnterBVN(newText)
                 },
@@ -171,7 +147,7 @@ fun BVNInputField(
 
                 ),
                 keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Number,
+                    keyboardType = KeyboardType.Text,
                     imeAction = ImeAction.Send
                 ),
                 shape = RoundedCornerShape(8.dp),

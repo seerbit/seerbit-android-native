@@ -8,8 +8,10 @@ object Route{
     const val USSD_HOME_SCREEN = "USSDHomeScreen"
 
     const val BANK_ACCOUNT_NUMBER_SCREEN = "BankAccountNumberScreen"
+    const val BANK_ACCOUNT_NAME_SCREEN = "BankAccountNamerScreen"
     const val BANK_ACCOUNT_BVN_SCREEN = "BankAccountBvnScreen"
     const val BANK_ACCOUNT_DOB_SCREEN = "BankAccountDobScreen"
     const val BANK_ACCOUNT_OTP_SCREEN = "BankAccountOtpScreen"
+
 
 }

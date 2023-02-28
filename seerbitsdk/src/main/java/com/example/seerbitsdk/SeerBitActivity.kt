@@ -52,6 +52,7 @@ import com.example.seerbitsdk.card.OTPScreen
 import com.example.seerbitsdk.component.*
 import com.example.seerbitsdk.models.card.CardDTO
 import com.example.seerbitsdk.models.CardDetails
+import com.example.seerbitsdk.models.RequiredFields
 import com.example.seerbitsdk.navigationpage.OtherPaymentScreen
 import com.example.seerbitsdk.screenstate.*
 import com.example.seerbitsdk.transfer.TransferHomeScreen
@@ -62,10 +63,10 @@ import com.example.seerbitsdk.viewmodels.CardEnterPinViewModel
 import com.example.seerbitsdk.viewmodels.TransactionViewModel
 import com.example.seerbitsdk.viewmodels.MerchantDetailsViewModel
 import com.example.seerbitsdk.viewmodels.SelectBankViewModel
+import com.google.gson.Gson
 
 class SeerBitActivity : ComponentActivity() {
     private val viewModel: MerchantDetailsViewModel by viewModels()
-    private val transactionViewModel: TransactionViewModel by viewModels()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -149,11 +150,11 @@ fun NavHostController.navigateSingleTopTo(route: String) =
     this.navigate(route) {
         popUpTo(this@navigateSingleTopTo.graph.findStartDestination().id) {
             saveState = true
-            inclusive = false
         }
         launchSingleTop = true
         restoreState = true
     }
+
 
 fun NavHostController.navigateSingleTopNoPopUpToHome(route: String) =
     this.navigate(route) {
@@ -163,6 +164,18 @@ fun NavHostController.navigateSingleTopNoPopUpToHome(route: String) =
         launchSingleTop = true
         restoreState = true
     }
+
+fun NavHostController.navigateSingleTopNoSavedState(route: String) =
+    this.navigate(route) {
+        this@navigateSingleTopNoSavedState.graph.findNode(route)?.id?.let {
+            popUpTo(it) {
+                saveState = false
+            }
+        }
+        launchSingleTop = true
+        restoreState = true
+    }
+
 
 
 @Preview(showBackground = true)
@@ -559,7 +572,7 @@ fun CardDetailsScreen(
     ) {
 
 
-        Card(modifier = modifier, elevation = 4.dp) {
+        Card(modifier = modifier, elevation = 1.dp) {
             var value by rememberSaveable { mutableStateOf(cardNumber) }
 
             OutlinedTextField(
@@ -618,7 +631,7 @@ fun CardDetailsScreen(
         //MMM_CVVScreen(modifier = , cardDetails = )
         Row(modifier = Modifier) {
 
-            Card(modifier = modifier.weight(1f), elevation = 4.dp) {
+            Card(modifier = modifier.weight(1f), elevation = 1.dp) {
                 var value by rememberSaveable { mutableStateOf("") }
                 OutlinedTextField(
                     value = value,
@@ -661,7 +674,7 @@ fun CardDetailsScreen(
                 )
             }
             Spacer(modifier = Modifier.width(4.dp))
-            Card(modifier = modifier.weight(1f), elevation = 4.dp) {
+            Card(modifier = modifier.weight(1f), elevation = 1.dp) {
                 var value by rememberSaveable { mutableStateOf("") }
 
                 OutlinedTextField(
@@ -944,7 +957,7 @@ fun MyAppNavHost(
 
         //BANK ACCOUUT HOME SCREEN
         composable(route = BankAccount.route) {
-            BankScreen(
+            BankAccountSelectBankScreen(
                 navigateToUssdHomeScreen = { /*TODO*/ },
                 currentDestination = currentDestination,
                 navController = navController,
@@ -956,34 +969,54 @@ fun MyAppNavHost(
 
         //BANK ACCOUNT NUMBER SCREEN
         composable(
-            "${Route.BANK_ACCOUNT_NUMBER_SCREEN}/{bankCode}",
+            "${Route.BANK_ACCOUNT_NUMBER_SCREEN}/{bankName}/{requiredFields}/{bankCode}",
             arguments = listOf(
                 // declaring argument type
+                navArgument("requiredFields") { type = NavType.StringType },
                 navArgument("bankCode") { type = NavType.StringType },
+                navArgument("bankName") { type = NavType.StringType },
 
-            )
+                )
         ) { navBackStackEntry ->
+            val requiredFieldsJson: String? =
+                navBackStackEntry.arguments?.getString("requiredFields")
+            val requiredField =
+                Gson().fromJson(requiredFieldsJson.toString(), RequiredFields::class.java)
+
             val bankCode = navBackStackEntry.arguments?.getString("bankCode")
+            val bankName = navBackStackEntry.arguments?.getString("bankName")
+
             BankAccountNumberScreen(
                 navController = navController,
                 merchantDetailsState = merchantDetailsState,
                 transactionViewModel = transactionViewModel,
                 bankCode = bankCode,
+                requiredFields = requiredField,
+                bankName = bankName
             )
         }
 
 
         //BANK ACCOUNT BVN SCREEN
         composable(
-            "${Route.BANK_ACCOUNT_BVN_SCREEN}/{bankCode}/{accountNumber}",
+            "${Route.BANK_ACCOUNT_BVN_SCREEN}/{bankName}/{requiredFields1}/{bankCode}/{accountNumber}",
             arguments = listOf(
                 // declaring argument type
+                navArgument("requiredFields1") { type = NavType.StringType },
                 navArgument("bankCode") { type = NavType.StringType },
+                navArgument("bankName") { type = NavType.StringType },
                 navArgument("accountNumber") { type = NavType.StringType },
 
-            )
+                )
         ) { navBackStackEntry ->
+            // getJsonField
+            val requiredFieldsJson: String? =
+                navBackStackEntry.arguments?.getString("requiredFields1")
+            val requiredField =
+                Gson().fromJson(requiredFieldsJson.toString(), RequiredFields::class.java)
+
             val bankCode = navBackStackEntry.arguments?.getString("bankCode")
+            val bankName = navBackStackEntry.arguments?.getString("bankName")
             val accountNumber = navBackStackEntry.arguments?.getString("accountNumber")
 
 
@@ -994,23 +1027,34 @@ fun MyAppNavHost(
                 transactionViewModel = transactionViewModel,
                 bankCode = bankCode,
                 bankAccountNumber = accountNumber!!,
+                requiredFields = requiredField,
+                bankName = bankName
 
             )
         }
 
         //BANK ACCOUNT DOB SCREEN
         composable(
-            "${Route.BANK_ACCOUNT_DOB_SCREEN}/{bankCode}/{accountNumber}/{bvn}",
+            "${Route.BANK_ACCOUNT_DOB_SCREEN}/{bankName}/{requiredFields2}/{bankCode}/{accountNumber}/{bvn}",
             arguments = listOf(
                 // declaring argument type
+                navArgument("requiredFields2") { type = NavType.StringType },
                 navArgument("bankCode") { type = NavType.StringType },
                 navArgument("accountNumber") { type = NavType.StringType },
                 navArgument("bvn") { type = NavType.StringType },
+                navArgument("bankName") { type = NavType.StringType },
             )
         ) { navBackStackEntry ->
+            // getJsonField
+            val requiredFieldsJson: String? =
+                navBackStackEntry.arguments?.getString("requiredFields2")
+                val requiredField =
+                Gson().fromJson(requiredFieldsJson.toString(), RequiredFields::class.java)
+
             val bankCode = navBackStackEntry.arguments?.getString("bankCode")
             val accountNumber = navBackStackEntry.arguments?.getString("accountNumber")
             val bvn = navBackStackEntry.arguments?.getString("bvn")
+            val bankName = navBackStackEntry.arguments?.getString("bankName")
 
 
             BankAccountDOBScreen(
@@ -1020,28 +1064,37 @@ fun MyAppNavHost(
                 bankCode = bankCode!!,
                 bankAccountNumber = accountNumber!!,
                 bvn = bvn!!,
+                requiredFields = requiredField,
+                bankName = bankName
             )
         }
 
         //BANK ACCOUNT OTP SCREEN
         composable(
-            "${Route.BANK_ACCOUNT_OTP_SCREEN}/{bankCode}/{accountNumber}/{bvn}/{birthday}",
+            "${Route.BANK_ACCOUNT_OTP_SCREEN}/{bankName}/{requiredFields3}/{bankCode}/{accountNumber}/{bvn}/{birthday}",
             arguments = listOf(
                 // declaring argument type
+                navArgument("requiredFields3") { type = NavType.StringType },
                 navArgument("bankCode") { type = NavType.StringType },
+                navArgument("bankName") { type = NavType.StringType },
                 navArgument("accountNumber") { type = NavType.StringType },
                 navArgument("bvn") { type = NavType.StringType },
                 navArgument("birthday") { type = NavType.StringType },
 
-            )
+                )
         ) { navBackStackEntry ->
+            // getJsonField
+            val requiredFieldsJson: String? =
+                navBackStackEntry.arguments?.getString("requiredFields3")
+            val requiredField =
+                Gson().fromJson(requiredFieldsJson.toString(), RequiredFields::class.java)
+
             val bankCode = navBackStackEntry.arguments?.getString("bankCode")
+            val bankName = navBackStackEntry.arguments?.getString("bankName")
             val accountNumber = navBackStackEntry.arguments?.getString("accountNumber")
             val bvn = navBackStackEntry.arguments?.getString("bvn")
             val birthday = navBackStackEntry.arguments?.getString("birthday")
-
-
-
+            transactionViewModel.resetTransactionState()
             BankAccountOTPScreen(
                 navController = navController,
                 merchantDetailsState = merchantDetailsState,
@@ -1050,6 +1103,8 @@ fun MyAppNavHost(
                 bankAccountNumber = accountNumber!!,
                 dob = birthday!!,
                 bvn = bvn!!,
+                requiredFields = requiredField,
+                bankName = bankName
             )
         }
 

@@ -1,40 +1,39 @@
 package com.example.seerbitsdk.bank
 
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.example.seerbitsdk.ErrorDialog
 import com.example.seerbitsdk.R
 
 import com.example.seerbitsdk.card.AuthorizeButton
-import com.example.seerbitsdk.card.OTPInputField
 import com.example.seerbitsdk.card.showCircularProgress
+import com.example.seerbitsdk.component.Dummy
 import com.example.seerbitsdk.component.Route
 import com.example.seerbitsdk.component.SeerbitPaymentDetailHeader
-import com.example.seerbitsdk.models.card.CardDTO
+import com.example.seerbitsdk.component.YES
+import com.example.seerbitsdk.models.RequiredFields
+import com.example.seerbitsdk.navigateSingleTopNoSavedState
 import com.example.seerbitsdk.navigateSingleTopTo
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.ui.theme.SeerBitTheme
 import com.example.seerbitsdk.viewmodels.TransactionViewModel
+import com.google.gson.Gson
 
 
 @Composable
@@ -44,12 +43,16 @@ fun BankAccountNumberScreen(
     merchantDetailsState: MerchantDetailsState,
     transactionViewModel: TransactionViewModel,
     bankCode: String?,
+    requiredFields: RequiredFields?,
+    bankName : String?
 ) {
 
 
     var accountNumber by remember {
         mutableStateOf("")
     }
+    var amount : String = "60,000"
+    var json by remember { mutableStateOf(Uri.encode(Gson().toJson(requiredFields))) }
     // if there is an error loading the report
     if (merchantDetailsState?.hasError!!) {
         ErrorDialog(message = merchantDetailsState.errorMessage ?: "Something went wrong")
@@ -95,13 +98,35 @@ fun BankAccountNumberScreen(
 
                 Spacer(modifier = modifier.height(10.dp))
                 AuthorizeButton(
-                    buttonText = "Pay $50",
+                    buttonText = "Pay NGN$amount",
                     onClick = {
+
+
                         if (accountNumber.isNotEmpty() && accountNumber.length == 10) {
-                            navController.navigateSingleTopTo(
-                                "${Route.BANK_ACCOUNT_BVN_SCREEN}/$bankCode/$accountNumber"
-                            )
+
+                            requiredFields?.let {
+
+                                if (it.bvn == YES) {
+                                    navController.navigateSingleTopNoSavedState(
+                                        "${Route.BANK_ACCOUNT_BVN_SCREEN}/$bankName/$json/$bankCode/$accountNumber"
+                                    )
+                                }
+                                else if (it.dateOfBirth == YES){
+                                    navController.navigateSingleTopNoSavedState(
+                                        "${Route.BANK_ACCOUNT_DOB_SCREEN}/$bankName/$json/$bankCode/$accountNumber/$Dummy"
+                                    )
+                                }
+                                else{
+                                    navController.navigateSingleTopNoSavedState(
+                                        "${Route.BANK_ACCOUNT_OTP_SCREEN}/$bankName/$json/$bankCode/$accountNumber/$Dummy/$Dummy"
+                                    )
+                                }
+
+                            }
+
                         }
+
+
                     }, true
                 )
 
@@ -131,7 +156,7 @@ fun BankAccountNumberField(
     Column {
 
 
-        Card(modifier = modifier, elevation = 4.dp) {
+        Card(modifier = modifier, elevation = 1.dp) {
             var value by remember { mutableStateOf("") }
             Image(
                 painter = painterResource(id = R.drawable.filled_bg_white),
@@ -155,7 +180,7 @@ fun BankAccountNumberField(
 
                 ),
                 keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.NumberPassword,
+                    keyboardType = KeyboardType.Number,
                     imeAction = ImeAction.Send
                 ),
                 shape = RoundedCornerShape(8.dp),

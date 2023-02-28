@@ -30,14 +30,14 @@ class SelectBankViewModel: ViewModel() {
         getBanks()
     }
 
-    fun resetTransactionState() {
+     fun resetTransactionState() {
         _availableBanksState.value = AvailableBanksState()
     }
 
 
 
 
-    private fun getBanks() {
+     fun getBanks() {
         _availableBanksState.value = AvailableBanksState(isLoading = true)
         viewModelScope.launch(Dispatchers.Main) {
             getBanksUseCase().collect { resource ->
