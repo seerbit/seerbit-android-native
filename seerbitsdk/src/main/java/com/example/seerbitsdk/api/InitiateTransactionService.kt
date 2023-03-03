@@ -62,7 +62,7 @@ private fun logger(): HttpLoggingInterceptor {
 
 
 private val retrofit = Retrofit.Builder()
-    .baseUrl("https://seerbitapi.com/sandbox/")
+    .baseUrl("https://seerbitapi.com/checkout/")
     .client(okHttpClient.build())
     .addConverterFactory(GsonConverterFactory.create())
     .build()

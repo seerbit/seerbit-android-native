@@ -265,7 +265,7 @@ fun CardHomeScreen(
             val cardDTO = CardDTO(
                 deviceType = "Desktop",
                 country = merchantDetailsData.payload?.address?.country!!,
-                60000.0,
+                20.0,
                 cvv = cvv,
                 redirectUrl = "http://localhost:3002/#/",
                 productId = "",
@@ -273,9 +273,9 @@ fun CardHomeScreen(
                 paymentReference = transactionViewModel.generateRandomReference(),
                 fee = merchantDetailsData.payload.cardFee?.mc,
                 expiryMonth = cardExpiryMonth,
-                fullName = "Amos Aorme",
+                fullName = "Bamigbaye Bukola",
                 "MASTERCARD",
-                publicKey = merchantDetailsData.payload.testPublicKey,
+                publicKey = merchantDetailsData.payload.livePublicKey,
                 expiryYear = cardExpiryYear,
                 source = "",
                 paymentType = "CARD",
@@ -378,7 +378,7 @@ fun CardHomeScreen(
                 horizontalArrangement = Arrangement.Center
             ) {
                 PayButton(
-                    amount = "NGN 60,000",
+                    amount = "NGN ${cardDTO.amount}",
                     onClick = {
 
                         if (validateCardDetails(
@@ -406,6 +406,7 @@ fun CardHomeScreen(
                 openDialog.value = true
                 alertDialogMessage = transactionState.errorMessage ?: "Something went wrong"
                 alertDialogHeaderMessage = "Error Occurred"
+                transactionViewModel.resetTransactionState()
             }
             showCircularProgressBar = transactionState.isLoading
 
@@ -416,10 +417,10 @@ fun CardHomeScreen(
             if (startQueryingTransaction) {
                 if (queryTransactionStateState.hasError) {
                     openDialog.value = true
-                    alertDialogMessage = "Invalid Card Details"
+                    alertDialogMessage = "Error"
                     alertDialogHeaderMessage =
                         queryTransactionStateState.errorMessage ?: "Something went wrong"
-
+                    transactionViewModel.resetTransactionState()
                 }
                 showCircularProgressBar = queryTransactionStateState.isLoading
 

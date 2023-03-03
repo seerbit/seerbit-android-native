@@ -106,7 +106,7 @@ fun USSDHomeScreen(
                 val ussdDTO = UssdDTO(
                     country = merchantDetailsData.payload.address?.country!!,
                     bankCode = bankCode,
-                    amount = "60000",
+                    amount = "20",
                     redirectUrl = "http://localhost:3002/#/",
                     productId = "",
                     mobileNumber = "404",
@@ -114,7 +114,7 @@ fun USSDHomeScreen(
                     fee = merchantDetailsData.payload.cardFee.mc,
                     fullName = "Amos Oruaroghene",
                     channelType = "ussd",
-                    publicKey = "SBTESTPUBK_t4G16GCA1O51AV0Va3PPretaisXubSw1",
+                    publicKey = merchantDetailsData.payload.livePublicKey,
                     source = "",
                     paymentType = "USSD",
                     sourceIP = "102.88.63.64",

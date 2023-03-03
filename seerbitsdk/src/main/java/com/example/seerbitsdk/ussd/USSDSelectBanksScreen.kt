@@ -78,7 +78,7 @@ fun USSDSelectBanksScreen(
                 SeerbitPaymentDetailHeader(
 
                     charges = merchantDetailsData.payload?.cardFee?.visa!!.toDouble(),
-                    amount = "60,000.00",
+                    amount = "20.00",
                     currencyText = merchantDetailsData.payload.defaultCurrency!!,
                     "Choose your bank to start this payment",
                     merchantDetailsData.payload.businessName!!,
@@ -102,7 +102,7 @@ fun USSDSelectBanksScreen(
                 Spacer(modifier = modifier.height(40.dp))
 
                 AuthorizeButton(
-                    buttonText = "Pay NGN60,000",
+                    buttonText = "Pay NGN 20.00",
                     onClick = {
                         if(bankCode.isNotEmpty()) {
                             navController.navigateSingleTopNoSavedState(

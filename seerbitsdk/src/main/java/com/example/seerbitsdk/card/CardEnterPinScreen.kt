@@ -151,7 +151,7 @@ fun CardEnterPinScreen(
                 val cardDTO = CardDTO(
                     deviceType = "Desktop",
                     country = merchantDetailsData.payload.address?.country!!,
-                    60000.0,
+                    20.0,
                     cvv = cvv,
                     redirectUrl = "http://localhost:3002/#/",
                     productId = "",
@@ -161,7 +161,7 @@ fun CardEnterPinScreen(
                     expiryMonth = cardExpiryMonth,
                     fullName = "Amos Aorme",
                     "MASTERCARD",
-                    publicKey = merchantDetailsData.payload.testPublicKey,
+                    publicKey = merchantDetailsData.payload.livePublicKey,
                     expiryYear = cardExpiryYear,
                     source = "MODAL",
                     paymentType = "CARD",
@@ -297,6 +297,12 @@ fun CardEnterPinScreen(
                     linkingReference = it.data.payments.linkingReference
                     isEnterOTP = it.data.message == KINDLY_ENTER_OTP
 
+                    if(it.data.code == "S12"){
+                        alertDialogMessage = it.data.message.toString()
+                        openDialog.value = true
+                        alertDialogHeaderMessage = "Error occurred"
+                    }
+
                 }
 
 
@@ -315,7 +321,7 @@ fun CardEnterPinScreen(
                 //payment button
                 if (isEnterPin && !isEnterOTP) {
                     PayButton(
-                        amount = "NGN 60,000",
+                        amount = "NGN ${cardDTO.amount}",
                         onClick = {
                             if(pin.length == 4){
                                 onPayButtonClicked(cardDTO)
