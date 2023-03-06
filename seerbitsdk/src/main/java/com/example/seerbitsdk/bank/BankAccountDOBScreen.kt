@@ -79,8 +79,8 @@ fun BankAccountDOBScreen(
                 Spacer(modifier = Modifier.height(25.dp))
 
                 SeerbitPaymentDetailHeader(
-                    charges = merchantDetailsData.payload?.cardFee?.visa!!.toDouble(),
-                    amount = "60,000.00",
+                    charges =  merchantDetailsData.payload?.vatFee?.toDouble()!!,
+                    amount = "20.00",
                     currencyText = merchantDetailsData.payload.defaultCurrency!!,
                     "Please Enter your birthday",
                     merchantDetailsData.payload.businessName!!,

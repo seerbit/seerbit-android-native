@@ -1,5 +1,6 @@
 package com.example.seerbitsdk
 
+
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -12,8 +13,6 @@ import androidx.activity.viewModels
 import androidx.compose.animation.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-
-
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
@@ -48,11 +47,10 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.seerbitsdk.bank.*
 import com.example.seerbitsdk.card.CardEnterPinScreen
-import com.example.seerbitsdk.card.OTPScreen
 import com.example.seerbitsdk.component.*
-import com.example.seerbitsdk.models.card.CardDTO
 import com.example.seerbitsdk.models.CardDetails
 import com.example.seerbitsdk.models.RequiredFields
+import com.example.seerbitsdk.models.card.CardDTO
 import com.example.seerbitsdk.navigationpage.OtherPaymentScreen
 import com.example.seerbitsdk.screenstate.*
 import com.example.seerbitsdk.transfer.TransferHomeScreen
@@ -60,9 +58,9 @@ import com.example.seerbitsdk.ui.theme.*
 import com.example.seerbitsdk.ussd.USSDHomeScreen
 import com.example.seerbitsdk.ussd.USSDSelectBanksScreen
 import com.example.seerbitsdk.viewmodels.CardEnterPinViewModel
-import com.example.seerbitsdk.viewmodels.TransactionViewModel
 import com.example.seerbitsdk.viewmodels.MerchantDetailsViewModel
 import com.example.seerbitsdk.viewmodels.SelectBankViewModel
+import com.example.seerbitsdk.viewmodels.TransactionViewModel
 import com.google.gson.Gson
 
 class SeerBitActivity : ComponentActivity() {
@@ -271,7 +269,7 @@ fun CardHomeScreen(
                 productId = "",
                 mobileNumber = merchantDetailsData.payload.number,
                 paymentReference = transactionViewModel.generateRandomReference(),
-                fee = merchantDetailsData.payload.cardFee?.mc,
+                fee = merchantDetailsData.payload.vatFee,
                 expiryMonth = cardExpiryMonth,
                 fullName = "Bamigbaye Bukola",
                 "MASTERCARD",
@@ -292,7 +290,7 @@ fun CardHomeScreen(
 
             //SeerBit Header
             SeerbitPaymentDetailHeader(
-                charges = merchantDetailsData.payload.cardFee?.visa!!.toDouble(),
+                charges = merchantDetailsData.payload.vatFee?.toDouble()!!,
                 amount = formatAmount(cardDTO.amount),
                 currencyText = merchantDetailsData.payload.defaultCurrency!!,
                 "Debit/Credit Card Details",
@@ -482,6 +480,7 @@ fun CardHomeScreen(
 
             Spacer(modifier = Modifier.height(100.dp))
             BottomSeerBitWaterMark(modifier = Modifier.align(alignment = Alignment.CenterHorizontally))
+
 
             //The alert dialog occurs here
             if (openDialog.value) {
@@ -1168,13 +1167,6 @@ fun MyAppNavHost(
 
         }
 
-        composable("otpscreen") {
-            OTPScreen(
-                onPaymentMethodClick = {}
-            )
-
-
-        }
     }
 }
 

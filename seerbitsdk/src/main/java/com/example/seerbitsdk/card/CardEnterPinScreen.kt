@@ -124,13 +124,14 @@ fun CardEnterPinScreen(
                 Spacer(modifier = Modifier.height(21.dp))
                 SeerbitPaymentDetailHeader(
 
-                    charges = merchantDetailsData.payload?.cardFee?.visa!!.toDouble(),
+                    charges =  merchantDetailsData.payload?.vatFee?.toDouble()!!,
                     amount = "60,000.00",
                     currencyText = merchantDetailsData.payload.defaultCurrency!!,
                     "",
                     merchantDetailsData.payload.businessName!!,
                     merchantDetailsData.payload.supportEmail!!
                 )
+
 
 
                 if (!isEnterOTP) {
@@ -149,7 +150,7 @@ fun CardEnterPinScreen(
                 }
 
                 val cardDTO = CardDTO(
-                    deviceType = "Desktop",
+                    deviceType = "Android",
                     country = merchantDetailsData.payload.address?.country!!,
                     20.0,
                     cvv = cvv,
@@ -157,7 +158,7 @@ fun CardEnterPinScreen(
                     productId = "",
                     mobileNumber = merchantDetailsData.payload.number,
                     paymentReference = paymentReference,
-                    fee = merchantDetailsData.payload.cardFee?.mc,
+                    fee = merchantDetailsData.payload.vatFee,
                     expiryMonth = cardExpiryMonth,
                     fullName = "Amos Aorme",
                     "MASTERCARD",
@@ -180,13 +181,14 @@ fun CardEnterPinScreen(
                     PinInputField(onEnterPin = { pin = it })
                 }
 
+
                 else {
                     Row(
                         horizontalArrangement = Arrangement.Center,
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(
-                            text = "Kindly enter the OTP sent to *******9502 and\n" +
+                            text = "Kindly enter the OTP sent to ${merchantDetailsData.payload.number?.maskedPhoneNumber()} and\n" +
                                     "o***********@gmail.com or enter the OTP generates on your hardware token device",
                             style = TextStyle(
                                 fontSize = 14.sp,

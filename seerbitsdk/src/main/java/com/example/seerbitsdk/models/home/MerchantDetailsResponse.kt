@@ -4,350 +4,598 @@ import com.google.gson.annotations.SerializedName
 
 data class MerchantDetailsResponse(
 
-	@SerializedName("payload")
+	@field:SerializedName("payload")
 	val payload: Payload? = null,
 
-	@SerializedName("message")
+	@field:SerializedName("message")
 	val message: String? = null,
 
-	@SerializedName("status")
+	@field:SerializedName("status")
 	val status: String? = null,
 
-	@SerializedName("responseCode")
+	@field:SerializedName("responseCode")
 	val responseCode: String? = null
 )
 
-data class DefaultCurrency(
+data class DefaultPaymentOptionsItem(
 
-	@SerializedName("country")
-	val country: String? = null,
+	@field:SerializedName("paymentOptionFeeMode")
+	val paymentOptionFeeMode: String? = null,
 
-	@SerializedName("number")
-	val number: String? = null,
+	@field:SerializedName("internationalPaymentOptionFee")
+	val internationalPaymentOptionFee: String? = null,
 
-	@SerializedName("code")
+	@field:SerializedName("internationalPaymentOptionCapStatus")
+	val internationalPaymentOptionCapStatus: InternationalPaymentOptionCapStatus? = null,
+
+	@field:SerializedName("code")
 	val code: String? = null,
 
-	@SerializedName("currency")
-	val currency: String? = null
-)
+	@field:SerializedName("cappedAmount")
+	val cappedAmount: String? = null,
 
-data class ChannelOptionStatusItem(
+	@field:SerializedName("internationalPaymentOptionMode")
+	val internationalPaymentOptionMode: String? = null,
 
-	@SerializedName("allow_option")
-	val allowOption: Boolean? = null,
+	@field:SerializedName("description")
+	val description: String? = null,
 
-	@SerializedName("name")
-	val name: String? = null
-)
+	@field:SerializedName("inCappedSettlement")
+	val inCappedSettlement: String? = null,
 
-data class DefaultFee(
+	@field:SerializedName("type")
+	val type: String? = null,
 
-	@SerializedName("mccCategory")
-	val mccCategory: String? = null,
+	@field:SerializedName("cappedSettlement")
+	val cappedSettlement: String? = null,
 
-	@SerializedName("mccPercentage")
-	val mccPercentage: String? = null
-)
+	@field:SerializedName("paymentOptionFee")
+	val paymentOptionFee: String? = null,
 
-data class Country(
-
-	@SerializedName("continent")
-	val continent: String? = null,
-
-	@SerializedName("nameCode")
-	val nameCode: String? = null,
-
-	@SerializedName("websiteUrl")
-	val websiteUrl: String? = null,
-
-	@SerializedName("countryCode")
-	val countryCode: String? = null,
-
-	@SerializedName("defaultCurrency")
-	val defaultCurrency: DefaultCurrency? = null,
-
-	@SerializedName("defaultPaymentOptions")
-	val defaultPaymentOptions: List<DefaultPaymentOptionsItem?>? = null,
-
-	@SerializedName("name")
-	val name: String? = null,
-
-	@SerializedName("countryCode2")
-	val countryCode2: String? = null,
-
-	@SerializedName("status")
-	val status: String? = null
-)
-
-data class Payload(
-
-	@SerializedName("country")
-	val country: Country? = null,
-
-	@SerializedName("enableUnderCharge")
-	val enableUnderCharge: Boolean? = null,
-
-	@SerializedName("checkoutPageConfig")
-	val checkoutPageConfig: CheckoutPageConfig? = null,
-
-	@SerializedName("setting")
-	val setting: Setting? = null,
-
-	@SerializedName("number")
+	@field:SerializedName("number")
 	val number: String? = null,
 
-	@SerializedName("paymentConfigs")
-	val paymentConfigs: List<Any?>? = null,
+	@field:SerializedName("allow_option")
+	val allowOption: Boolean? = null,
 
-	@SerializedName("cardFee")
-	val cardFee: CardFee? = null,
+	@field:SerializedName("deleted")
+	val deleted: Boolean? = null,
 
-	@SerializedName("channelOptionStatus")
-	val channelOptionStatus: List<ChannelOptionStatusItem?>? = null,
+	@field:SerializedName("viewName")
+	val viewName: String? = null,
 
-	@SerializedName("live_public_key")
-	val livePublicKey: String? = null,
+	@field:SerializedName("paymentOptionCapStatus")
+	val paymentOptionCapStatus: PaymentOptionCapStatus? = null,
 
-	@SerializedName("logo")
-	val logo: String? = null,
+	@field:SerializedName("name")
+	val name: String? = null,
 
-	@SerializedName("max_threshold")
-	val maxThreshold: String? = null,
+	@field:SerializedName("id")
+	val id: Int? = null,
 
-	@SerializedName("business_name")
-	val businessName: String? = null,
+	@field:SerializedName("applyFixCharge")
+	val applyFixCharge: Boolean? = null,
 
-	@SerializedName("address")
-	val address: Address? = null,
+	@field:SerializedName("status")
+	val status: String? = null,
 
-	@SerializedName("min_amount")
-	val minAmount: Double? = null,
+	@field:SerializedName("inCappedAmount")
+	val inCappedAmount: Double? = null,
 
-	@SerializedName("isWhiteLabelled")
-	val isWhiteLabelled: Boolean? = null,
+	@field:SerializedName("fixCharge")
+	val fixCharge: String? = null
+)
 
-	@SerializedName("transLink")
-	val transLink: String? = null,
+data class Address(
 
-	@SerializedName("min_threshold")
-	val minThreshold: String? = null,
+	@field:SerializedName("country")
+	val country: String? = null,
 
-	@SerializedName("enableOvercharge")
-	val enableOvercharge: Boolean? = null,
+	@field:SerializedName("city")
+	val city: String? = null,
 
-	@SerializedName("enableForDiscount")
-	val enableForDiscount: Boolean? = null,
+	@field:SerializedName("street")
+	val street: String? = null,
 
-	@SerializedName("transactionFee")
-	val transactionFee: TransactionFee? = null,
-
-	@SerializedName("support_email")
-	val supportEmail: String? = null,
-
-	@SerializedName("activeForValidationService")
-	val activeForValidationService: Boolean? = null,
-
-	@SerializedName("allowedCurrency")
-	val allowedCurrency: List<String?>? = null,
-
-	@SerializedName("enable_descriptor")
-	val enableDescriptor: Boolean? = null,
-
-	@SerializedName("test_public_key")
-	val testPublicKey: String? = null,
-
-	@SerializedName("max_amount")
-	val maxAmount: Double? = null,
-
-	@SerializedName("partnerId")
-	val partnerId: String? = null,
-
-	@SerializedName("default_currency")
-	val defaultCurrency: String? = null,
-
-	@SerializedName("enableCustomerForTransfer")
-	val enableCustomerForTransfer: Boolean? = null,
-
-	@SerializedName("status")
-	val status: String? = null
+	@field:SerializedName("state")
+	val state: String? = null
 )
 
 data class Setting(
 
-	@SerializedName("mode")
+	@field:SerializedName("mode")
 	val mode: String? = null,
 
-	@SerializedName("transfer_option")
+	@field:SerializedName("transfer_option")
 	val transferOption: Boolean? = null,
 
-	@SerializedName("email_receipt_merchant")
+	@field:SerializedName("email_receipt_merchant")
 	val emailReceiptMerchant: Boolean? = null,
 
-	@SerializedName("applySettlementPattern")
+	@field:SerializedName("applySettlementPattern")
 	val applySettlementPattern: Boolean? = null,
 
-	@SerializedName("bank_option")
+	@field:SerializedName("bank_option")
 	val bankOption: Boolean? = null,
 
-	@SerializedName("email_receipt_customer")
+	@field:SerializedName("email_receipt_customer")
 	val emailReceiptCustomer: Boolean? = null,
 
-	@SerializedName("card_option")
+	@field:SerializedName("card_option")
 	val cardOption: Boolean? = null,
 
-	@SerializedName("display_fee")
+	@field:SerializedName("display_fee")
 	val displayFee: Boolean? = null,
 
-	@SerializedName("payday")
+	@field:SerializedName("payday")
 	val payday: String? = null,
 
-	@SerializedName("charge_option")
+	@field:SerializedName("charge_option")
 	val chargeOption: String? = null
 )
 
-data class PaymentOptionCapStatus(
+data class Invoice(
 
-	@SerializedName("cappedAmount")
-	val cappedAmount: Double? = null,
+	@field:SerializedName("liveMultiBusinessBranchRef")
+	val liveMultiBusinessBranchRef: String? = null,
 
-	@SerializedName("cappedSettlement")
-	val cappedSettlement: String? = null
+	@field:SerializedName("active")
+	val active: Boolean? = null,
+
+	@field:SerializedName("totalLength")
+	val totalLength: Int? = null,
+
+	@field:SerializedName("testMultiBusinessBranchRef")
+	val testMultiBusinessBranchRef: String? = null,
+
+	@field:SerializedName("billLength")
+	val billLength: Int? = null,
+
+	@field:SerializedName("activeOverInternet")
+	val activeOverInternet: Boolean? = null
 )
 
-data class AccountTransactionFee(
-	val any: Any? = null
+data class DefaultFee(
+
+	@field:SerializedName("mccCategory")
+	val mccCategory: String? = null,
+
+	@field:SerializedName("mccPercentage")
+	val mccPercentage: String? = null
 )
 
-data class CheckoutPageConfig(
+data class PaymentConfigsItem(
 
-	@SerializedName("paybuttonColor")
-	val paybuttonColor: String? = null,
+	@field:SerializedName("paymentOptionFeeMode")
+	val paymentOptionFeeMode: String? = null,
 
-	@SerializedName("backgroundColor")
-	val backgroundColor: String? = null,
+	@field:SerializedName("internationalPaymentOptionFee")
+	val internationalPaymentOptionFee: Double? = null,
 
-	@SerializedName("checkoutAdverts")
-	val checkoutAdverts: List<Any?>? = null,
+	@field:SerializedName("internationalPaymentOptionCapStatus")
+	val internationalPaymentOptionCapStatus: InternationalPaymentOptionCapStatus? = null,
 
-	@SerializedName("maxCheckAdvertCount")
-	val maxCheckAdvertCount: String? = null,
+	@field:SerializedName("code")
+	val code: String? = null,
 
-	@SerializedName("paychannelColor")
-	val paychannelColor: String? = null,
+	@field:SerializedName("channelOptionNumber")
+	val channelOptionNumber: String? = null,
 
-	@SerializedName("checkAdvertStatus")
-	val checkAdvertStatus: String? = null
-)
+	@field:SerializedName("internationalPaymentOptionMode")
+	val internationalPaymentOptionMode: String? = null,
 
-data class TransactionCapStatus(
+	@field:SerializedName("inCappedSettlement")
+	val inCappedSettlement: String? = null,
 
-	@SerializedName("cappedAmount")
+	@field:SerializedName("type")
+	val type: String? = null,
+
+	@field:SerializedName("cappedSettlement")
+	val cappedSettlement: String? = null,
+
+	@field:SerializedName("paymentOptionFee")
+	val paymentOptionFee: Double? = null,
+
+	@field:SerializedName("allow_option")
+	val allowOption: Boolean? = null,
+
+	@field:SerializedName("deleted")
+	val deleted: Boolean? = null,
+
+	@field:SerializedName("viewName")
+	val viewName: String? = null,
+
+	@field:SerializedName("paymentOptionCapStatus")
+	val paymentOptionCapStatus: PaymentOptionCapStatus? = null,
+
+	@field:SerializedName("name")
+	val name: String? = null,
+
+	@field:SerializedName("id")
+	val id: Int? = null,
+
+	@field:SerializedName("applyFixCharge")
+	val applyFixCharge: Boolean? = null,
+
+	@field:SerializedName("status")
+	val status: String? = null,
+
+	@field:SerializedName("cappedAmount")
 	val cappedAmount: String? = null,
 
-	@SerializedName("cappedSettlement")
-	val cappedSettlement: String? = null
-)
-
-data class InternationalPaymentOptionCapStatus(
-
-	@SerializedName("inCappedAmount")
+	@field:SerializedName("inCappedAmount")
 	val inCappedAmount: Double? = null
 )
 
 data class CardFee(
 
-	@SerializedName("mc")
-	val mc: String? = null,
+	@field:SerializedName("mc")
+	val mc: Any? = null,
 
-	@SerializedName("visa")
-	val visa: String? = null,
+	@field:SerializedName("visa")
+	val visa: Any? = null,
 
-	@SerializedName("verve")
-	val verve: String? = null
+	@field:SerializedName("verve")
+	val verve: Any? = null
 )
 
-data class DefaultPaymentOptionsItem(
+data class DefaultCurrency(
 
-	@SerializedName("paymentOptionFeeMode")
-	val paymentOptionFeeMode: String? = null,
-
-	@SerializedName("internationalPaymentOptionFee")
-	val internationalPaymentOptionFee: Double? = null,
-
-	@SerializedName("internationalPaymentOptionCapStatus")
-	val internationalPaymentOptionCapStatus: InternationalPaymentOptionCapStatus? = null,
-
-	@SerializedName("code")
-	val code: String? = null,
-
-	@SerializedName("internationalPaymentOptionMode")
-	val internationalPaymentOptionMode: String? = null,
-
-	@SerializedName("description")
-	val description: String? = null,
-
-	@SerializedName("type")
-	val type: String? = null,
-
-	@SerializedName("paymentOptionFee")
-	val paymentOptionFee: String? = null,
-
-	@SerializedName("number")
+	@field:SerializedName("number")
 	val number: String? = null,
 
-	@SerializedName("allow_option")
+	@field:SerializedName("country")
+	val country: String? = null,
+
+	@field:SerializedName("code")
+	val code: String? = null,
+
+	@field:SerializedName("countryCode")
+	val countryCode: String? = null,
+
+	@field:SerializedName("currency")
+	val currency: String? = null,
+
+	@field:SerializedName("id")
+	val id: Int? = null
+)
+
+data class CheckoutPageConfig(
+
+	@field:SerializedName("checkoutAdverts")
+	val checkoutAdverts: List<Any?>? = null,
+
+	@field:SerializedName("maxCheckAdvertCount")
+	val maxCheckAdvertCount: String? = null,
+
+	@field:SerializedName("id")
+	val id: Int? = null,
+
+	@field:SerializedName("checkAdvertStatus")
+	val checkAdvertStatus: String? = null
+)
+
+data class CardFeeTemp(
+	val any: Any? = null
+)
+
+data class TransferTransactionFee(
+
+	@field:SerializedName("transferFee")
+	val transferFee: String? = null,
+
+	@field:SerializedName("transferFeeMode")
+	val transferFeeMode: String? = null
+)
+
+data class AccountTransactionFee(
+
+	@field:SerializedName("accountFee")
+	val accountFee: String? = null,
+
+	@field:SerializedName("accountFeeMode")
+	val accountFeeMode: String? = null
+)
+
+data class TransactionCapStatus(
+
+	@field:SerializedName("cappedAmount")
+	val cappedAmount: String? = null,
+
+	@field:SerializedName("cappedSettlement")
+	val cappedSettlement: String? = null
+)
+
+data class Webhook(
+
+	@field:SerializedName("active")
+	val active: Boolean? = null,
+
+	@field:SerializedName("testUrl")
+	val testUrl: String? = null,
+
+	@field:SerializedName("testUrlActive")
+	val testUrlActive: Boolean? = null,
+
+	@field:SerializedName("url")
+	val url: String? = null
+)
+
+data class ChannelOptionStatusItem(
+
+	@field:SerializedName("allow_option")
 	val allowOption: Boolean? = null,
 
-	@SerializedName("viewName")
-	val viewName: String? = null,
+	@field:SerializedName("code")
+	val code: String? = null,
 
-	@SerializedName("paymentOptionCapStatus")
-	val paymentOptionCapStatus: PaymentOptionCapStatus? = null,
+	@field:SerializedName("deleted")
+	val deleted: Boolean? = null,
 
-	@SerializedName("name")
+	@field:SerializedName("channelOptionNumber")
+	val channelOptionNumber: String? = null,
+
+	@field:SerializedName("name")
 	val name: String? = null,
 
-	@SerializedName("applyFixCharge")
-	val applyFixCharge: Boolean? = null,
+	@field:SerializedName("id")
+	val id: Int? = null
+)
 
-	@SerializedName("status")
+data class Country(
+
+	@field:SerializedName("continent")
+	val continent: String? = null,
+
+	@field:SerializedName("default_currency_id")
+	val defaultCurrencyId: Int? = null,
+
+	@field:SerializedName("vat")
+	val vat: Double? = null,
+
+	@field:SerializedName("countryCode2")
+	val countryCode2: String? = null,
+
+	@field:SerializedName("deleted")
+	val deleted: Boolean? = null,
+
+	@field:SerializedName("nameCode")
+	val nameCode: String? = null,
+
+	@field:SerializedName("websiteUrl")
+	val websiteUrl: String? = null,
+
+	@field:SerializedName("countryCode")
+	val countryCode: String? = null,
+
+	@field:SerializedName("defaultCurrency")
+	val defaultCurrency: DefaultCurrency? = null,
+
+	@field:SerializedName("defaultPaymentOptions")
+	val defaultPaymentOptions: List<DefaultPaymentOptionsItem?>? = null,
+
+	@field:SerializedName("name")
+	val name: String? = null,
+
+	@field:SerializedName("id")
+	val id: Int? = null,
+
+	@field:SerializedName("status")
+	val status: String? = null
+)
+
+data class Payload(
+
+	@field:SerializedName("country")
+	val country: Country? = null,
+
+	@field:SerializedName("merchant_email")
+	val merchantEmail: String? = null,
+
+	@field:SerializedName("webhook")
+	val webhook: Webhook? = null,
+
+	@field:SerializedName("checkoutPageConfig")
+	val checkoutPageConfig: CheckoutPageConfig? = null,
+
+	@field:SerializedName("applyVat")
+	val applyVat: Boolean? = null,
+
+	@field:SerializedName("setting")
+	val setting: Setting? = null,
+
+	@field:SerializedName("number")
+	val number: String? = null,
+
+	@field:SerializedName("enabledForVerve3DS")
+	val enabledForVerve3DS: Boolean? = null,
+
+	@field:SerializedName("id")
+	val id: Int? = null,
+
+	@field:SerializedName("canRaiseRefund")
+	val canRaiseRefund: Boolean? = null,
+
+	@field:SerializedName("settleToWallet")
+	val settleToWallet: Boolean? = null,
+
+	@field:SerializedName("kycUpdateRequired")
+	val kycUpdateRequired: Boolean? = null,
+
+	@field:SerializedName("max_threshold")
+	val maxThreshold: String? = null,
+
+	@field:SerializedName("business_name")
+	val businessName: String? = null,
+
+	@field:SerializedName("chargeback_email")
+	val chargebackEmail: String? = null,
+
+	@field:SerializedName("min_amount")
+	val minAmount: Double? = null,
+
+	@field:SerializedName("business_industry")
+	val businessIndustry: String? = null,
+
+	@field:SerializedName("isWhiteLabelled")
+	val isWhiteLabelled: Boolean? = null,
+
+	@field:SerializedName("min_threshold")
+	val minThreshold: String? = null,
+
+	@field:SerializedName("enableForDiscount")
+	val enableForDiscount: Boolean? = null,
+
+	@field:SerializedName("enforceCvv")
+	val enforceCvv: Boolean? = null,
+
+	@field:SerializedName("business_email")
+	val businessEmail: String? = null,
+
+	@field:SerializedName("phone_number")
+	val phoneNumber: String? = null,
+
+	@field:SerializedName("live_private_key")
+	val livePrivateKey: String? = null,
+
+	@field:SerializedName("enableCustomerForTransfer")
+	val enableCustomerForTransfer: Boolean? = null,
+
+	@field:SerializedName("country_id")
+	val countryId: String? = null,
+
+	@field:SerializedName("status")
 	val status: String? = null,
 
-	@SerializedName("fixCharge")
-	val fixCharge: String? = null
+	@field:SerializedName("rc_number")
+	val rcNumber: String? = null,
+
+	@field:SerializedName("enableUnderCharge")
+	val enableUnderCharge: Boolean? = null,
+
+	@field:SerializedName("applyOperationFixCharge")
+	val applyOperationFixCharge: Boolean? = null,
+
+	@field:SerializedName("paymentConfigs")
+	val paymentConfigs: List<PaymentConfigsItem?>? = null,
+
+	@field:SerializedName("cardFee")
+	val cardFee: CardFee? = null,
+
+	@field:SerializedName("channelOptionStatus")
+	val channelOptionStatus: List<ChannelOptionStatusItem?>? = null,
+
+	@field:SerializedName("live_public_key")
+	val livePublicKey: String? = null,
+
+	@field:SerializedName("canBrandCheckout")
+	val canBrandCheckout: Boolean? = null,
+
+	@field:SerializedName("address")
+	val address: Address? = null,
+
+	@field:SerializedName("test_private_key")
+	val testPrivateKey: String? = null,
+
+	@field:SerializedName("transLink")
+	val transLink: String? = null,
+
+	@field:SerializedName("enableOvercharge")
+	val enableOvercharge: Boolean? = null,
+
+	@field:SerializedName("cardFeeTemp")
+	val cardFeeTemp: CardFeeTemp? = null,
+
+	@field:SerializedName("transactionFee")
+	val transactionFee: TransactionFee? = null,
+
+	@field:SerializedName("support_email")
+	val supportEmail: String? = null,
+
+	@field:SerializedName("website_url")
+	val websiteUrl: String? = null,
+
+	@field:SerializedName("activeForValidationService")
+	val activeForValidationService: Boolean? = null,
+
+	@field:SerializedName("allowedCurrency")
+	val allowedCurrency: List<String?>? = null,
+
+	@field:SerializedName("vatFee")
+	val vatFee: String? = null,
+
+	@field:SerializedName("enable_descriptor")
+	val enableDescriptor: Boolean? = null,
+
+	@field:SerializedName("test_public_key")
+	val testPublicKey: String? = null,
+
+	@field:SerializedName("max_amount")
+	val maxAmount: Double? = null,
+
+	@field:SerializedName("applyChannelFixCharge")
+	val applyChannelFixCharge: Boolean? = null,
+
+	@field:SerializedName("SPayoutIncompleteDetailsNotification")
+	val sPayoutIncompleteDetailsNotification: Boolean? = null,
+
+	@field:SerializedName("invoice")
+	val invoice: Invoice? = null,
+
+	@field:SerializedName("partnerId")
+	val partnerId: String? = null,
+
+	@field:SerializedName("default_currency")
+	val defaultCurrency: String? = null,
+
+	@field:SerializedName("businessType")
+	val businessType: String? = null
+)
+
+data class InternationalPaymentOptionCapStatus(
+
+	@field:SerializedName("inCappedAmount")
+	val inCappedAmount: Double? = null
+)
+
+data class CardTransactionFee(
+
+	@field:SerializedName("internationalCardFee")
+	val internationalCardFee: String? = null,
+
+	@field:SerializedName("cardFee")
+	val cardFee: String? = null,
+
+	@field:SerializedName("cardFeeMode")
+	val cardFeeMode: String? = null,
+
+	@field:SerializedName("internationalCardFeeMode")
+	val internationalCardFeeMode: String? = null
+)
+
+data class PaymentOptionCapStatus(
+
+	@field:SerializedName("cappedAmount")
+	val cappedAmount: String? = null,
+
+	@field:SerializedName("cappedSettlement")
+	val cappedSettlement: String? = null
 )
 
 data class TransactionFee(
 
-	@SerializedName("transactionCapStatus")
+	@field:SerializedName("transactionCapStatus")
 	val transactionCapStatus: TransactionCapStatus? = null,
 
-	@SerializedName("defaultFee")
+	@field:SerializedName("defaultFee")
 	val defaultFee: DefaultFee? = null,
 
-	@SerializedName("accountTransactionFee")
+	@field:SerializedName("transferTransactionFee")
+	val transferTransactionFee: TransferTransactionFee? = null,
+
+	@field:SerializedName("accountTransactionFee")
 	val accountTransactionFee: AccountTransactionFee? = null,
 
-	@SerializedName("cardTransactionFee")
+	@field:SerializedName("cardTransactionFee")
 	val cardTransactionFee: CardTransactionFee? = null
-)
-
-data class Address(
-
-	@SerializedName("country")
-	val country: String? = null,
-
-	@SerializedName("city")
-	val city: String? = null,
-
-	@SerializedName("street")
-	val street: String? = null,
-
-	@SerializedName("state")
-	val state: String? = null
-)
-
-data class CardTransactionFee(
-	val any: Any? = null
 )

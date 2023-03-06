@@ -83,7 +83,7 @@ fun BankAccountBVNScreen(
 
                 SeerbitPaymentDetailHeader(
 
-                    charges = merchantDetailsData.payload?.cardFee?.visa!!.toDouble(),
+                    charges =  merchantDetailsData.payload?.vatFee?.toDouble()!!,
                     amount = "60,000.00",
                     currencyText = merchantDetailsData.payload.defaultCurrency!!,
                     "Kindly Enter your BVN",

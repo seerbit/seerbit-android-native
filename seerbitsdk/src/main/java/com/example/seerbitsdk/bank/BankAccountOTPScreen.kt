@@ -85,7 +85,7 @@ fun BankAccountOTPScreen(
                 Spacer(modifier = Modifier.height(25.dp))
 
                 val bankAccountDTO = BankAccountDTO(
-                    deviceType = "Desktop",
+                    deviceType = "Android",
                     country = merchantDetailsData.payload?.address?.country!!,
                     bankCode = bankCode,
                     amount = "100",
@@ -93,7 +93,7 @@ fun BankAccountOTPScreen(
                     productId = "",
                     mobileNumber = merchantDetailsData.payload.number,
                     paymentReference = transactionViewModel.generateRandomReference(),
-                    fee = merchantDetailsData.payload.cardFee?.mc,
+                    fee = merchantDetailsData.payload.vatFee,
                     fullName = "Amos Aorme",
                     channelType = "$bankName",
                     dateOfBirth = dateOfBirth,
@@ -114,7 +114,7 @@ fun BankAccountOTPScreen(
                 val maskedEmailAddress = "A**************@gmail.com"
 
                 SeerbitPaymentDetailHeaderTwo(
-                    charges = merchantDetailsData.payload?.cardFee?.visa!!.toDouble(),
+                    charges =  merchantDetailsData.payload?.vatFee?.toDouble()!!,
                     amount = "60,000.00",
                     currencyText = merchantDetailsData.payload.defaultCurrency!!,
                     merchantDetailsData.payload.businessName!!,

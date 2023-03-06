@@ -25,29 +25,29 @@ import javax.inject.Singleton
 @Singleton
 interface SeerBitService {
 
-    @GET("merchant/clear/SBTESTPUBK_t4G16GCA1O51AV0Va3PPretaisXubSw1")
+    @GET("merchant/verify/?key=SBPUBK_0HSRUO39Y4WZABLHEFMHTTLKYYJ52MTS&sbcp=uFWgBWF8OB56oCSJudCxKYqNm8Cttss4&partner-id=1")
     suspend fun merchantDetails(): Response<MerchantDetailsResponse>
 
-    @GET("query/{paymentReference}")
+    @GET("checkout/query/{paymentReference}")
     suspend fun queryTransaction(@Path("paymentReference") paymentReference: String)
             : Response<QueryTransactionResponse>
 
     // using this here because the url points to live
-    @POST("initiates")
+    @POST("checkout/initiates")
     suspend fun initiateUssd(@Body ussdDTO: UssdDTO): Response<CardResponse>
 
     // using this here because the url points to live
-    @POST("initiates")
+    @POST("checkout/initiates")
     suspend fun initiateTransfer(@Body transferDTO: TransferDTO): Response<CardResponse>
 
     // using this here because the url points to live
-    @POST("initiates")
+    @POST("checkout/initiates")
     suspend fun initiateBankAccountMode(@Body bankAccountDTO: BankAccountDTO): Response<CardResponse>
 
-    @GET("banks")
+    @GET("checkout/banks")
     suspend fun getBanks(): Response<GetBanksResponse>
 
-    @GET("bin/{firstSixDigit}")
+    @GET("checkout/bin/{firstSixDigit}")
     suspend fun getCardBin(@Path("firstSixDigit") firstSixDigit: String): Response<CardBinResponse>
 
 }
@@ -78,22 +78,12 @@ private fun logger(): HttpLoggingInterceptor {
 }
 
 
-object Baseurl {
-
-    fun baseUrl(): String {
-        return if (BuildConfig.DEBUG) SEER_BIT_BASE_URL_TEST
-        else SEER_BIT_BASE_LIVE_URL
-    }
-
-    private const val SEER_BIT_BASE_LIVE_URL = "https://seerbitapi.com/checkout"
-    private const val SEER_BIT_BASE_URL_TEST = "https://seerbitapi.com/sandbox/"
-}
-
 private val retrofit = Retrofit.Builder()
-    .baseUrl("https://seerbitapi.com/checkout/")
+    .baseUrl("https://seerbitapi.com/")
     .client(okHttpClient.build())
     .addConverterFactory(GsonConverterFactory.create())
     .build()
+
 
 object MerchantServiceApi {
     val retrofitService: SeerBitService by lazy {

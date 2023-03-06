@@ -97,7 +97,7 @@ fun TransferHomeScreen(
                 productId = "",
                 mobileNumber = "404",
                 paymentReference = "SBT-T54367073117",
-                fee = merchantDetailsData.payload.cardFee?.mc,
+                fee = merchantDetailsData.payload.vatFee,
                 fullName = "Amos Oruaroghene",
                 channelType = "Transfer",
                 publicKey = merchantDetailsData.payload.livePublicKey,
@@ -108,7 +108,7 @@ fun TransferHomeScreen(
                 productDescription = "",
                 email = "inspiron.amos@gmail.com",
                 retry = true,
-                deviceType = "Desktop",
+                deviceType = "Android",
                 amountControl = "FIXEDAMOUNT",
                 walletDaysActive = "1"
             )
@@ -126,7 +126,7 @@ fun TransferHomeScreen(
             Spacer(modifier = Modifier.height(21.dp))
 
             SeerbitPaymentDetailHeaderTwo(
-                charges = merchantDetailsData.payload.cardFee?.visa!!.toDouble(),
+                charges =  merchantDetailsData.payload.vatFee?.toDouble()!!,
                 amount = transferAmount,
                 currencyText = defaultCurrency,
                 businessName = merchantDetailsData.payload.businessName!!,

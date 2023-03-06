@@ -2,31 +2,38 @@ package com.example.seerbitsdk.component
 
 import java.text.DecimalFormat
 
-fun String.isValidCardNumber() : Boolean{
+fun String.isValidCardNumber(): Boolean {
     return this.length == 16
 }
 
-fun String.isValidCvv() : Boolean{
+fun String.isValidCvv(): Boolean {
     return this.length == 3
 }
-fun String.isValidCardExpiryMonth() : Boolean{
-     if(this == "")
-         return  false
-    return if(this.length >=2)
-         this.substring(0,2).toInt()<= 12
+
+fun String.isValidCardExpiryMonth(): Boolean {
+    if (this == "")
+        return false
+    return if (this.length >= 2)
+        this.substring(0, 2).toInt() <= 12
     else false
 }
-fun String.isValidCardExpiryYear() : Boolean{
-    return if(this == "")
+
+fun String.isValidCardExpiryYear(): Boolean {
+    return if (this == "")
         false
     else
-        this.length ==4
+        this.length == 4
 }
-fun validateCardDetails(isValidCvv : Boolean, isValidCardNumber : Boolean, isValidCardExpiryMonth: Boolean) : Boolean{
+
+fun validateCardDetails(
+    isValidCvv: Boolean,
+    isValidCardNumber: Boolean,
+    isValidCardExpiryMonth: Boolean
+): Boolean {
     return isValidCvv && isValidCardNumber && isValidCardExpiryMonth
 }
 
-fun generateRandomReference() : String {
+fun generateRandomReference(): String {
     var str = "ABCDEFGHIJKLMNOPQRSTNVabcdefghijklmnopqrstuvwxyzABCD123456789"
     var password = ""
     for (i in 1..100) {
@@ -35,11 +42,11 @@ fun generateRandomReference() : String {
     return password
 }
 
-fun String.maskedPhoneNumber (): String {
-    if(this.length >= 5){
-
-    }
-    return ""
+fun String.maskedPhoneNumber(): String {
+    return if (this.length >= 5) {
+        "*****${this.substring(5)}"
+    } else
+        "*****${this.last()}"
 }
 
 fun formatAmount(amount: Double?): String {

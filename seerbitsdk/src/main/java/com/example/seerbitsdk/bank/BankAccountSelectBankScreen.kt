@@ -84,8 +84,8 @@ fun BankAccountSelectBankScreen(
                 Spacer(modifier = Modifier.height(25.dp))
 
                 SeerbitPaymentDetailHeader(
-                    charges = merchantDetailsData.payload?.cardFee?.visa!!.toDouble(),
-                    amount = "60,000.00",
+                    charges =  merchantDetailsData.payload?.vatFee?.toDouble()!!,
+                    amount = "20.00",
                     currencyText = merchantDetailsData.payload.defaultCurrency!!,
                     "Choose your bank to start this payment",
                     merchantDetailsData.payload.businessName!!,

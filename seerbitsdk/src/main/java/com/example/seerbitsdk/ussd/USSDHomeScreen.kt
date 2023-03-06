@@ -95,8 +95,8 @@ fun USSDHomeScreen(
                 Spacer(modifier = Modifier.height(21.dp))
                 SeerbitPaymentDetailHeader(
 
-                    charges = merchantDetailsData.payload?.cardFee?.visa!!.toDouble(),
-                    amount = "60,000.00",
+                    charges = merchantDetailsData.payload?.vatFee?.toDouble()!!,
+                    amount = "20.00",
                     currencyText = merchantDetailsData.payload.defaultCurrency!!,
                     "",
                     merchantDetailsData.payload.businessName!!,
@@ -109,9 +109,9 @@ fun USSDHomeScreen(
                     amount = "20",
                     redirectUrl = "http://localhost:3002/#/",
                     productId = "",
-                    mobileNumber = "404",
+                    mobileNumber = merchantDetailsData.payload.number,
                     paymentReference = "SBT-T54367073117",
-                    fee = merchantDetailsData.payload.cardFee.mc,
+                    fee =  merchantDetailsData.payload?.vatFee,
                     fullName = "Amos Oruaroghene",
                     channelType = "ussd",
                     publicKey = merchantDetailsData.payload.livePublicKey,
@@ -122,7 +122,7 @@ fun USSDHomeScreen(
                     productDescription = "",
                     email = "inspiron.amos@gmail.com",
                     retry = true,
-                    ddeviceType = "Desktop"
+                    ddeviceType = "Android"
                 )
 
                 //HANDLES initiate query response

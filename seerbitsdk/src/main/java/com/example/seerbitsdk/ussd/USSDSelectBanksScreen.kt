@@ -77,7 +77,7 @@ fun USSDSelectBanksScreen(
 
                 SeerbitPaymentDetailHeader(
 
-                    charges = merchantDetailsData.payload?.cardFee?.visa!!.toDouble(),
+                    charges =  merchantDetailsData.payload?.vatFee?.toDouble()!!,
                     amount = "20.00",
                     currencyText = merchantDetailsData.payload.defaultCurrency!!,
                     "Choose your bank to start this payment",
