@@ -580,7 +580,7 @@ fun CardDetailsScreen(
                 value = value,
                 visualTransformation = { cardNumberFormatting(it) },
                 onValueChange = { newText ->
-                    if (newText.length <= 16) {
+                    if (newText.length <= 20) {
                         value = newText
                         onChangeCardNumber(newText)
                     }
@@ -757,7 +757,7 @@ fun cardNumberFormatting(text: AnnotatedString): TransformedText {
     val annotatedString = AnnotatedString.Builder().run {
         for (i in text.indices) {
             append(text[i])
-            if (i == 3 || i == 7 || i == 11) {
+            if (i == 3 || i == 7 || i == 11 || i == 15) {
                 append(" ")
             }
         }
@@ -771,7 +771,8 @@ fun cardNumberFormatting(text: AnnotatedString): TransformedText {
             if (offset <= 7) return offset + 1
             if (offset <= 11) return offset + 2
             if (offset <= 15) return offset + 3
-            return 19
+            if (offset <= 19) return offset + 4
+            return 23
         }
 
         override fun transformedToOriginal(offset: Int): Int {
@@ -779,7 +780,8 @@ fun cardNumberFormatting(text: AnnotatedString): TransformedText {
             if (offset <= 7) return offset - 1
             if (offset <= 11) return offset - 2
             if (offset <= 15) return offset - 3
-            return 16
+            if (offset <= 19) return offset - 4
+            return 20
         }
     }
     return TransformedText(annotatedString, phoneNumberOffsetTranslator)

@@ -222,7 +222,7 @@ fun CardEnterPinScreen(
                             if (otp.length < 6) {
                                 openDialog.value = true
                                 alertDialogMessage = "Invalid otp"
-                                alertDialogHeaderMessage = "Error Occured"
+                                alertDialogHeaderMessage = "Error Occurred"
                             } else {
                                 cardEnterPinViewModel.sendOtp(cardOTPDTO)
 
