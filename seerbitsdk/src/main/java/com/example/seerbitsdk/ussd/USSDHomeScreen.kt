@@ -44,12 +44,6 @@ import com.example.seerbitsdk.viewmodels.TransactionViewModel
 @Composable
 fun USSDHomeScreen(
     modifier: Modifier = Modifier,
-    navigateToLoadingScreen: () -> Unit,
-    currentDestination: NavDestination?,
-    navController: NavHostController,
-    paymentReference: String = "",
-    onConfirmPaymentClicked: () -> Unit,
-    onOtherPaymentButtonClicked: () -> Unit,
     merchantDetailsState: MerchantDetailsState?,
     transactionViewModel: TransactionViewModel = viewModel(),
     bankCode: String?
@@ -64,6 +58,7 @@ fun USSDHomeScreen(
     val openDialog = remember { mutableStateOf(false) }
     var alertDialogMessage by remember { mutableStateOf("") }
     var alertDialogHeaderMessage by remember { mutableStateOf("") }
+    var paymentRef = transactionViewModel.getPaymentReference()
 
 
     Column(modifier = modifier) {
@@ -110,9 +105,9 @@ fun USSDHomeScreen(
                     redirectUrl = "http://localhost:3002/#/",
                     productId = "",
                     mobileNumber = merchantDetailsData.payload.number,
-                    paymentReference = "SBT-T54367073117",
+                    paymentReference = paymentRef,
                     fee = merchantDetailsData.payload.vatFee,
-                    fullName = "Amos Oruaroghene",
+                    fullName = merchantDetailsData.payload.businessName,
                     channelType = "ussd",
                     publicKey = merchantDetailsData.payload.livePublicKey,
                     source = "",
@@ -120,7 +115,7 @@ fun USSDHomeScreen(
                     sourceIP = "102.88.63.64",
                     currency = merchantDetailsData.payload.defaultCurrency,
                     productDescription = "",
-                    email = "inspiron.amos@gmail.com",
+                    email = SEERBIT_DEFAULT_EMAIL,
                     retry = true,
                     ddeviceType = "Android"
                 )
@@ -176,7 +171,7 @@ fun USSDHomeScreen(
                 queryTransactionStateState.data?.data?.let {
 
                     if (queryTransactionStateState.data.data.code == PENDING_CODE) {
-                        transactionViewModel.queryTransaction(ussdDTO.paymentReference!!)
+                        transactionViewModel.queryTransaction(paymentRef)
                     }
                     if (queryTransactionStateState.data.data.code == SUCCESS) {
 
@@ -245,7 +240,7 @@ fun USSDHomeScreen(
                         onClick = {
                             if (isSuccesfulResponse) {
                                 showLoadingScreen = true
-                                transactionViewModel.queryTransaction(ussdDTO.paymentReference!!)
+                                transactionViewModel.queryTransaction(paymentRef)
 
                             }
 
@@ -352,12 +347,6 @@ fun HeaderScreenPreview() {
     val viewModel: TransactionViewModel by viewModel()
     SeerBitTheme {
         USSDHomeScreen(
-            navigateToLoadingScreen = { /*TODO*/ },
-            currentDestination = null,
-            navController = rememberNavController(),
-            onConfirmPaymentClicked = {
-            },
-            onOtherPaymentButtonClicked = { },
             merchantDetailsState = MerchantDetailsState(),
             transactionViewModel = viewModel,
             bankCode = ""

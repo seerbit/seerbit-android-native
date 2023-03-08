@@ -52,7 +52,7 @@ fun BankAccountOTPScreen(
     var alertDialogMessage by remember { mutableStateOf("") }
     var alertDialogHeaderMessage by remember { mutableStateOf("") }
     var amount : String = "60,000"
-
+    var paymentRef = transactionViewModel.getPaymentReference()
     myBVN = if (bvn == Dummy) "" else bvn
     dateOfBirth = if (dob == Dummy) "" else dob
 
@@ -92,7 +92,7 @@ fun BankAccountOTPScreen(
                     redirectUrl = "http://localhost:3002/#/",
                     productId = "",
                     mobileNumber = merchantDetailsData.payload.number,
-                    paymentReference = transactionViewModel.generateRandomReference(),
+                    paymentReference = paymentRef,
                     fee = merchantDetailsData.payload.vatFee,
                     fullName = "Amos Aorme",
                     channelType = "$bankName",

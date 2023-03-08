@@ -16,6 +16,8 @@ import com.example.seerbitsdk.use_cases.CardBinUseCase
 import com.example.seerbitsdk.use_cases.OtpUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 class TransactionViewModel : ViewModel() {
@@ -226,6 +228,12 @@ class TransactionViewModel : ViewModel() {
             }
         }
 
+    }
+
+    fun getPaymentReference(): String {
+        val current = LocalDateTime.now()
+        val formatter = DateTimeFormatter.BASIC_ISO_DATE
+        return "SBT-T${current.format(formatter)}"
     }
 
     fun generateRandomReference() : String {

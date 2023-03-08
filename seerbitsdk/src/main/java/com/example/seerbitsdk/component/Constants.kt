@@ -9,3 +9,5 @@ const val FAILED : String  = "SMV_N"
 
 const val YES : String = "YES"
 const val Dummy = "-2234"
+
+const val SEERBIT_DEFAULT_EMAIL = "seerbit_android_sdk@gmail.com"

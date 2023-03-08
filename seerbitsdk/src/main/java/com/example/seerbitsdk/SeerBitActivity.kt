@@ -175,7 +175,6 @@ fun NavHostController.navigateSingleTopNoSavedState(route: String) =
     }
 
 
-
 @Preview(showBackground = true)
 @Composable
 fun SeerBitWaterMarkPreview() {
@@ -233,6 +232,7 @@ fun CardHomeScreen(
     var alertDialogMessage by remember { mutableStateOf("") }
     var alertDialogHeaderMessage by remember { mutableStateOf("") }
     val openDialog = remember { mutableStateOf(false) }
+    var paymentReference = transactionViewModel.getPaymentReference()
 
     if (merchantDetailsState.hasError) {
         ErrorDialog(message = merchantDetailsState.errorMessage ?: "Something went wrong")
@@ -261,14 +261,14 @@ fun CardHomeScreen(
             ) {
 
             val cardDTO = CardDTO(
-                deviceType = "Desktop",
+                deviceType = "Android",
                 country = merchantDetailsData.payload?.address?.country!!,
                 20.0,
                 cvv = cvv,
                 redirectUrl = "http://localhost:3002/#/",
                 productId = "",
                 mobileNumber = merchantDetailsData.payload.number,
-                paymentReference = transactionViewModel.generateRandomReference(),
+                paymentReference = paymentReference,
                 fee = merchantDetailsData.payload.vatFee,
                 expiryMonth = cardExpiryMonth,
                 fullName = "Bamigbaye Bukola",
@@ -1051,7 +1051,7 @@ fun MyAppNavHost(
             // getJsonField
             val requiredFieldsJson: String? =
                 navBackStackEntry.arguments?.getString("requiredFields2")
-                val requiredField =
+            val requiredField =
                 Gson().fromJson(requiredFieldsJson.toString(), RequiredFields::class.java)
 
             val bankCode = navBackStackEntry.arguments?.getString("bankCode")
@@ -1112,17 +1112,9 @@ fun MyAppNavHost(
         }
 
 
-
-
-
         composable(route = Transfer.route) {
             transactionViewModel.resetTransactionState()
             TransferHomeScreen(
-                navigateToLoadingScreen = { /*TODO*/ },
-                currentDestination = null,
-                navController = rememberNavController(),
-                onOtherPaymentButtonClicked = { navController.navigateSingleTopTo(Route.OTHER_PAYMENT_SCREEN) },
-                onCancelPaymentButtonClicked = { navController.navigateSingleTopTo(Debit_CreditCard.route) },
                 merchantDetailsState = merchantDetailsState,
             )
         }
@@ -1143,11 +1135,6 @@ fun MyAppNavHost(
             val bankCode = navBackStackEntry.arguments?.getString("bankCode")
             transactionViewModel.resetTransactionState()
             USSDHomeScreen(
-                navigateToLoadingScreen = {},
-                currentDestination = currentDestination,
-                navController = navController,
-                onConfirmPaymentClicked = {},
-                onOtherPaymentButtonClicked = { navController.navigateSingleTopTo(Route.OTHER_PAYMENT_SCREEN) },
                 merchantDetailsState = merchantDetailsState,
                 transactionViewModel = transactionViewModel,
                 bankCode = bankCode

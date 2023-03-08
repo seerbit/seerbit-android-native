@@ -43,15 +43,8 @@ import com.example.seerbitsdk.viewmodels.TransactionViewModel
 @Composable
 fun TransferHomeScreen(
     modifier: Modifier = Modifier,
-    navigateToLoadingScreen: () -> Unit,
-    currentDestination: NavDestination?,
-    navController: NavHostController,
-    paymentReference: String = "",
-    onCancelPaymentButtonClicked: () -> Unit,
-    onOtherPaymentButtonClicked: () -> Unit,
     merchantDetailsState: MerchantDetailsState?,
     transactionViewModel: TransactionViewModel = viewModel()
-
 ) {
 
     var showLoadingScreen by remember { mutableStateOf(false) }
@@ -66,6 +59,7 @@ fun TransferHomeScreen(
     val openDialog = remember { mutableStateOf(false) }
     var alertDialogMessage by remember { mutableStateOf("") }
     var alertDialogHeaderMessage by remember { mutableStateOf("") }
+    val paymentRef = transactionViewModel.getPaymentReference()
 
 
     // if there is an error loading the report
@@ -96,9 +90,9 @@ fun TransferHomeScreen(
                 amount = "20",
                 productId = "",
                 mobileNumber = merchantDetailsData.payload.number,
-                paymentReference = "SBT-T54367073117",
+                paymentReference = paymentRef,
                 fee = merchantDetailsData.payload.vatFee,
-                fullName = "Amos Oruaroghene",
+                fullName = merchantDetailsData.payload.businessName,
                 channelType = "Transfer",
                 publicKey = merchantDetailsData.payload.livePublicKey,
                 source = "",
@@ -106,7 +100,7 @@ fun TransferHomeScreen(
                 sourceIP = "102.88.63.64",
                 currency = merchantDetailsData.payload.defaultCurrency,
                 productDescription = "",
-                email = "inspiron.amos@gmail.com",
+                email =  SEERBIT_DEFAULT_EMAIL,
                 retry = true,
                 deviceType = "Android",
                 amountControl = "FIXEDAMOUNT",
@@ -187,7 +181,7 @@ fun TransferHomeScreen(
 
                 if (queryTransactionStateState.data.data.code == PENDING_CODE) {
                     showCircularProgressBar = true
-                    transactionViewModel.queryTransaction(transferDTO.paymentReference!!)
+                    transactionViewModel.queryTransaction(paymentRef)
                 }
                 if (queryTransactionStateState.data.data.code == SUCCESS) {
                     alertDialogHeaderMessage = "Successful"
@@ -267,7 +261,7 @@ fun TransferHomeScreen(
                 buttonText = "I have completed this bank transfer",
                 onClick = {
                     if (isSuccesfulResponse) {
-                        transactionViewModel.queryTransaction(transferDTO.paymentReference!!)
+                        transactionViewModel.queryTransaction(paymentRef)
                     }
                 }, !showCircularProgressBar
             )
@@ -330,11 +324,6 @@ fun TransferHomeScreenPreview() {
     SeerBitTheme {
 
         TransferHomeScreen(
-            navigateToLoadingScreen = { /*TODO*/ },
-            currentDestination = null,
-            navController = rememberNavController(),
-            onCancelPaymentButtonClicked = { /*TODO*/ },
-            onOtherPaymentButtonClicked = { /*TODO*/ },
             merchantDetailsState = MerchantDetailsState(),
             transactionViewModel = viewModel
         )
