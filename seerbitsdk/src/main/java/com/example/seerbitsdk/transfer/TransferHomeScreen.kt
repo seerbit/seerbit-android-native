@@ -95,7 +95,7 @@ fun TransferHomeScreen(
                 bankCode = "044",
                 amount = "20",
                 productId = "",
-                mobileNumber = "404",
+                mobileNumber = merchantDetailsData.payload.number,
                 paymentReference = "SBT-T54367073117",
                 fee = merchantDetailsData.payload.vatFee,
                 fullName = "Amos Oruaroghene",
@@ -138,17 +138,26 @@ fun TransferHomeScreen(
 
             if (initiateTransferPayment.data == null && !isSuccesfulResponse) {
                 transactionViewModel.initiateTransaction(transferDTO)
+
             }
 
             if (initiateTransferPayment.hasError) {
-                ErrorDialog(
-                    message = initiateTransferPayment.errorMessage
-                        ?: "Something went wrong"
-                )
+                showCircularProgressBar = false
+                openDialog.value = true
+                alertDialogMessage =
+                    queryTransactionStateState.errorMessage ?: "Could not retrieve bank details"
+                alertDialogHeaderMessage = "Failed"
+                transactionViewModel.resetTransactionState()
+                isSuccesfulResponse = true
             }
-            showCircularProgressBar = initiateTransferPayment.isLoading
+
+            if(initiateTransferPayment.isLoading){
+                showCircularProgressBar = true
+            }
+
 
             initiateTransferPayment.data?.let {
+                showCircularProgressBar = false
                 if (!isSuccesfulResponse) {
                     wallet = it.data?.payments?.wallet!!
                     walletName = it.data.payments.walletName!!
@@ -160,12 +169,17 @@ fun TransferHomeScreen(
 
             //querying transaction happens after otp has been inputted
             if (queryTransactionStateState.hasError) {
-                ErrorDialog(
-                    message = queryTransactionStateState.errorMessage ?: "Something went wrong"
-                )
+                showCircularProgressBar = false
+                openDialog.value = true
+                alertDialogMessage =
+                    queryTransactionStateState.data?.data?.message ?: "Could not retrieve bank details"
+                alertDialogHeaderMessage = "Failed"
+                transactionViewModel.resetTransactionState()
+
             }
             if (queryTransactionStateState.isLoading) {
                 showCircularProgressBar = true
+
             }
 
 
@@ -400,8 +414,9 @@ fun CustomAccountDetailsRow(
                     fontSize = 14.sp,
                     fontFamily = Faktpro,
                     fontWeight = FontWeight.Normal,
-                    lineHeight = 10.sp,
-                )
+                    lineHeight = 14.sp,
+                ),
+                textAlign = TextAlign.Right
             )
             Spacer(modifier = Modifier.width(4.dp))
             if (icon != null) {

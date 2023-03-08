@@ -51,7 +51,7 @@ import com.example.seerbitsdk.component.*
 import com.example.seerbitsdk.models.CardDetails
 import com.example.seerbitsdk.models.RequiredFields
 import com.example.seerbitsdk.models.card.CardDTO
-import com.example.seerbitsdk.navigationpage.OtherPaymentScreen
+import com.example.seerbitsdk.component.OtherPaymentScreen
 import com.example.seerbitsdk.screenstate.*
 import com.example.seerbitsdk.transfer.TransferHomeScreen
 import com.example.seerbitsdk.ui.theme.*
@@ -897,7 +897,8 @@ fun MyAppNavHost(
             OtherPaymentScreen(
                 onCancelButtonClicked = { navController.navigateSingleTopTo(Debit_CreditCard.route) },
                 currentDestination = currentDestination,
-                navController = navController
+                navController = navController,
+                merchantDetailsState = merchantDetailsState,
             )
         }
 

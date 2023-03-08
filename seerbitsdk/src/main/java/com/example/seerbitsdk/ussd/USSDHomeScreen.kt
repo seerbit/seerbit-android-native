@@ -111,7 +111,7 @@ fun USSDHomeScreen(
                     productId = "",
                     mobileNumber = merchantDetailsData.payload.number,
                     paymentReference = "SBT-T54367073117",
-                    fee =  merchantDetailsData.payload?.vatFee,
+                    fee = merchantDetailsData.payload.vatFee,
                     fullName = "Amos Oruaroghene",
                     channelType = "ussd",
                     publicKey = merchantDetailsData.payload.livePublicKey,
@@ -139,19 +139,24 @@ fun USSDHomeScreen(
                 }
 
                 if (initiateUssdPayment.hasError) {
-                    ErrorDialog(
-                        message = initiateUssdPayment.errorMessage
-                            ?: "Something went wrong"
-                    )
-                    retryCount++
+                    showCircularProgressBar = false
+                    openDialog.value = true
+                    alertDialogMessage =
+                        queryTransactionStateState.errorMessage ?: "Something went wrong"
+                    alertDialogHeaderMessage = "Failed"
+                    transactionViewModel.resetTransactionState()
+                    isSuccesfulResponse = true
                 }
-                showCircularProgressBar = initiateUssdPayment.isLoading
+                if(initiateUssdPayment.isLoading) {
+                    showCircularProgressBar = true
+                }
 
                 initiateUssdPayment.data?.let {
                     val paymentReference2 = it.data?.payments?.paymentReference
                     if (!isSuccesfulResponse) {
                         ussdCode = it.data?.payments?.ussdDailCode.toString()
                     }
+                    showCircularProgressBar = false
                     isSuccesfulResponse = true
 
 
@@ -163,7 +168,7 @@ fun USSDHomeScreen(
                     openDialog.value = true
                     alertDialogMessage =
                         queryTransactionStateState.errorMessage ?: "Something went wrong"
-                    alertDialogHeaderMessage = "Success"
+                    alertDialogHeaderMessage = "Failed"
                 }
                 if (queryTransactionStateState.isLoading) {
                 }
