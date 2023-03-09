@@ -115,14 +115,13 @@ fun OtherPaymentScreen(
                     showCircularProgressBar = true
                 }
 
-
                 initiateTransferPayment.data?.let {
                     paymentRef = it.data?.payments?.paymentReference?:""
                     showCircularProgressBar = false
                     wallet = it.data?.payments?.wallet!!
-                        walletName = it.data.payments.walletName!!
-                        bankName = it.data.payments.bankName!!
-                        accountNumber = it.data.payments.accountNumber!!
+                        walletName = it.data.payments.walletName?:""
+                        bankName = it.data.payments.bankName?:""
+                        accountNumber = it.data.payments.accountNumber?:""
 
                     navController.navigateSingleTopNoSavedState("${Transfer.route}/$paymentRef/$wallet/$walletName/$bankName/$accountNumber")
 
@@ -137,7 +136,6 @@ fun OtherPaymentScreen(
                         }
                         else
                             navController.navigateSingleTopNoSavedState(newScreen.route)
-
 
                     },
                     currentButtonSelected = Transfer,

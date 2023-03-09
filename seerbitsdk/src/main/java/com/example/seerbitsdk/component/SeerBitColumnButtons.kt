@@ -88,7 +88,6 @@ fun SeerBitNavButtonsColumn(
     ) {
 
         Column(Modifier.selectableGroup()) {
-
             allButtons.forEach { navButtons ->
                 SeerBitNavButtons(
                     text = navButtons.name,
