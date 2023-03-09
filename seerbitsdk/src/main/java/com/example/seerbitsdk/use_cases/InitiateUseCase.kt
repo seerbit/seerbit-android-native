@@ -41,21 +41,6 @@ class InitiateUseCase {
                             emit(Resource.Error(jsonObject.getString("message")))
                     }
                 }
-                is UssdDTO -> {
-                    val apiResponse = initiateTransactionRepository.initiateUssd(transactionDTO)
-                    if (apiResponse.isSuccessful) {
-                        val result = apiResponse.body()
-                        emit(Resource.Success(result))
-                    } else {
-                        val jsonObject = JSONObject(
-                            Objects.requireNonNull<ResponseBody>(apiResponse.errorBody()).string()
-                        )
-                        if (apiResponse.code() == 500)
-                            emit(Resource.Error(jsonObject.getString("error")))
-                        else
-                            emit(Resource.Error(jsonObject.getString("message")))
-                    }
-                }
 
                 is TransferDTO -> {
                     val apiResponse = initiateTransactionRepository.initiateTransfer(transactionDTO)
@@ -91,6 +76,34 @@ class InitiateUseCase {
                 }
             }
 
+
+        } catch (e: IOException) {
+            emit(Resource.Error("IO Exception: ${e.message}"))
+        } catch (e: TimeoutException) {
+            emit(Resource.Error("Timeout Exception: ${e.message}"))
+        } catch (e: HttpException) {
+            emit(Resource.Error("Http Exception: ${e.message}"))
+        }
+
+    }
+
+    operator fun invoke(ussdDTO: UssdDTO) = flow {
+        try {
+            emit(Resource.Loading())
+            val apiResponse = initiateTransactionRepository.initiateUssd(ussdDTO)
+            if (apiResponse.isSuccessful) {
+                val result = apiResponse.body()
+                emit(Resource.Success(result))
+            } else {
+
+                val jsonObject = JSONObject(
+                    Objects.requireNonNull<ResponseBody>(apiResponse.errorBody()).string()
+                )
+                if (apiResponse.code() == 500)
+                    emit(Resource.Error(jsonObject.getString("error")))
+                else
+                    emit(Resource.Error(jsonObject.getString("message")))
+            }
 
         } catch (e: IOException) {
             emit(Resource.Error("IO Exception: ${e.message}"))

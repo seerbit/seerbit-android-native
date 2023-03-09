@@ -1116,33 +1116,33 @@ fun MyAppNavHost(
         }
 
         composable(
-            "${Route.USSD_HOME_SCREEN}/{bankCode}",
+            "${Route.USSD_HOME_SCREEN}/{paymentReference}/{ussdCode}",
             arguments = listOf(
                 // declaring argument type
-                navArgument("bankCode") { type = NavType.StringType },
+                navArgument("ussdCode") { type = NavType.StringType },
+                navArgument("paymentReference") { type = NavType.StringType },
 
                 )
         ) { navBackStackEntry ->
 
-            val bankCode = navBackStackEntry.arguments?.getString("bankCode")
+            val ussdCode = navBackStackEntry.arguments?.getString("ussdCode")
+            val paymentReference = navBackStackEntry.arguments?.getString("paymentReference")
             transactionViewModel.resetTransactionState()
             USSDHomeScreen(
                 merchantDetailsState = merchantDetailsState,
                 transactionViewModel = transactionViewModel,
-                bankCode = bankCode
+                ussdCode = ussdCode,
+                paymentReference = paymentReference,
+                navController = navController
             )
         }
 
 
         composable(UssdSelectBank.route) {
-
             USSDSelectBanksScreen(
-                navigateToUssdHomeScreen = { },
-                currentDestination = currentDestination,
                 navController = navController,
-                onConfirmPaymentClicked = { /*TODO*/ },
                 merchantDetailsState = merchantDetailsState,
-                selectBankViewModel = selectBankViewModel
+               transactionViewModel = transactionViewModel
             )
 
         }

@@ -19,6 +19,7 @@ import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.seerbitsdk.*
+import com.example.seerbitsdk.models.transfer.TransferDTO
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.ui.theme.DeepRed
 import com.example.seerbitsdk.ui.theme.Faktpro
@@ -88,7 +89,9 @@ fun OtherPaymentScreen(
                 SeerBitNavButtonsColumn(
                     allButtons = addedButtons,
                     onButtonSelected = { newScreen ->
+
                         navController.navigateSingleTopNoSavedState(newScreen.route)
+
                     },
                     currentButtonSelected = Transfer
                 )
@@ -131,6 +134,10 @@ fun OtherPaymentScreen(
 
         }
     }
+}
+
+fun generateTransferDTO (merchantDetailsState: MerchantDetailsState?){
+
 }
 
 @Preview(showBackground = true, widthDp = 400, heightDp = 700)

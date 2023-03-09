@@ -28,25 +28,27 @@ import com.example.seerbitsdk.component.Route
 import com.example.seerbitsdk.component.SeerbitPaymentDetailHeader
 import com.example.seerbitsdk.models.MerchantBanksItem
 import com.example.seerbitsdk.models.ussd.UssdBankData
+import com.example.seerbitsdk.models.ussd.UssdDTO
 import com.example.seerbitsdk.navigateSingleTopNoSavedState
 import com.example.seerbitsdk.navigateSingleTopTo
+import com.example.seerbitsdk.screenstate.InitiateTransactionState
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.ui.theme.SeerBitTheme
 import com.example.seerbitsdk.viewmodels.SelectBankViewModel
+import com.example.seerbitsdk.viewmodels.TransactionViewModel
 
 @Composable
 fun USSDSelectBanksScreen(
     modifier: Modifier = Modifier,
-    navigateToUssdHomeScreen: () -> Unit,
-    currentDestination: NavDestination?,
     navController: NavHostController,
-    onConfirmPaymentClicked: () -> Unit,
     merchantDetailsState: MerchantDetailsState?,
-    selectBankViewModel: SelectBankViewModel
+   transactionViewModel : TransactionViewModel
 ) {
     var bankCode by remember { mutableStateOf("") }
     var showErrorDialog by remember { mutableStateOf(false) }
     var showCircularProgressBar by remember { mutableStateOf(false) }
+    var paymentRef by  remember { mutableStateOf("") }
+    var ussdCode by  remember { mutableStateOf("") }
 
     // if there is an error loading the report
     if (merchantDetailsState?.hasError!!) {
@@ -76,7 +78,6 @@ fun USSDSelectBanksScreen(
                 Spacer(modifier = Modifier.height(25.dp))
 
                 SeerbitPaymentDetailHeader(
-
                     charges =  merchantDetailsData.payload?.vatFee?.toDouble()!!,
                     amount = "20.00",
                     currencyText = merchantDetailsData.payload.defaultCurrency!!,
@@ -89,15 +90,63 @@ fun USSDSelectBanksScreen(
                 if (showErrorDialog) {
                     ErrorDialog(message = "Kindly Select a bank")
                 }
+
                 if(showCircularProgressBar){
                     showCircularProgress(showProgress = true)
                 }
 
-
-
                 UssdSelectBankButton {
                     bankCode = it
                 }
+
+                val ussdDTO = UssdDTO(
+                    country = merchantDetailsData.payload.country?.nameCode ?: "",
+                    bankCode = bankCode,
+                    amount = "20",
+                    redirectUrl = "http://localhost:3002/#/",
+                    productId = "",
+                    mobileNumber = merchantDetailsData.payload.number,
+                    paymentReference = transactionViewModel.generateRandomReference(),
+                    fee = merchantDetailsData.payload.vatFee,
+                    fullName = merchantDetailsData.payload.businessName,
+                    channelType = "ussd",
+                    publicKey = "SBPUBK_TCDUH6MNIDLHMJXJEJLBO6ZU2RNUUPHI",
+                    source = "",
+                    paymentType = "USSD",
+                    sourceIP = "102.88.63.64",
+                    currency = merchantDetailsData.payload.defaultCurrency,
+                    productDescription = "",
+                    email = "sdk@gmail.com",
+                    retry = false,
+                    ddeviceType = "Android"
+                )
+
+                //HANDLE INITIATE TRANSACTION RESPONSE
+                val initiateUssdPayment: InitiateTransactionState =
+                    transactionViewModel.initiateTransactionState2.value
+                //enter payment states
+
+
+                if (initiateUssdPayment.hasError) {
+                    showCircularProgressBar = false
+                    transactionViewModel.resetTransactionState()
+                }
+
+                if (initiateUssdPayment.isLoading) {
+                    showCircularProgressBar = true
+                }
+
+                initiateUssdPayment.data?.let {
+                    paymentRef = it.data?.payments?.paymentReference ?: ""
+                    ussdCode = it.data?.payments?.ussdDailCode.toString()
+                    showCircularProgressBar = false
+                    navController.navigateSingleTopNoSavedState(
+                        "${Route.USSD_HOME_SCREEN}/$paymentRef/$ussdCode")
+
+                }
+
+
+
 
                 Spacer(modifier = modifier.height(40.dp))
 
@@ -105,8 +154,7 @@ fun USSDSelectBanksScreen(
                     buttonText = "Pay NGN 20.00",
                     onClick = {
                         if(bankCode.isNotEmpty()) {
-                            navController.navigateSingleTopNoSavedState(
-                                "${Route.USSD_HOME_SCREEN}/$bankCode")
+                            transactionViewModel.initiateUssdTransaction(ussdDTO)
                         }
                         else {
                             showErrorDialog = true

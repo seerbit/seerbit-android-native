@@ -27,11 +27,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.seerbitsdk.Debit_CreditCard
 import com.example.seerbitsdk.ErrorDialog
 import com.example.seerbitsdk.card.AuthorizeButton
 import com.example.seerbitsdk.card.showCircularProgress
 import com.example.seerbitsdk.component.*
 import com.example.seerbitsdk.models.ussd.UssdDTO
+import com.example.seerbitsdk.navigateSingleTopNoSavedState
 import com.example.seerbitsdk.screenstate.InitiateTransactionState
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.screenstate.QueryTransactionState
@@ -45,22 +47,21 @@ import com.example.seerbitsdk.viewmodels.TransactionViewModel
 @Composable
 fun USSDHomeScreen(
     modifier: Modifier = Modifier,
+    navController: NavHostController,
     merchantDetailsState: MerchantDetailsState?,
-    transactionViewModel: TransactionViewModel = viewModel(),
-    bankCode: String?
+    transactionViewModel: TransactionViewModel,
+    paymentReference: String?,
+    ussdCode: String?,
 
-) {
+
+    ) {
     var showLoadingScreen by remember { mutableStateOf(false) }
-    var ussdCode by remember { mutableStateOf("") }
-    var isSuccesfulResponse by remember { mutableStateOf(false) }
-    var retryCount by remember { mutableStateOf(0) }
     val context = LocalContext.current
     var showCircularProgressBar by rememberSaveable { mutableStateOf(false) }
     val openDialog = remember { mutableStateOf(false) }
     var alertDialogMessage by remember { mutableStateOf("") }
     var alertDialogHeaderMessage by remember { mutableStateOf("") }
 
-    var paymentRef by remember { mutableStateOf("") }
 
 
     Column(modifier = modifier) {
@@ -72,9 +73,8 @@ fun USSDHomeScreen(
             showCircularProgress(showProgress = true)
         }
 
-
-        merchantDetailsState.data?.let { merchantDetailsData ->
-
+        if (merchantDetailsState.data != null) {
+            val merchantDetailsData = merchantDetailsState.data
             Column(
                 modifier = modifier
                     .fillMaxHeight()
@@ -88,7 +88,6 @@ fun USSDHomeScreen(
             ) {
 
 
-
                 Spacer(modifier = Modifier.height(21.dp))
                 SeerbitPaymentDetailHeader(
 
@@ -100,63 +99,11 @@ fun USSDHomeScreen(
                     merchantDetailsData.payload.supportEmail!!
                 )
 
-                val ussdDTO = UssdDTO(
-                    country = merchantDetailsData.payload.country?.nameCode?:"",
-                    bankCode = bankCode,
-                    amount = "20",
-                    redirectUrl = "http://localhost:3002/#/",
-                    productId = "",
-                    mobileNumber = merchantDetailsData.payload.number,
-                    paymentReference  = transactionViewModel.generateRandomReference(),
-                    fee = merchantDetailsData.payload.vatFee,
-                    fullName = merchantDetailsData.payload.businessName,
-                    channelType = "ussd",
-                    publicKey = "SBPUBK_TCDUH6MNIDLHMJXJEJLBO6ZU2RNUUPHI",
-                    source = "",
-                    paymentType = "USSD",
-                    sourceIP = "102.88.63.64",
-                    currency = merchantDetailsData.payload.defaultCurrency,
-                    productDescription = "",
-                    email ="sdk@gmail.com",
-                    retry = false,
-                    ddeviceType = "Android"
-                )
 
                 //HANDLES initiate query response
                 val queryTransactionStateState: QueryTransactionState =
                     transactionViewModel.queryTransactionState.value
 
-                //HANDLE INITIATE TRANSACTION RESPONSE
-                val initiateUssdPayment: InitiateTransactionState =
-                    transactionViewModel.initiateTransactionState.value
-                //enter payment states
-
-                if (initiateUssdPayment.data == null && !isSuccesfulResponse) {
-                    transactionViewModel.initiateTransaction(ussdDTO)
-                }
-
-                if (initiateUssdPayment.hasError) {
-                    showCircularProgressBar = false
-                    openDialog.value = true
-                    alertDialogMessage = queryTransactionStateState.errorMessage ?: "Something went wrong"
-                    alertDialogHeaderMessage = "Failed"
-                    transactionViewModel.resetTransactionState()
-                    isSuccesfulResponse = true
-                }
-
-                if(initiateUssdPayment.isLoading) {
-                    showCircularProgressBar = true
-                }
-
-                initiateUssdPayment.data?.let {
-                    paymentRef = it.data?.payments?.paymentReference!!
-                    if (!isSuccesfulResponse) {
-                        ussdCode = it.data?.payments?.ussdDailCode.toString()
-                    }
-                    showCircularProgressBar = false
-                    isSuccesfulResponse = true
-
-                }
 
                 //querying transaction happens after otp has been inputted
                 if (queryTransactionStateState.hasError) {
@@ -172,7 +119,7 @@ fun USSDHomeScreen(
                 queryTransactionStateState.data?.data?.let {
 
                     if (queryTransactionStateState.data.data.code == PENDING_CODE) {
-                        transactionViewModel.queryTransaction(paymentRef)
+                        transactionViewModel.queryTransaction(paymentReference!!)
                     }
                     if (queryTransactionStateState.data.data.code == SUCCESS) {
 
@@ -213,7 +160,7 @@ fun USSDHomeScreen(
                     )
 
                     Spacer(modifier = Modifier.height(20.dp))
-                    USSDCodeSurfaceView(LocalContext.current, ussdCodeText = ussdCode)
+                    USSDCodeSurfaceView(LocalContext.current, ussdCodeText = ussdCode ?: "")
                     Spacer(modifier = modifier.height(20.dp))
 
                     Text(
@@ -227,7 +174,7 @@ fun USSDHomeScreen(
                         modifier = Modifier
                             .align(alignment = Alignment.CenterHorizontally)
                             .clickable {
-                                copyToClipboard(context, ussdCode)
+                                copyToClipboard(context, ussdCode ?: "")
                                 Toast
                                     .makeText(context, "Ussd code copied!", Toast.LENGTH_SHORT)
                                     .show()
@@ -239,11 +186,9 @@ fun USSDHomeScreen(
                     AuthorizeButton(
                         buttonText = "Confirm Payment",
                         onClick = {
-                            if (isSuccesfulResponse) {
-                                showLoadingScreen = true
-                                transactionViewModel.queryTransaction(paymentRef)
+                            showLoadingScreen = true
+                            transactionViewModel.queryTransaction(paymentReference ?: "")
 
-                            }
 
                         },
                         !showCircularProgressBar
@@ -252,6 +197,7 @@ fun USSDHomeScreen(
                 } else {
                     showLoaderLayout()
                 }
+
 
                 //The alert dialog occurs here
                 if (openDialog.value) {
@@ -280,7 +226,9 @@ fun USSDHomeScreen(
                             Button(
 
                                 onClick = {
+                                    navController.navigateSingleTopNoSavedState(Debit_CreditCard.route)
                                     openDialog.value = false
+
                                 },
                                 colors = ButtonDefaults.buttonColors(
                                     backgroundColor = SignalRed
@@ -292,9 +240,6 @@ fun USSDHomeScreen(
                         },
                     )
                 }
-
-
-
 
 
             }
@@ -350,8 +295,11 @@ fun HeaderScreenPreview() {
         USSDHomeScreen(
             merchantDetailsState = MerchantDetailsState(),
             transactionViewModel = viewModel,
-            bankCode = ""
-        )
+            paymentReference = "",
+            ussdCode = "",
+            navController = rememberNavController()
+
+            )
     }
 }
 

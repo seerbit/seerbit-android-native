@@ -61,4 +61,4 @@ data class UssdDTO(
 
 	@field:SerializedName("retry")
 	val retry: Boolean? = null
-) : TransactionDTO
+)

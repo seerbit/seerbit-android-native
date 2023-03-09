@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.seerbitsdk.models.CardOTPDTO
 import com.example.seerbitsdk.models.Resource
 import com.example.seerbitsdk.models.TransactionDTO
+import com.example.seerbitsdk.models.ussd.UssdDTO
 import com.example.seerbitsdk.screenstate.CardBinState
 import com.example.seerbitsdk.use_cases.InitiateUseCase
 import com.example.seerbitsdk.screenstate.InitiateTransactionState
@@ -24,24 +25,18 @@ import java.util.*
 class TransactionViewModel : ViewModel() {
 
     private val initiateTransactionUseCase: InitiateUseCase = InitiateUseCase()
-    private val sendOtpUseCase: OtpUseCase= OtpUseCase()
+    private val sendOtpUseCase: OtpUseCase = OtpUseCase()
     private val cardBinUseCase: CardBinUseCase = CardBinUseCase()
 
     private var _initiateTransactionState = mutableStateOf(InitiateTransactionState())
     val initiateTransactionState: State<InitiateTransactionState>
         get() = _initiateTransactionState
 
-    private var _initiateTransactionState2 = mutableStateOf(InitiateTransactionState())
-    val initiateTransactionState2: State<InitiateTransactionState>
-        get() = _initiateTransactionState2
 
     private var _queryTransactionState = mutableStateOf(QueryTransactionState())
     val queryTransactionState: State<QueryTransactionState>
         get() = _queryTransactionState
 
-    private var _queryTransactionState2 = mutableStateOf(QueryTransactionState())
-    val queryTransactionState2: State<QueryTransactionState>
-        get() = _queryTransactionState2
 
     private var _otpState = mutableStateOf(OTPState())
     val otpState: State<OTPState>
@@ -56,8 +51,9 @@ class TransactionViewModel : ViewModel() {
         get() = _paymentRefState
 
 
-
-
+    private var _initiateTransactionState2 = mutableStateOf(InitiateTransactionState())
+    val initiateTransactionState2: State<InitiateTransactionState>
+        get() = _initiateTransactionState2
 
 
     init {
@@ -66,17 +62,17 @@ class TransactionViewModel : ViewModel() {
         _paymentRefState.value = generateRandomReference()
     }
 
-    fun resetTransactionState(){
+    fun resetTransactionState() {
         _initiateTransactionState.value = InitiateTransactionState()
         _initiateTransactionState2.value = InitiateTransactionState()
         _queryTransactionState.value = QueryTransactionState()
-        _queryTransactionState2.value = QueryTransactionState()
     }
 
 
-    fun clearCardBinState(){
+    fun clearCardBinState() {
         _cardBinState.value = CardBinState()
     }
+
     fun initiateTransaction(transactionDTO: TransactionDTO) {
         _initiateTransactionState.value = InitiateTransactionState(isLoading = true)
         viewModelScope.launch(Dispatchers.Main) {
@@ -103,10 +99,10 @@ class TransactionViewModel : ViewModel() {
         }
     }
 
-    fun initiateTransaction2(transactionDTO: TransactionDTO) {
-        _initiateTransactionState.value = InitiateTransactionState(isLoading = true)
-        viewModelScope.launch(Dispatchers.Main) {
-            initiateTransactionUseCase(transactionDTO).collectLatest { resource ->
+    fun initiateUssdTransaction(ussdDTO: UssdDTO) {
+        _initiateTransactionState2.value = InitiateTransactionState(isLoading = true)
+        viewModelScope.launch(Dispatchers.IO) {
+            initiateTransactionUseCase(ussdDTO).collectLatest { resource ->
                 when (resource) {
                     is Resource.Success -> {
                         _initiateTransactionState2.value =
@@ -157,45 +153,19 @@ class TransactionViewModel : ViewModel() {
         }
     }
 
-    fun queryTransaction2(paymentReference: String) {
-        _queryTransactionState2.value = QueryTransactionState(isLoading = true)
-        viewModelScope.launch(Dispatchers.Main) {
-
-            initiateTransactionUseCase(paymentReference = paymentReference).collectLatest { resource ->
-                when (resource) {
-                    is Resource.Success -> {
-                        _queryTransactionState2.value = QueryTransactionState(data = resource.data)
-                    }
-
-                    is Resource.Error -> {
-                        _queryTransactionState2.value = QueryTransactionState(
-                            hasError = true,
-                            errorMessage = resource.message
-                        )
-                    }
-                    is Resource.Loading -> {
-                        _queryTransactionState2.value = QueryTransactionState(
-                            isLoading = true
-                        )
-                    }
-                }
-            }
-
-        }
-    }
 
     fun sendOtp(cardOTPDTO: CardOTPDTO) {
         _otpState.value = OTPState(isLoading = true)
         viewModelScope.launch(Dispatchers.Main) {
 
-           sendOtpUseCase(cardOTPDTO).collectLatest { resource ->
+            sendOtpUseCase(cardOTPDTO).collectLatest { resource ->
                 when (resource) {
                     is Resource.Success -> {
-                        _otpState.value =  OTPState(data = resource.data)
+                        _otpState.value = OTPState(data = resource.data)
                     }
 
                     is Resource.Error -> {
-                        _otpState.value =  OTPState(
+                        _otpState.value = OTPState(
                             hasError = true,
                             errorMessage = resource.message
                         )
@@ -212,9 +182,9 @@ class TransactionViewModel : ViewModel() {
     }
 
 
-    fun fetchCardBin(firstSixDigits : String) {
+    fun fetchCardBin(firstSixDigits: String) {
         _cardBinState.value = CardBinState(isLoading = true)
-        viewModelScope.launch (Dispatchers.Main){
+        viewModelScope.launch(Dispatchers.Main) {
 
             cardBinUseCase(firstSixDigits).collect { resource ->
                 when (resource) {
@@ -245,14 +215,14 @@ class TransactionViewModel : ViewModel() {
         return "SBT-T${current.format(formatter)}"
     }
 
-    fun generateRandomReference() : String {
+    fun generateRandomReference(): String {
 
         val str = "ABCDEFGHIJKLMNOPQRSTNVabcdef6ghijklmnopqrstuvwxyzABCD123456789"
         var password = ""
         for (i in 1..8) {
             password += str.random()
         }
-        return  "SBT-T" + UUID.randomUUID().toString()
+        return "SBT-T" + UUID.randomUUID().toString()
     }
 
 
