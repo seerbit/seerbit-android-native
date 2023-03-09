@@ -3,6 +3,7 @@ package com.example.seerbitsdk.ussd
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.text.TextUtils
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -58,7 +59,8 @@ fun USSDHomeScreen(
     val openDialog = remember { mutableStateOf(false) }
     var alertDialogMessage by remember { mutableStateOf("") }
     var alertDialogHeaderMessage by remember { mutableStateOf("") }
-    var paymentRef = transactionViewModel.getPaymentReference()
+
+    var paymentRef by remember { mutableStateOf("") }
 
 
     Column(modifier = modifier) {
@@ -99,24 +101,24 @@ fun USSDHomeScreen(
                 )
 
                 val ussdDTO = UssdDTO(
-                    country = merchantDetailsData.payload.address?.country!!,
+                    country = merchantDetailsData.payload.country?.nameCode?:"",
                     bankCode = bankCode,
                     amount = "20",
                     redirectUrl = "http://localhost:3002/#/",
                     productId = "",
                     mobileNumber = merchantDetailsData.payload.number,
-                    paymentReference = paymentRef,
+                    paymentReference  = transactionViewModel.generateRandomReference(),
                     fee = merchantDetailsData.payload.vatFee,
                     fullName = merchantDetailsData.payload.businessName,
                     channelType = "ussd",
-                    publicKey = merchantDetailsData.payload.livePublicKey,
+                    publicKey = "SBPUBK_TCDUH6MNIDLHMJXJEJLBO6ZU2RNUUPHI",
                     source = "",
                     paymentType = "USSD",
                     sourceIP = "102.88.63.64",
                     currency = merchantDetailsData.payload.defaultCurrency,
                     productDescription = "",
-                    email = SEERBIT_DEFAULT_EMAIL,
-                    retry = true,
+                    email ="sdk@gmail.com",
+                    retry = false,
                     ddeviceType = "Android"
                 )
 
@@ -136,24 +138,23 @@ fun USSDHomeScreen(
                 if (initiateUssdPayment.hasError) {
                     showCircularProgressBar = false
                     openDialog.value = true
-                    alertDialogMessage =
-                        queryTransactionStateState.errorMessage ?: "Something went wrong"
+                    alertDialogMessage = queryTransactionStateState.errorMessage ?: "Something went wrong"
                     alertDialogHeaderMessage = "Failed"
                     transactionViewModel.resetTransactionState()
                     isSuccesfulResponse = true
                 }
+
                 if(initiateUssdPayment.isLoading) {
                     showCircularProgressBar = true
                 }
 
                 initiateUssdPayment.data?.let {
-                    val paymentReference2 = it.data?.payments?.paymentReference
+                    paymentRef = it.data?.payments?.paymentReference!!
                     if (!isSuccesfulResponse) {
                         ussdCode = it.data?.payments?.ussdDailCode.toString()
                     }
                     showCircularProgressBar = false
                     isSuccesfulResponse = true
-
 
                 }
 

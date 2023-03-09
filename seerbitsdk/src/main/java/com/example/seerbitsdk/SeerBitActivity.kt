@@ -201,12 +201,10 @@ fun showCircularProgress(showProgress: Boolean) {
 fun CardHomeScreen(
     modifier: Modifier = Modifier,
     onNavigateToPinScreen: (CardDTO) -> Unit,
-    currentDestination: NavDestination?,
     navController: NavHostController,
     merchantDetailsState: MerchantDetailsState,
     onOtherPaymentButtonClicked: () -> Unit,
-    transactionViewModel: TransactionViewModel,
-    merchantDetailsViewModel: MerchantDetailsViewModel
+    transactionViewModel: TransactionViewModel
 ) {
 
     var cardDetailsData: CardDetails by remember { mutableStateOf(CardDetails("", "", "", "")) }
@@ -216,19 +214,16 @@ fun CardHomeScreen(
     var cardNumber by rememberSaveable { mutableStateOf("") }
     var cardExpiryMonth by rememberSaveable { mutableStateOf("") }
     var cardExpiryYear by rememberSaveable { mutableStateOf("") }
-    var isSuccessfulResponse by rememberSaveable { mutableStateOf(false) }
     var redirectUrl by rememberSaveable { mutableStateOf("") }
     var canRedirectToUrl by remember { mutableStateOf(false) }
     var trailingIcon by rememberSaveable { mutableStateOf(0) }
 
 
-    var showErrorDialog by remember { mutableStateOf(false) }
     var startQueryingTransaction by remember { mutableStateOf(false) }
 
     //determines if to show progress bar when loading
     var showCircularProgressBar by remember { mutableStateOf(false) }
     var paymentRef by remember { mutableStateOf("") }
-
     var alertDialogMessage by remember { mutableStateOf("") }
     var alertDialogHeaderMessage by remember { mutableStateOf("") }
     val openDialog = remember { mutableStateOf(false) }
@@ -262,24 +257,24 @@ fun CardHomeScreen(
 
             val cardDTO = CardDTO(
                 deviceType = "Android",
-                country = merchantDetailsData.payload?.address?.country!!,
+                country = merchantDetailsData.payload?.country?.nameCode?:"",
                 20.0,
                 cvv = cvv,
                 redirectUrl = "http://localhost:3002/#/",
                 productId = "",
-                mobileNumber = merchantDetailsData.payload.number,
+                mobileNumber = merchantDetailsData.payload?.number,
                 paymentReference = paymentReference,
-                fee = merchantDetailsData.payload.vatFee,
+                fee = merchantDetailsData.payload?.vatFee,
                 expiryMonth = cardExpiryMonth,
-                fullName = "Bamigbaye Bukola",
+                fullName = merchantDetailsData.payload?.businessName,
                 "MASTERCARD",
-                publicKey = merchantDetailsData.payload.livePublicKey,
+                publicKey = merchantDetailsData.payload?.livePublicKey,
                 expiryYear = cardExpiryYear,
                 source = "",
                 paymentType = "CARD",
                 sourceIP = "0.0.0.1",
                 pin = "",
-                currency = merchantDetailsData.payload.defaultCurrency,
+                currency = merchantDetailsData.payload?.defaultCurrency,
                 "LOCAL",
                 false,
                 email = "inspiron.amos@gmail.com",
@@ -290,7 +285,7 @@ fun CardHomeScreen(
 
             //SeerBit Header
             SeerbitPaymentDetailHeader(
-                charges = merchantDetailsData.payload.vatFee?.toDouble()!!,
+                charges = merchantDetailsData.payload?.vatFee?.toDouble()!!,
                 amount = formatAmount(cardDTO.amount),
                 currencyText = merchantDetailsData.payload.defaultCurrency!!,
                 "Debit/Credit Card Details",
@@ -909,13 +904,10 @@ fun MyAppNavHost(
                     // if there is an error loading the report
                     transactionViewModel.initiateTransaction(cardDTO)
                 },
-
-                onOtherPaymentButtonClicked = { navController.navigateSingleTopTo(Route.OTHER_PAYMENT_SCREEN) },
-                currentDestination = currentDestination,
                 navController = navController,
                 merchantDetailsState = merchantDetailsState,
-                transactionViewModel = transactionViewModel,
-                merchantDetailsViewModel = merchantDetailsViewModel
+                onOtherPaymentButtonClicked = { navController.navigateSingleTopTo(Route.OTHER_PAYMENT_SCREEN) },
+                transactionViewModel = transactionViewModel
             )
         }
 

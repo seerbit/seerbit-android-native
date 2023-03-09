@@ -25,7 +25,7 @@ import javax.inject.Singleton
 @Singleton
 interface SeerBitService {
 
-    @GET("merchant/verify/?key=SBPUBK_0HSRUO39Y4WZABLHEFMHTTLKYYJ52MTS&sbcp=uFWgBWF8OB56oCSJudCxKYqNm8Cttss4&partner-id=1")
+    @GET("merchant/verify/?key=SBPUBK_TCDUH6MNIDLHMJXJEJLBO6ZU2RNUUPHI&sbcp=uFWgBWF8OB56oCSJudCxKYqNm8Cttss4&partner-id=1")
     suspend fun merchantDetails(): Response<MerchantDetailsResponse>
 
     @GET("checkout/query/{paymentReference}")

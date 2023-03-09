@@ -59,7 +59,7 @@ fun TransferHomeScreen(
     val openDialog = remember { mutableStateOf(false) }
     var alertDialogMessage by remember { mutableStateOf("") }
     var alertDialogHeaderMessage by remember { mutableStateOf("") }
-    val paymentRef = transactionViewModel.getPaymentReference()
+    var paymentRef by remember { mutableStateOf("") }
 
 
     // if there is an error loading the report
@@ -85,27 +85,28 @@ fun TransferHomeScreen(
         ) {
 
             val transferDTO = TransferDTO(
-                country = merchantDetailsData.payload?.address?.country!!,
+                country = merchantDetailsData.payload?.country?.countryCode?:"",
                 bankCode = "044",
-                amount = "20",
+                amount = "20.0",
                 productId = "",
-                mobileNumber = merchantDetailsData.payload.number,
-                paymentReference = paymentRef,
-                fee = merchantDetailsData.payload.vatFee,
-                fullName = merchantDetailsData.payload.businessName,
+                mobileNumber = merchantDetailsData.payload?.number,
+                paymentReference = transactionViewModel.generateRandomReference(),
+                fee = merchantDetailsData.payload?.vatFee,
+                fullName = merchantDetailsData.payload?.businessName,
                 channelType = "Transfer",
-                publicKey = merchantDetailsData.payload.livePublicKey,
+                publicKey =  "SBPUBK_TCDUH6MNIDLHMJXJEJLBO6ZU2RNUUPHI",
                 source = "",
                 paymentType = "TRANSFER",
                 sourceIP = "102.88.63.64",
-                currency = merchantDetailsData.payload.defaultCurrency,
+                currency = merchantDetailsData.payload?.defaultCurrency,
                 productDescription = "",
-                email =  SEERBIT_DEFAULT_EMAIL,
-                retry = true,
+                email = "sdk@gmail.com",
+                retry = false,
                 deviceType = "Android",
                 amountControl = "FIXEDAMOUNT",
                 walletDaysActive = "1"
             )
+
 
             //HANDLES initiate query response
             val queryTransactionStateState: QueryTransactionState =
@@ -115,12 +116,12 @@ fun TransferHomeScreen(
                 transactionViewModel.initiateTransactionState.value
             //enter payment states
             transferAmount = formatAmount(transferDTO.amount?.toDouble()!!)
-            val defaultCurrency : String = merchantDetailsData.payload.defaultCurrency?: ""
+            val defaultCurrency : String = merchantDetailsData.payload?.defaultCurrency?: ""
 
             Spacer(modifier = Modifier.height(21.dp))
 
             SeerbitPaymentDetailHeaderTwo(
-                charges =  merchantDetailsData.payload.vatFee?.toDouble()!!,
+                charges =  merchantDetailsData.payload?.vatFee?.toDouble()!!,
                 amount = transferAmount,
                 currencyText = defaultCurrency,
                 businessName = merchantDetailsData.payload.businessName!!,
@@ -151,8 +152,10 @@ fun TransferHomeScreen(
 
 
             initiateTransferPayment.data?.let {
+                paymentRef = it.data?.payments?.paymentReference?:""
                 showCircularProgressBar = false
                 if (!isSuccesfulResponse) {
+
                     wallet = it.data?.payments?.wallet!!
                     walletName = it.data.payments.walletName!!
                     bankName = it.data.payments.bankName!!

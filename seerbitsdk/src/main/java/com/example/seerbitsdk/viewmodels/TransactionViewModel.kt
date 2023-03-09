@@ -15,6 +15,7 @@ import com.example.seerbitsdk.screenstate.QueryTransactionState
 import com.example.seerbitsdk.use_cases.CardBinUseCase
 import com.example.seerbitsdk.use_cases.OtpUseCase
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -50,13 +51,21 @@ class TransactionViewModel : ViewModel() {
     val cardBinState: State<CardBinState>
         get() = _cardBinState
 
+    private var _paymentRefState = mutableStateOf("")
+    val paymentRefState: State<String>
+        get() = _paymentRefState
+
+
+
 
 
 
     init {
         clearCardBinState()
         resetTransactionState()
+        _paymentRefState.value = generateRandomReference()
     }
+
     fun resetTransactionState(){
         _initiateTransactionState.value = InitiateTransactionState()
         _initiateTransactionState2.value = InitiateTransactionState()
@@ -71,7 +80,7 @@ class TransactionViewModel : ViewModel() {
     fun initiateTransaction(transactionDTO: TransactionDTO) {
         _initiateTransactionState.value = InitiateTransactionState(isLoading = true)
         viewModelScope.launch(Dispatchers.Main) {
-            initiateTransactionUseCase(transactionDTO).collect { resource ->
+            initiateTransactionUseCase(transactionDTO).collectLatest { resource ->
                 when (resource) {
                     is Resource.Success -> {
                         _initiateTransactionState.value =
@@ -97,7 +106,7 @@ class TransactionViewModel : ViewModel() {
     fun initiateTransaction2(transactionDTO: TransactionDTO) {
         _initiateTransactionState.value = InitiateTransactionState(isLoading = true)
         viewModelScope.launch(Dispatchers.Main) {
-            initiateTransactionUseCase(transactionDTO).collect { resource ->
+            initiateTransactionUseCase(transactionDTO).collectLatest { resource ->
                 when (resource) {
                     is Resource.Success -> {
                         _initiateTransactionState2.value =
@@ -125,7 +134,7 @@ class TransactionViewModel : ViewModel() {
         _queryTransactionState.value = QueryTransactionState(isLoading = true)
         viewModelScope.launch(Dispatchers.Main) {
 
-            initiateTransactionUseCase(paymentReference = paymentReference).collect { resource ->
+            initiateTransactionUseCase(paymentReference = paymentReference).collectLatest { resource ->
                 when (resource) {
                     is Resource.Success -> {
                         _queryTransactionState.value = QueryTransactionState(data = resource.data)
@@ -152,7 +161,7 @@ class TransactionViewModel : ViewModel() {
         _queryTransactionState2.value = QueryTransactionState(isLoading = true)
         viewModelScope.launch(Dispatchers.Main) {
 
-            initiateTransactionUseCase(paymentReference = paymentReference).collect { resource ->
+            initiateTransactionUseCase(paymentReference = paymentReference).collectLatest { resource ->
                 when (resource) {
                     is Resource.Success -> {
                         _queryTransactionState2.value = QueryTransactionState(data = resource.data)
@@ -179,7 +188,7 @@ class TransactionViewModel : ViewModel() {
         _otpState.value = OTPState(isLoading = true)
         viewModelScope.launch(Dispatchers.Main) {
 
-           sendOtpUseCase(cardOTPDTO).collect { resource ->
+           sendOtpUseCase(cardOTPDTO).collectLatest { resource ->
                 when (resource) {
                     is Resource.Success -> {
                         _otpState.value =  OTPState(data = resource.data)
@@ -240,10 +249,10 @@ class TransactionViewModel : ViewModel() {
 
         val str = "ABCDEFGHIJKLMNOPQRSTNVabcdef6ghijklmnopqrstuvwxyzABCD123456789"
         var password = ""
-        for (i in 1..80) {
+        for (i in 1..8) {
             password += str.random()
         }
-        return  password + UUID.randomUUID().toString()
+        return  "SBT-T" + UUID.randomUUID().toString()
     }
 
 

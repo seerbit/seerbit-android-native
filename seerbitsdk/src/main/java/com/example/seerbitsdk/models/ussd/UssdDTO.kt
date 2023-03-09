@@ -24,7 +24,7 @@ data class UssdDTO(
 	val mobileNumber: String? = null,
 
 	@field:SerializedName("paymentReference")
-    var paymentReference: String? = null,
+	var paymentReference: String? = null,
 
 	@field:SerializedName("fee")
 	val fee: String? = null,
