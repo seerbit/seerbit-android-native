@@ -257,7 +257,7 @@ fun CardHomeScreen(
 
             val cardDTO = CardDTO(
                 deviceType = "Android",
-                country = merchantDetailsData.payload?.country?.nameCode?:"",
+                country = merchantDetailsData.payload?.country?.nameCode ?: "",
                 20.0,
                 cvv = cvv,
                 redirectUrl = "http://localhost:3002/#/",
@@ -891,9 +891,9 @@ fun MyAppNavHost(
         composable(Route.OTHER_PAYMENT_SCREEN) {
             OtherPaymentScreen(
                 onCancelButtonClicked = { navController.navigateSingleTopTo(Debit_CreditCard.route) },
-                currentDestination = currentDestination,
                 navController = navController,
                 merchantDetailsState = merchantDetailsState,
+                transactionViewModel = transactionViewModel
             )
         }
 
@@ -1104,10 +1104,34 @@ fun MyAppNavHost(
         }
 
 
-        composable(route = Transfer.route) {
+        composable(
+            route = "${Transfer.route}/{paymentRef}/{wallet}/{walletName}/{bankName}/{accountNumber}",
+
+            arguments = listOf(
+                navArgument("paymentRef") { type = NavType.StringType },
+                navArgument("wallet") { type = NavType.StringType },
+                navArgument("walletName") { type = NavType.StringType },
+                navArgument("bankName") { type = NavType.StringType },
+                navArgument("accountNumber") { type = NavType.StringType },
+
+            )
+        )
+        { navBackStackEntry ->
+            val paymentRef = navBackStackEntry.arguments?.getString("paymentRef")
+            val wallet = navBackStackEntry.arguments?.getString("paymentRef")
+            val walletName = navBackStackEntry.arguments?.getString("walletName")
+            val bankName = navBackStackEntry.arguments?.getString("bankName")
+            val accountNumber = navBackStackEntry.arguments?.getString("accountNumber")
+
+
             transactionViewModel.resetTransactionState()
             TransferHomeScreen(
                 merchantDetailsState = merchantDetailsState,
+                paymentRef = paymentRef,
+                wallet = wallet,
+                walletName = walletName,
+                bankName = bankName,
+                accountNumber = accountNumber
             )
         }
 
@@ -1131,7 +1155,7 @@ fun MyAppNavHost(
             USSDHomeScreen(
                 merchantDetailsState = merchantDetailsState,
                 transactionViewModel = transactionViewModel,
-                ussdCode = ussdCode,
+                ussdCode = "$ussdCode#",
                 paymentReference = paymentReference,
                 navController = navController
             )
@@ -1142,7 +1166,7 @@ fun MyAppNavHost(
             USSDSelectBanksScreen(
                 navController = navController,
                 merchantDetailsState = merchantDetailsState,
-               transactionViewModel = transactionViewModel
+                transactionViewModel = transactionViewModel
             )
 
         }

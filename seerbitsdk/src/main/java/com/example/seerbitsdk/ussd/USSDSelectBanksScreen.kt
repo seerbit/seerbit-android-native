@@ -1,5 +1,6 @@
 package com.example.seerbitsdk.ussd
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -49,6 +50,8 @@ fun USSDSelectBanksScreen(
     var showCircularProgressBar by remember { mutableStateOf(false) }
     var paymentRef by  remember { mutableStateOf("") }
     var ussdCode by  remember { mutableStateOf("") }
+    var amount : String = "20" //todo this would later be parsed from the developer
+    var defaultCurrency : String = ""
 
     // if there is an error loading the report
     if (merchantDetailsState?.hasError!!) {
@@ -77,15 +80,18 @@ fun USSDSelectBanksScreen(
             ) {
                 Spacer(modifier = Modifier.height(25.dp))
 
+                defaultCurrency = merchantDetailsData.payload?.defaultCurrency?:""
+
                 SeerbitPaymentDetailHeader(
-                    charges =  merchantDetailsData.payload?.vatFee?.toDouble()!!,
-                    amount = "20.00",
-                    currencyText = merchantDetailsData.payload.defaultCurrency!!,
+                    charges =  merchantDetailsData.payload?.vatFee?.toDouble()?: 0.00,
+                    amount = amount,
+                    currencyText = defaultCurrency,
                     "Choose your bank to start this payment",
-                    merchantDetailsData.payload.businessName!!,
-                    merchantDetailsData.payload.supportEmail!!
+                    merchantDetailsData.payload?.businessName?:"",
+                    merchantDetailsData.payload?.supportEmail?:""
                 )
                 Spacer(modifier = Modifier.height(41.dp))
+
 
                 if (showErrorDialog) {
                     ErrorDialog(message = "Kindly Select a bank")
@@ -100,21 +106,21 @@ fun USSDSelectBanksScreen(
                 }
 
                 val ussdDTO = UssdDTO(
-                    country = merchantDetailsData.payload.country?.nameCode ?: "",
+                    country = merchantDetailsData.payload?.country?.nameCode ?: "",
                     bankCode = bankCode,
-                    amount = "20",
+                    amount = amount,
                     redirectUrl = "http://localhost:3002/#/",
                     productId = "",
-                    mobileNumber = merchantDetailsData.payload.number,
+                    mobileNumber = merchantDetailsData.payload?.number,
                     paymentReference = transactionViewModel.generateRandomReference(),
-                    fee = merchantDetailsData.payload.vatFee,
-                    fullName = merchantDetailsData.payload.businessName,
+                    fee = merchantDetailsData.payload?.vatFee,
+                    fullName = merchantDetailsData.payload?.businessName,
                     channelType = "ussd",
                     publicKey = "SBPUBK_TCDUH6MNIDLHMJXJEJLBO6ZU2RNUUPHI",
                     source = "",
                     paymentType = "USSD",
                     sourceIP = "102.88.63.64",
-                    currency = merchantDetailsData.payload.defaultCurrency,
+                    currency = merchantDetailsData.payload?.defaultCurrency,
                     productDescription = "",
                     email = "sdk@gmail.com",
                     retry = false,
@@ -138,10 +144,11 @@ fun USSDSelectBanksScreen(
 
                 initiateUssdPayment.data?.let {
                     paymentRef = it.data?.payments?.paymentReference ?: ""
-                    ussdCode = it.data?.payments?.ussdDailCode.toString()
+                    ussdCode = it.data?.payments?.ussdDailCode?: ""
+                    Log.d("ussdCodesss", ussdCode)
                     showCircularProgressBar = false
                     navController.navigateSingleTopNoSavedState(
-                        "${Route.USSD_HOME_SCREEN}/$paymentRef/$ussdCode")
+                        "${Route.USSD_HOME_SCREEN}/$paymentRef/${ussdCode}")
 
                 }
 
@@ -151,7 +158,7 @@ fun USSDSelectBanksScreen(
                 Spacer(modifier = modifier.height(40.dp))
 
                 AuthorizeButton(
-                    buttonText = "Pay NGN 20.00",
+                    buttonText = "Pay $defaultCurrency $amount",
                     onClick = {
                         if(bankCode.isNotEmpty()) {
                             transactionViewModel.initiateUssdTransaction(ussdDTO)
@@ -248,6 +255,10 @@ fun UssdSelectBankButton(modifier: Modifier = Modifier, onBankCodeSelected: (Str
 
     }
 
+
+}
+
+fun setAmountWithCurrency(){
 
 }
 

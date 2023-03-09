@@ -22,9 +22,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavDestination
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.example.seerbitsdk.ErrorDialog
 import com.example.seerbitsdk.R
 import com.example.seerbitsdk.card.AuthorizeButton
@@ -44,22 +41,20 @@ import com.example.seerbitsdk.viewmodels.TransactionViewModel
 fun TransferHomeScreen(
     modifier: Modifier = Modifier,
     merchantDetailsState: MerchantDetailsState?,
-    transactionViewModel: TransactionViewModel = viewModel()
+    transactionViewModel: TransactionViewModel = viewModel(),
+    paymentRef: String?,
+    wallet: String?,
+    walletName: String?,
+    bankName: String?,
+    accountNumber: String?
 ) {
 
-    var showLoadingScreen by remember { mutableStateOf(false) }
     var transferAmount by remember { mutableStateOf("") }
-    var walletName by remember { mutableStateOf("") }
-    var wallet by remember { mutableStateOf("") }
-    var bankName by remember { mutableStateOf("") }
-    var accountNumber by remember { mutableStateOf("") }
-    var isSuccesfulResponse by remember { mutableStateOf(false) }
-    var retryCount by remember { mutableStateOf(0) }
     var showCircularProgressBar by rememberSaveable { mutableStateOf(false) }
     val openDialog = remember { mutableStateOf(false) }
     var alertDialogMessage by remember { mutableStateOf("") }
     var alertDialogHeaderMessage by remember { mutableStateOf("") }
-    var paymentRef by remember { mutableStateOf("") }
+
 
 
     // if there is an error loading the report
@@ -131,38 +126,6 @@ fun TransferHomeScreen(
 
 
 
-            if (initiateTransferPayment.data == null && !isSuccesfulResponse) {
-                transactionViewModel.initiateTransaction(transferDTO)
-
-            }
-
-            if (initiateTransferPayment.hasError) {
-                showCircularProgressBar = false
-                openDialog.value = true
-                alertDialogMessage =
-                    queryTransactionStateState.errorMessage ?: "Could not retrieve bank details"
-                alertDialogHeaderMessage = "Failed"
-                transactionViewModel.resetTransactionState()
-                isSuccesfulResponse = true
-            }
-
-            if(initiateTransferPayment.isLoading){
-                showCircularProgressBar = true
-            }
-
-
-            initiateTransferPayment.data?.let {
-                paymentRef = it.data?.payments?.paymentReference?:""
-                showCircularProgressBar = false
-                if (!isSuccesfulResponse) {
-
-                    wallet = it.data?.payments?.wallet!!
-                    walletName = it.data.payments.walletName!!
-                    bankName = it.data.payments.bankName!!
-                    accountNumber = it.data.payments.accountNumber!!
-                }
-                isSuccesfulResponse = true
-            }
 
             //querying transaction happens after otp has been inputted
             if (queryTransactionStateState.hasError) {
@@ -184,7 +147,7 @@ fun TransferHomeScreen(
 
                 if (queryTransactionStateState.data.data.code == PENDING_CODE) {
                     showCircularProgressBar = true
-                    transactionViewModel.queryTransaction(paymentRef)
+                    transactionViewModel.queryTransaction(paymentRef?:"")
                 }
                 if (queryTransactionStateState.data.data.code == SUCCESS) {
                     alertDialogHeaderMessage = "Successful"
@@ -232,11 +195,10 @@ fun TransferHomeScreen(
                 modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
             )
 
-            if (isSuccesfulResponse) {
                 Row(modifier.padding(12.dp)) {
-                    AccountDetailsSurfaceView(accountNumber, bankName, walletName)
+                    AccountDetailsSurfaceView(accountNumber?:"", bankName?:"", walletName?:"")
                 }
-            }
+
 
             Text(
                 text = "Account number can only be used once",
@@ -263,9 +225,8 @@ fun TransferHomeScreen(
             AuthorizeButton(
                 buttonText = "I have completed this bank transfer",
                 onClick = {
-                    if (isSuccesfulResponse) {
-                        transactionViewModel.queryTransaction(paymentRef)
-                    }
+                        transactionViewModel.queryTransaction(paymentRef?:"")
+
                 }, !showCircularProgressBar
             )
             Spacer(modifier = Modifier.height(50.dp))
@@ -328,7 +289,12 @@ fun TransferHomeScreenPreview() {
 
         TransferHomeScreen(
             merchantDetailsState = MerchantDetailsState(),
-            transactionViewModel = viewModel
+            transactionViewModel = viewModel,
+            paymentRef = "",
+            wallet = "wallet",
+            walletName = "walletName",
+            bankName = "bankName",
+            accountNumber = "accountNumber"
         )
     }
 }

@@ -1,6 +1,7 @@
 package com.example.seerbitsdk.component
 
 import java.text.DecimalFormat
+import java.util.*
 
 fun String.isValidCardNumber(): Boolean {
     return this.length == 16
@@ -33,15 +34,6 @@ fun validateCardDetails(
     return isValidCvv && isValidCardNumber && isValidCardExpiryMonth
 }
 
-fun generateRandomReference(): String {
-    var str = "ABCDEFGHIJKLMNOPQRSTNVabcdefghijklmnopqrstuvwxyzABCD123456789"
-    var password = ""
-    for (i in 1..100) {
-        password += str.random()
-    }
-    return password
-}
-
 fun String.maskedPhoneNumber(): String {
     return if (this.length >= 5) {
         "*****${this.substring(5)}"
@@ -51,6 +43,15 @@ fun String.maskedPhoneNumber(): String {
 
 fun formatAmount(amount: Double?): String {
     return AmountDecimalFormat.format(amount)
+}
+
+fun generateRandomReference(): String {
+    val str = "ABCDEFGHIJKLMNOPQRSTNVabcdef6ghijklmnopqrstuvwxyzABCD123456789"
+    var password = ""
+    for (i in 1..8) {
+        password += str.random()
+    }
+    return "SBT-T" + UUID.randomUUID().toString()
 }
 
 private val AccountDecimalFormat = DecimalFormat("####")

@@ -64,6 +64,7 @@ fun USSDHomeScreen(
 
 
 
+
     Column(modifier = modifier) {
         // if there is an error loading the report
         if (merchantDetailsState?.hasError!!) {
@@ -124,7 +125,7 @@ fun USSDHomeScreen(
                     if (queryTransactionStateState.data.data.code == SUCCESS) {
 
                         openDialog.value = true
-                        alertDialogMessage = queryTransactionStateState.data.data.message!!
+                        alertDialogMessage = queryTransactionStateState.data.data.message?:""
                         alertDialogHeaderMessage = "Success"
                         showLoadingScreen = false
                         transactionViewModel.resetTransactionState()
