@@ -79,28 +79,6 @@ fun TransferHomeScreen(
                 .fillMaxWidth()
         ) {
 
-            val transferDTO = TransferDTO(
-                country = merchantDetailsData.payload?.country?.countryCode?:"",
-                bankCode = "044",
-                amount = "20.0",
-                productId = "",
-                mobileNumber = merchantDetailsData.payload?.number,
-                paymentReference = transactionViewModel.generateRandomReference(),
-                fee = merchantDetailsData.payload?.vatFee,
-                fullName = merchantDetailsData.payload?.businessName,
-                channelType = "Transfer",
-                publicKey =  "SBPUBK_TCDUH6MNIDLHMJXJEJLBO6ZU2RNUUPHI",
-                source = "",
-                paymentType = "TRANSFER",
-                sourceIP = "102.88.63.64",
-                currency = merchantDetailsData.payload?.defaultCurrency,
-                productDescription = "",
-                email = "sdk@gmail.com",
-                retry = false,
-                deviceType = "Android",
-                amountControl = "FIXEDAMOUNT",
-                walletDaysActive = "1"
-            )
 
 
             //HANDLES initiate query response
@@ -109,7 +87,7 @@ fun TransferHomeScreen(
             //HANDLE INITIATE TRANSACTION RESPONSE
 
             //enter payment states
-            transferAmount = formatAmount(transferDTO.amount?.toDouble()!!)
+            transferAmount = formatAmount(20.00)
             val defaultCurrency : String = merchantDetailsData.payload?.defaultCurrency?: ""
 
             Spacer(modifier = Modifier.height(21.dp))
@@ -150,12 +128,14 @@ fun TransferHomeScreen(
                 }
                 if (queryTransactionStateState.data.data.code == SUCCESS) {
                     alertDialogHeaderMessage = "Successful"
+                    openDialog.value = true
                     alertDialogMessage = queryTransactionStateState.data.data.payments?.reason!!
                     showCircularProgressBar = false
                 }
 
                 if (queryTransactionStateState.data.data.code == "SM_X23" || queryTransactionStateState.data.data.code == "S12") {
                     alertDialogHeaderMessage = "Failed"
+                    openDialog.value = true
                     alertDialogMessage = queryTransactionStateState.data.data.payments?.reason!!
                     showCircularProgressBar = false
                 }
