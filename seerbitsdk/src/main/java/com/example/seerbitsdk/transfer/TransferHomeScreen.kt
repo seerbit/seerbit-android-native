@@ -22,12 +22,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHost
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
+import com.example.seerbitsdk.Debit_CreditCard
 import com.example.seerbitsdk.ErrorDialog
 import com.example.seerbitsdk.R
 import com.example.seerbitsdk.card.AuthorizeButton
 import com.example.seerbitsdk.card.showCircularProgress
 import com.example.seerbitsdk.component.*
 import com.example.seerbitsdk.models.transfer.TransferDTO
+import com.example.seerbitsdk.navigateSingleTopNoSavedState
 import com.example.seerbitsdk.screenstate.InitiateTransactionState
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.screenstate.QueryTransactionState
@@ -43,7 +48,7 @@ fun TransferHomeScreen(
     merchantDetailsState: MerchantDetailsState?,
     transactionViewModel: TransactionViewModel = viewModel(),
     paymentRef: String?,
-    wallet: String?,
+    navController : NavHostController,
     walletName: String?,
     bankName: String?,
     accountNumber: String?
@@ -100,10 +105,6 @@ fun TransferHomeScreen(
                 email = merchantDetailsData.payload.supportEmail!!
             )
 
-
-
-
-
             //querying transaction happens after otp has been inputted
             if (queryTransactionStateState.hasError) {
                 showCircularProgressBar = false
@@ -131,6 +132,7 @@ fun TransferHomeScreen(
                     openDialog.value = true
                     alertDialogMessage = queryTransactionStateState.data.data.payments?.reason!!
                     showCircularProgressBar = false
+                    transactionViewModel.resetTransactionState()
                 }
 
                 if (queryTransactionStateState.data.data.code == "SM_X23" || queryTransactionStateState.data.data.code == "S12") {
@@ -138,6 +140,7 @@ fun TransferHomeScreen(
                     openDialog.value = true
                     alertDialogMessage = queryTransactionStateState.data.data.payments?.reason!!
                     showCircularProgressBar = false
+                    transactionViewModel.resetTransactionState()
                 }
             }
 
@@ -240,6 +243,7 @@ fun TransferHomeScreen(
 
                             onClick = {
                                 openDialog.value = false
+                                navController.navigateSingleTopNoSavedState(Debit_CreditCard.route)
                             },
                             colors = ButtonDefaults.buttonColors(
                                 backgroundColor = SignalRed
@@ -270,7 +274,7 @@ fun TransferHomeScreenPreview() {
             merchantDetailsState = MerchantDetailsState(),
             transactionViewModel = viewModel,
             paymentRef = "",
-            wallet = "wallet",
+            navController = rememberNavController(),
             walletName = "walletName",
             bankName = "bankName",
             accountNumber = "accountNumber"

@@ -1118,20 +1118,20 @@ fun MyAppNavHost(
         )
         { navBackStackEntry ->
             val paymentRef = navBackStackEntry.arguments?.getString("paymentRef")
-            val wallet = navBackStackEntry.arguments?.getString("paymentRef")
+            val wallet = navBackStackEntry.arguments?.getString("wallet")
             val walletName = navBackStackEntry.arguments?.getString("walletName")
             val bankName = navBackStackEntry.arguments?.getString("bankName")
             val accountNumber = navBackStackEntry.arguments?.getString("accountNumber")
-
 
             transactionViewModel.resetTransactionState()
             TransferHomeScreen(
                 merchantDetailsState = merchantDetailsState,
                 paymentRef = paymentRef,
-                wallet = wallet,
+                navController = navController,
                 walletName = walletName,
                 bankName = bankName,
-                accountNumber = accountNumber
+                accountNumber = accountNumber,
+
             )
         }
 
