@@ -219,7 +219,7 @@ fun TransferHomeScreen(
             if (openDialog.value) {
                 AlertDialog(
                     onDismissRequest = {
-                        openDialog.value = false
+
                     },
                     title = {
                         Row(
