@@ -1,6 +1,7 @@
 package com.example.seerbitsdk.component
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 
 import androidx.compose.foundation.selection.selectable
@@ -25,7 +26,8 @@ fun SeerBitNavButtons(
     attachedDescription: String,
     onSelected: () -> Unit,
     selected: Boolean,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    enabled : Boolean
 ) {
     Surface(
 
@@ -36,6 +38,7 @@ fun SeerBitNavButtons(
             .selectable(
                 selected = selected,
                 onClick = onSelected,
+                enabled = enabled
 
                 )
             .padding(4.dp),
@@ -74,7 +77,8 @@ fun SeerBitNavButtons(
 fun SeerBitNavButtonsColumn(
     allButtons: List<SeerBitDestination>,
     onButtonSelected: (SeerBitDestination) -> Unit,
-    currentButtonSelected: SeerBitDestination
+    currentButtonSelected: SeerBitDestination,
+    enable : Boolean
 ) {
 
     Surface(
@@ -90,7 +94,8 @@ fun SeerBitNavButtonsColumn(
                     text = navButtons.name,
                     attachedDescription = navButtons.attachedDescription,
                     onSelected = { onButtonSelected(navButtons) },
-                    selected = currentButtonSelected == navButtons
+                    selected = currentButtonSelected == navButtons,
+                    enabled = enable
                 )
             }
             Spacer(modifier = Modifier.padding(top = 8.dp, bottom = 8.dp))
@@ -116,7 +121,8 @@ fun paymentOptionsButtonPreview() {
             text = "Bank",
             attachedDescription = "",
             onSelected = { /*TODO*/ },
-            selected = true
+            selected = true,
+            enabled = true
         )
     }
 }

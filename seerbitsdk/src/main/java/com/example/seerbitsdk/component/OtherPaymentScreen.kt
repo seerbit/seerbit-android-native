@@ -135,10 +135,13 @@ fun OtherPaymentScreen(
                         if(newScreen.route == Transfer.route){
                             transactionViewModel.initiateTransaction(generateTransferDTO(merchantDetailsData))
                         }
+                        else
+                            navController.navigateSingleTopNoSavedState(newScreen.route)
 
 
                     },
-                    currentButtonSelected = Transfer
+                    currentButtonSelected = Transfer,
+                    !showCircularProgressBar
                 )
 
                 Spacer(modifier = Modifier.height(30.dp))
