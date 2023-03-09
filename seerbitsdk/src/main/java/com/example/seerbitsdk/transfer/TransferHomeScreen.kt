@@ -107,8 +107,7 @@ fun TransferHomeScreen(
             val queryTransactionStateState: QueryTransactionState =
                 transactionViewModel.queryTransactionState.value
             //HANDLE INITIATE TRANSACTION RESPONSE
-            val initiateTransferPayment: InitiateTransactionState =
-                transactionViewModel.initiateTransactionState.value
+
             //enter payment states
             transferAmount = formatAmount(transferDTO.amount?.toDouble()!!)
             val defaultCurrency : String = merchantDetailsData.payload?.defaultCurrency?: ""
