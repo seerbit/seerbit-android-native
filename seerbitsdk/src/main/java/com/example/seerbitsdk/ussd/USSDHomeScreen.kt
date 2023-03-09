@@ -225,7 +225,6 @@ fun USSDHomeScreen(
                         },
                         confirmButton = {
                             Button(
-
                                 onClick = {
                                     navController.navigateSingleTopNoSavedState(Debit_CreditCard.route)
                                     openDialog.value = false
