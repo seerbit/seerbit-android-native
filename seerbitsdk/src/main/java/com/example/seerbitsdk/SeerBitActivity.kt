@@ -219,7 +219,7 @@ fun CardHomeScreen(
     var trailingIcon by rememberSaveable { mutableStateOf(0) }
 
 
-    var startQueryingTransaction by remember { mutableStateOf(false) }
+
 
     //determines if to show progress bar when loading
     var showCircularProgressBar by remember { mutableStateOf(false) }
@@ -430,31 +430,30 @@ fun CardHomeScreen(
             }
 
             queryTransactionStateState.data?.data?.let {
-                if (queryTransactionStateState.data.data.code == PENDING_CODE) {
-                    transactionViewModel.queryTransaction(paymentRef)
-                }
 
-                if (it.code == SUCCESS) {
-                    showCircularProgressBar = false
-                    openDialog.value = true
-                    alertDialogHeaderMessage = "Successful"
-                    alertDialogMessage = it.message ?: "Successful"
-                    transactionViewModel.resetTransactionState()
-                    return@let
-                }
-                else {
-                    showCircularProgressBar = false
-                    openDialog.value = true
-                    alertDialogHeaderMessage = "Error"
-                    alertDialogMessage = it.message ?: "Something went wrong"
-                    transactionViewModel.resetTransactionState()
-                    return@let
-                }
+                when(it.code){
+                   PENDING_CODE -> {
+                       transactionViewModel.queryTransaction(paymentRef)
+                   }
+                   SUCCESS -> {
+                       showCircularProgressBar = false
+                       openDialog.value = true
+                       alertDialogHeaderMessage = "Successful"
+                       alertDialogMessage = it.message ?: ""
+                       transactionViewModel.resetTransactionState()
+                       return@let
+                   }
+                   else -> {
+                       showCircularProgressBar = false
+                       openDialog.value = true
+                       alertDialogHeaderMessage = "Error"
+                       alertDialogMessage = it.message ?: "Something went wrong"
+                       transactionViewModel.resetTransactionState()
+                       return@let
+                   }
+
+               }
             }
-
-
-
-
 
 
 
@@ -479,7 +478,7 @@ fun CardHomeScreen(
                 } else if (canRedirectToUrl) {
                     redirectUrl(redirectUrl = redirectUrl)
                     transactionViewModel.queryTransaction(paymentRef)
-                    startQueryingTransaction = true
+                    transactionViewModel.resetTransactionState()
                     canRedirectToUrl = false
                     return@let
                 }
@@ -490,7 +489,6 @@ fun CardHomeScreen(
                     transactionViewModel.resetTransactionState()
                     return@let
                 }
-
 
             }
             Spacer(modifier = Modifier.height(100.dp))
