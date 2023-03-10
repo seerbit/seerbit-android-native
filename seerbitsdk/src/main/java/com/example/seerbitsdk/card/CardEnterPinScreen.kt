@@ -3,7 +3,9 @@ package com.example.seerbitsdk.card
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
@@ -140,7 +142,7 @@ fun CardEnterPinScreen(
 
 
 
-                if (!isEnterOTP) {
+                if (isEnterPin && !isEnterOTP && !useOtp) {
                     Text(
                         text = "Enter your four digit card pin to authorize the payment",
                         style = TextStyle(
@@ -225,7 +227,9 @@ fun CardEnterPinScreen(
                         horizontalArrangement = Arrangement.End,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text(text = "Resend OTP")
+                        Text(text = "Resend OTP", modifier = Modifier.clickable(enabled = !showCircularProgressBar,"" ){
+
+                        })
                     }
                     Spacer(modifier = modifier.height(10.dp))
 

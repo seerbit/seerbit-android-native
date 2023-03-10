@@ -175,6 +175,7 @@ fun USSDHomeScreen(
                         modifier = Modifier
                             .align(alignment = Alignment.CenterHorizontally)
                             .clickable {
+
                                 copyToClipboard(context, ussdCode ?: "")
                                 Toast
                                     .makeText(context, "Ussd code copied!", Toast.LENGTH_SHORT)
