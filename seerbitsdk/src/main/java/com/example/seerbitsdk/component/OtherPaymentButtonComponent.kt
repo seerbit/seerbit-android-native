@@ -38,7 +38,7 @@ fun OtherPaymentButtonComponent(
             modifier = Modifier
                 .height(50.dp)
                 .weight(1.7f)
-                .padding(end = 8.dp)
+                .padding(end = 4.dp)
 
         ) {
             Text(
@@ -59,6 +59,7 @@ fun OtherPaymentButtonComponent(
             onClick = onCancelButtonClicked,
             colors = ButtonDefaults.buttonColors(backgroundColor = SignalRed),
             shape = RoundedCornerShape(4.dp),
+            enabled = enable,
             modifier = Modifier
                 .height(50.dp)
                 .weight(1f)

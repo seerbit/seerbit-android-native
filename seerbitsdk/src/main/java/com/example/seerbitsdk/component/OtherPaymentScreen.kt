@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -154,7 +155,7 @@ fun OtherPaymentScreen(
                         colors = ButtonDefaults.buttonColors(backgroundColor = SignalRed),
                         shape = RoundedCornerShape(4.dp),
                         modifier = Modifier
-                            .width(140.dp)
+                            .width(160.dp)
                             .height(50.dp)
 
                     ) {
@@ -167,6 +168,7 @@ fun OtherPaymentScreen(
                                 fontWeight = FontWeight.Normal,
                                 lineHeight = 10.sp,
                                 color = DeepRed,
+                                textAlign = TextAlign.Center
                             ),
                             modifier = Modifier.align(alignment = Alignment.CenterVertically)
                         )

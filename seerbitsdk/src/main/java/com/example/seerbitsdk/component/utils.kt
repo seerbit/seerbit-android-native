@@ -4,7 +4,7 @@ import java.text.DecimalFormat
 import java.util.*
 
 fun String.isValidCardNumber(): Boolean {
-    return this.length == 16
+    return this.length >= 16
 }
 
 fun String.isValidCvv(): Boolean {

@@ -385,7 +385,7 @@ fun CardHomeScreen(
                         } else {
                             openDialog.value = true
                             alertDialogMessage = "Invalid Card Details"
-                            alertDialogHeaderMessage = "Error Occurred"
+                            alertDialogHeaderMessage = "Error Occured"
                         }
                     }, !showCircularProgressBar
                 )
@@ -395,6 +395,11 @@ fun CardHomeScreen(
             val transactionState: InitiateTransactionState =
                 transactionViewModel.initiateTransactionState.value
 
+            //HANDLES initiate query response
+            val queryTransactionStateState: QueryTransactionState =
+                transactionViewModel.queryTransactionState.value
+            //querying transaction happens after otp has been inputted
+
             if (transactionState.hasError) {
                 showCircularProgressBar = false
                 openDialog.value = true
@@ -402,37 +407,51 @@ fun CardHomeScreen(
                 alertDialogHeaderMessage = "Error Occurred"
                 transactionViewModel.resetTransactionState()
             }
-            showCircularProgressBar = transactionState.isLoading
+            
+            if(transactionState.isLoading){
+                showCircularProgressBar = true
+            }
 
-            //HANDLES initiate query response
-            val queryTransactionStateState: QueryTransactionState =
-                transactionViewModel.queryTransactionState.value
-            //querying transaction happens after otp has been inputted
-            if (startQueryingTransaction) {
-                if (queryTransactionStateState.hasError) {
-                    openDialog.value = true
-                    alertDialogMessage = "Error"
-                    alertDialogHeaderMessage =
-                        queryTransactionStateState.errorMessage ?: "Something went wrong"
-                    transactionViewModel.resetTransactionState()
+
+
+
+
+            if (queryTransactionStateState.hasError) {
+                openDialog.value = true
+                alertDialogMessage = "Error"
+                alertDialogHeaderMessage =
+                    queryTransactionStateState.errorMessage ?: "Something went wrong"
+                transactionViewModel.resetTransactionState()
+                showCircularProgressBar = false
+
+            }
+            if (queryTransactionStateState.isLoading) {
+                
+            }
+
+            queryTransactionStateState.data?.data?.let {
+                if (queryTransactionStateState.data.data.code == PENDING_CODE) {
+                    transactionViewModel.queryTransaction(paymentRef)
                 }
-                showCircularProgressBar = queryTransactionStateState.isLoading
 
-                queryTransactionStateState.data?.data?.let {
-                    showCircularProgressBar =
-                        queryTransactionStateState.data.data.code == PENDING_CODE
-
-                    if (it.code == SUCCESS) {
-                        showCircularProgressBar = false
-
-                        return@let
-                    }
-                    if (it.code == FAILED) {
-                        showCircularProgressBar = false
-                        return@let
-                    }
+                if (it.code == SUCCESS) {
+                    showCircularProgressBar = false
+                    openDialog.value = true
+                    alertDialogHeaderMessage = "Successful"
+                    alertDialogMessage = it.message ?: "Successful"
+                    transactionViewModel.resetTransactionState()
+                    return@let
+                }
+                else {
+                    showCircularProgressBar = false
+                    openDialog.value = true
+                    alertDialogHeaderMessage = "Error"
+                    alertDialogMessage = it.message ?: "Something went wrong"
+                    transactionViewModel.resetTransactionState()
+                    return@let
                 }
             }
+
 
 
 
@@ -443,7 +462,9 @@ fun CardHomeScreen(
                 paymentRef = transactionState.data.data?.payments?.paymentReference ?: ""
                 val linkingRef = transactionState.data.data?.payments?.linkingReference ?: ""
                 val toEnterPinScreen = transactionState.data.data?.message == KINDLY_ENTER_PIN
-                val useOtp =  transactionState.data.data?.message?.contains(KINDLY_ENTER_THE_OTP, true)?: false
+                val useOtp =
+                    transactionState.data.data?.message?.contains(KINDLY_ENTER_THE_OTP, true)
+                        ?: false
                 val otpText = transactionState.data.data?.message
                 transactionState.data.data?.payments?.redirectUrl?.let {
                     redirectUrl = it
@@ -454,18 +475,20 @@ fun CardHomeScreen(
                     navController.navigateSingleTopTo(
                         "${Route.PIN_SCREEN}/$paymentRef/$cvv/$cardNumber/$cardExpiryMonth/$cardExpiryYear/$toEnterPinScreen/$useOtp/$otpText/$linkingRef"
                     )
-
+                    return@let
                 } else if (canRedirectToUrl) {
                     redirectUrl(redirectUrl = redirectUrl)
                     transactionViewModel.queryTransaction(paymentRef)
                     startQueryingTransaction = true
                     canRedirectToUrl = false
+                    return@let
                 }
                 if (it.data?.code == "S100") {
                     openDialog.value = true
                     alertDialogHeaderMessage = "Error"
                     alertDialogMessage = it.data.message ?: "Something went wrong"
                     transactionViewModel.resetTransactionState()
+                    return@let
                 }
 
 
@@ -474,7 +497,7 @@ fun CardHomeScreen(
 
             OtherPaymentButtonComponent(
                 onOtherPaymentButtonClicked = onOtherPaymentButtonClicked,
-                onCancelButtonClicked = {}, enable = !showCircularProgressBar
+                onCancelButtonClicked = {navController.navigateSingleTopTo(Debit_CreditCard.route)}, enable = !showCircularProgressBar
             )
 
             Spacer(modifier = Modifier.height(100.dp))
@@ -930,7 +953,7 @@ fun MyAppNavHost(
                 navArgument("otpText") { type = NavType.StringType },
                 navArgument("linkingRef") { type = NavType.StringType },
 
-            )
+                )
         ) { navBackStackEntry ->
             val paymentReference = navBackStackEntry.arguments?.getString("paymentRef")
             val cvv = navBackStackEntry.arguments?.getString("cvv")
@@ -1128,7 +1151,7 @@ fun MyAppNavHost(
                 navArgument("bankName") { type = NavType.StringType },
                 navArgument("accountNumber") { type = NavType.StringType },
 
-            )
+                )
         )
         { navBackStackEntry ->
             val paymentRef = navBackStackEntry.arguments?.getString("paymentRef")
@@ -1146,7 +1169,7 @@ fun MyAppNavHost(
                 bankName = bankName,
                 accountNumber = accountNumber,
 
-            )
+                )
         }
 
         composable(route = PhoneNumber.route) {
