@@ -227,7 +227,7 @@ fun CardHomeScreen(
     var alertDialogMessage by remember { mutableStateOf("") }
     var alertDialogHeaderMessage by remember { mutableStateOf("") }
     val openDialog = remember { mutableStateOf(false) }
-    var paymentReference = transactionViewModel.getPaymentReference()
+    var paymentReference = transactionViewModel.generateRandomReference()
 
     if (merchantDetailsState.hasError) {
         ErrorDialog(message = merchantDetailsState.errorMessage ?: "Something went wrong")
@@ -257,7 +257,7 @@ fun CardHomeScreen(
 
             val cardDTO = CardDTO(
                 deviceType = "Android",
-                country = merchantDetailsData.payload?.country?.nameCode ?: "",
+                country = merchantDetailsData.payload?.country?.countryCode ?: "",
                 20.0,
                 cvv = cvv,
                 redirectUrl = "http://localhost:3002/#/",
@@ -268,7 +268,7 @@ fun CardHomeScreen(
                 expiryMonth = cardExpiryMonth,
                 fullName = merchantDetailsData.payload?.businessName,
                 "MASTERCARD",
-                publicKey = merchantDetailsData.payload?.livePublicKey,
+                publicKey = "SBPUBK_TCDUH6MNIDLHMJXJEJLBO6ZU2RNUUPHI",
                 expiryYear = cardExpiryYear,
                 source = "",
                 paymentType = "CARD",
@@ -277,7 +277,7 @@ fun CardHomeScreen(
                 currency = merchantDetailsData.payload?.defaultCurrency,
                 "LOCAL",
                 false,
-                email = "inspiron.amos@gmail.com",
+                email = "sdk@gmail.com",
                 cardNumber = cardNumber,
                 retry = false
             )
@@ -323,18 +323,19 @@ fun CardHomeScreen(
                 },
                 onChangeCardNumber = {
                     cardNumber = it
-                    transactionViewModel.clearCardBinState()
-                    if (it.length == 16 || it.length >= 6) {
+                    if (it.length >= 16 || it.length >= 6) {
 
                         transactionViewModel.fetchCardBin(it)
 
                         if (cardBinState.data != null) {
                             var split: List<String?>
                             if (cardBinState.data.responseMessage != "BIN not Found") {
+                                transactionViewModel.clearCardBinState()
                                 split = cardBinState.data.cardName?.split(" ")!!
 
                                 trailingIcon = if (split[0].equals("MASTERCARD")) {
                                     R.drawable.mastercard
+
                                 } else if (split[0].equals("VISA")) {
                                     R.drawable.visa
                                 } else if (split[0].equals("Interswitch", ignoreCase = true)) {
@@ -440,15 +441,18 @@ fun CardHomeScreen(
 
             transactionState.data?.let {
                 paymentRef = transactionState.data.data?.payments?.paymentReference ?: ""
+                val linkingRef = transactionState.data.data?.payments?.linkingReference ?: ""
                 val toEnterPinScreen = transactionState.data.data?.message == KINDLY_ENTER_PIN
+                val useOtp =  transactionState.data.data?.message?.contains(KINDLY_ENTER_THE_OTP, true)?: false
+                val otpText = transactionState.data.data?.message
                 transactionState.data.data?.payments?.redirectUrl?.let {
                     redirectUrl = it
                     canRedirectToUrl = true
                 }
-                if (toEnterPinScreen) {
+                if (toEnterPinScreen || useOtp) {
                     redirectUrl = ""
                     navController.navigateSingleTopTo(
-                        "${Route.PIN_SCREEN}/$paymentRef/$cvv/$cardNumber/$cardExpiryMonth/$cardExpiryYear/$toEnterPinScreen"
+                        "${Route.PIN_SCREEN}/$paymentRef/$cvv/$cardNumber/$cardExpiryMonth/$cardExpiryYear/$toEnterPinScreen/$useOtp/$otpText/$linkingRef"
                     )
 
                 } else if (canRedirectToUrl) {
@@ -459,7 +463,7 @@ fun CardHomeScreen(
                 }
                 if (it.data?.code == "S100") {
                     openDialog.value = true
-                    alertDialogHeaderMessage = "Invalid Card Details"
+                    alertDialogHeaderMessage = "Error"
                     alertDialogMessage = it.data.message ?: "Something went wrong"
                     transactionViewModel.resetTransactionState()
                 }
@@ -766,7 +770,7 @@ fun cardNumberFormatting(text: AnnotatedString): TransformedText {
             if (offset <= 11) return offset + 2
             if (offset <= 15) return offset + 3
             if (offset <= 19) return offset + 4
-            return 23
+            return 24
         }
 
         override fun transformedToOriginal(offset: Int): Int {
@@ -913,7 +917,7 @@ fun MyAppNavHost(
 
         composable(
 
-            "${Route.PIN_SCREEN}/{paymentRef}/{cvv}/{cardNumber}/{cardExpiryMonth}/{cardExpiryYear}/{isEnterPin}",
+            "${Route.PIN_SCREEN}/{paymentRef}/{cvv}/{cardNumber}/{cardExpiryMonth}/{cardExpiryYear}/{isEnterPin}/{useOtp}/{otpText}/{linkingRef}",
             arguments = listOf(
                 // declaring argument type
                 navArgument("paymentRef") { type = NavType.StringType },
@@ -922,6 +926,10 @@ fun MyAppNavHost(
                 navArgument("cardExpiryMonth") { type = NavType.StringType },
                 navArgument("cardExpiryYear") { type = NavType.StringType },
                 navArgument("isEnterPin") { type = NavType.BoolType },
+                navArgument("useOtp") { type = NavType.BoolType },
+                navArgument("otpText") { type = NavType.StringType },
+                navArgument("linkingRef") { type = NavType.StringType },
+
             )
         ) { navBackStackEntry ->
             val paymentReference = navBackStackEntry.arguments?.getString("paymentRef")
@@ -930,6 +938,10 @@ fun MyAppNavHost(
             val cardExpiryMonth = navBackStackEntry.arguments?.getString("cardExpiryMonth")
             val cardExpiryYear = navBackStackEntry.arguments?.getString("cardExpiryYear")
             val isEnterPin = navBackStackEntry.arguments?.getBoolean("isEnterPin")
+            val useOtp = navBackStackEntry.arguments?.getBoolean("useOtp")
+            val otpText = navBackStackEntry.arguments?.getString("otpText")
+            val linkingRef = navBackStackEntry.arguments?.getString("linkingRef")
+
             cardEnterPinViewModel.resetTransactionState()
             CardEnterPinScreen(
                 onPayButtonClicked = { cardDTO ->
@@ -946,7 +958,9 @@ fun MyAppNavHost(
                 cardExpiryMonth = cardExpiryMonth!!,
                 cardExpiryYear = cardExpiryYear!!,
                 isEnterPin = isEnterPin!!,
-                resetVM = {}
+                useOtp = useOtp!!,
+                otpText = otpText!!,
+                linkingRef = linkingRef!!
             )
         }
 

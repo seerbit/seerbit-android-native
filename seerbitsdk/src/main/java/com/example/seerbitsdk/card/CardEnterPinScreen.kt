@@ -71,7 +71,9 @@ fun CardEnterPinScreen(
     cardExpiryMonth: String,
     cardExpiryYear: String,
     isEnterPin: Boolean,
-    resetVM: () -> Unit,
+    useOtp : Boolean,
+    otpText : String,
+    linkingRef : String,
     cardEnterPinViewModel: CardEnterPinViewModel,
 
     ) {
@@ -102,14 +104,13 @@ fun CardEnterPinScreen(
 
                 var pin by remember { mutableStateOf("") }
                 var isEnterOTP by remember { mutableStateOf(false) }
-                var showErrorDialog by remember { mutableStateOf(false) }
                 var showCircularProgressBar by remember { mutableStateOf(false) }
                 var linkingReference: String? by remember { mutableStateOf("") }
                 var paymentReference2 by remember { mutableStateOf("") }
                 var otp by remember { mutableStateOf("") }
-                var startQuerying by remember { mutableStateOf(true) }
                 var alertDialogMessage  by remember { mutableStateOf("") }
                 var alertDialogHeaderMessage  by remember { mutableStateOf("") }
+
                 //HANDLE ENTER OTP STATE
                 val otpState: OTPState = cardEnterPinViewModel.otpState.value
                 //HANDLE INITIATE TRANSACTION RESPONSE
@@ -119,13 +120,18 @@ fun CardEnterPinScreen(
                 val queryTransactionStateState: QueryTransactionState =
                     cardEnterPinViewModel.queryTransactionState.value
                 val openDialog = remember { mutableStateOf(false) }
+                var amount: String = "20.0"
 
+
+                if(useOtp){
+                    linkingReference = linkingRef
+                }
 
                 Spacer(modifier = Modifier.height(21.dp))
                 SeerbitPaymentDetailHeader(
 
                     charges =  merchantDetailsData.payload?.vatFee?.toDouble()!!,
-                    amount = "60,000.00",
+                    amount = amount,
                     currencyText = merchantDetailsData.payload.defaultCurrency!!,
                     "",
                     merchantDetailsData.payload.businessName!!,
@@ -151,8 +157,8 @@ fun CardEnterPinScreen(
 
                 val cardDTO = CardDTO(
                     deviceType = "Android",
-                    country = merchantDetailsData.payload.address?.country!!,
-                    20.0,
+                    country = merchantDetailsData.payload?.country?.countryCode ?: "",
+                    amount = 20.0,
                     cvv = cvv,
                     redirectUrl = "http://localhost:3002/#/",
                     productId = "",
@@ -160,9 +166,9 @@ fun CardEnterPinScreen(
                     paymentReference = paymentReference,
                     fee = merchantDetailsData.payload.vatFee,
                     expiryMonth = cardExpiryMonth,
-                    fullName = "Amos Aorme",
+                    fullName = merchantDetailsData.payload?.businessName,
                     "MASTERCARD",
-                    publicKey = merchantDetailsData.payload.livePublicKey,
+                    publicKey = "SBPUBK_TCDUH6MNIDLHMJXJEJLBO6ZU2RNUUPHI",
                     expiryYear = cardExpiryYear,
                     source = "MODAL",
                     paymentType = "CARD",
@@ -171,16 +177,23 @@ fun CardEnterPinScreen(
                     currency = merchantDetailsData.payload.defaultCurrency,
                     "LOCAL",
                     false,
-                    email = "inspiron.amos@gmail.com",
+                    email = "sdk@gmail.com",
                     cardNumber = cardNumber,
                     retry = false
                 )
                 val cardOTPDTO = CardOTPDTO( transaction = Transaction( linkingReference, otp) )
 
-                if (isEnterPin && !isEnterOTP) {
-                    PinInputField(onEnterPin = { pin = it })
+                var otpHeaderText : String = ""
+                val alternativeOTPText : String = "Kindly enter the OTP sent to ${merchantDetailsData.payload.number?.maskedPhoneNumber()} and\n" +
+                        "o***********@gmail.com or enter the OTP generates on your hardware token device"
+
+                otpHeaderText = otpText.ifEmpty {
+                    alternativeOTPText
                 }
 
+                if (isEnterPin && !isEnterOTP && !useOtp) {
+                    PinInputField(onEnterPin = { pin = it })
+                }
 
                 else {
                     Row(
@@ -188,9 +201,7 @@ fun CardEnterPinScreen(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(
-                            text = "Kindly enter the OTP sent to ${merchantDetailsData.payload.number?.maskedPhoneNumber()} and\n" +
-                                    "o***********@gmail.com or enter the OTP generates on your hardware token device",
-                            style = TextStyle(
+                            text = otpHeaderText,  style = TextStyle(
                                 fontSize = 14.sp,
                                 fontFamily = FontFamily.SansSerif,
                                 fontWeight = FontWeight.Normal,
@@ -244,6 +255,8 @@ fun CardEnterPinScreen(
                     alertDialogMessage = otpState.errorMessage?:  "Something went wrong"
                    openDialog.value = true
                     alertDialogHeaderMessage = "Error occurred"
+                    showCircularProgressBar = false
+                    cardEnterPinViewModel.resetTransactionState()
                 }
                 showCircularProgressBar = otpState.isLoading
 
@@ -266,18 +279,31 @@ fun CardEnterPinScreen(
                                 } while (queryTransactionStateState.data.data?.code == PENDING_CODE)
 
 
-                                if (queryTransactionStateState.data.data?.code == FAILED) {
+                                if (queryTransactionStateState.data.data?.code == FAILED_CODE || queryTransactionStateState.data.data?.code == FAILED) {
                                     showCircularProgressBar = false
                                     openDialog.value = true
-                                    alertDialogMessage = queryTransactionStateState.data.data.payments?.reason!!
+                                    alertDialogMessage = queryTransactionStateState.data.data.payments?.reason?:""
+                                    alertDialogHeaderMessage = "Failed"
+                                    cardEnterPinViewModel.resetTransactionState()
+                                    return@let
+                                }
+                                else {
+                                    showCircularProgressBar = false
+                                    openDialog.value = true
+                                    alertDialogMessage = queryTransactionStateState.data.data?.payments?.reason?:""
                                     alertDialogHeaderMessage = "Failed"
                                     cardEnterPinViewModel.resetTransactionState()
                                     return@let
                                 }
 
+
                             }else cardEnterPinViewModel.queryTransaction(cardDTO.paymentReference!!)
                         } else if (otpState.data.status == FAILED) {
-                            showErrorDialog = true
+                        showCircularProgressBar = false
+                        openDialog.value = true
+                        alertDialogMessage = otpState.data.data?.message?:"Error processing otp"
+                        alertDialogHeaderMessage = "Failed"
+                        cardEnterPinViewModel.resetTransactionState()
                         }
                     }
 
@@ -320,8 +346,9 @@ fun CardEnterPinScreen(
 
 
                 Spacer(modifier = Modifier.height(16.dp))
+
                 //payment button
-                if (isEnterPin && !isEnterOTP) {
+                if (isEnterPin && !isEnterOTP && !useOtp) {
                     PayButton(
                         amount = "NGN ${cardDTO.amount}",
                         onClick = {
@@ -407,7 +434,9 @@ fun HeaderScreenPreview() {
             cardExpiryMonth = "",
             cardExpiryYear = "",
             isEnterPin = false,
-            resetVM = {}
+            useOtp = true,
+            otpText = "",
+            linkingRef = ""
         )
     }
 }

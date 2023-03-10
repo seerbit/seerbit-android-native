@@ -125,7 +125,7 @@ fun OTPInputField(
             OutlinedTextField(
                 value = value,
                 onValueChange = { newText ->
-                    if (newText.length <= 6)
+                    if (newText.length <= 8)
                         value = newText
                     onEnterOTP(newText)
                 },
