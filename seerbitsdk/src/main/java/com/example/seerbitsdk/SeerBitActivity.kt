@@ -304,6 +304,7 @@ fun CardHomeScreen(
                 openDialog.value = true
                 alertDialogMessage = "Invalid Card Details"
                 alertDialogHeaderMessage = "Error Occurred"
+                transactionViewModel.clearCardBinState()
             }
             if (cardBinState.isLoading) {
 
@@ -385,7 +386,7 @@ fun CardHomeScreen(
                         } else {
                             openDialog.value = true
                             alertDialogMessage = "Invalid Card Details"
-                            alertDialogHeaderMessage = "Error Occured"
+                            alertDialogHeaderMessage = "Error Occurred"
                         }
                     }, !showCircularProgressBar
                 )
@@ -411,9 +412,6 @@ fun CardHomeScreen(
             if(transactionState.isLoading){
                 showCircularProgressBar = true
             }
-
-
-
 
 
             if (queryTransactionStateState.hasError) {
@@ -458,34 +456,40 @@ fun CardHomeScreen(
 
 
             transactionState.data?.let {
-                paymentRef = transactionState.data.data?.payments?.paymentReference ?: ""
-                val linkingRef = transactionState.data.data?.payments?.linkingReference ?: ""
-                val toEnterPinScreen = transactionState.data.data?.message == KINDLY_ENTER_PIN
-                val useOtp =
-                    transactionState.data.data?.message?.contains(KINDLY_ENTER_THE_OTP, true)
-                        ?: false
-                val otpText = transactionState.data.data?.message
-                transactionState.data.data?.payments?.redirectUrl?.let {
-                    redirectUrl = it
-                    canRedirectToUrl = true
+
+                if(it.data?.code == SUCCESS) {
+                    showCircularProgressBar = false
+                    paymentRef = transactionState.data.data?.payments?.paymentReference ?: ""
+                    val linkingRef = transactionState.data.data?.payments?.linkingReference ?: ""
+                    val toEnterPinScreen = transactionState.data.data?.message == KINDLY_ENTER_PIN
+                    val useOtp =
+                        transactionState.data.data?.message?.contains(KINDLY_ENTER_THE_OTP, true)
+                            ?: false
+                    val otpText = transactionState.data.data?.message
+                    transactionState.data.data?.payments?.redirectUrl?.let {
+                        redirectUrl = it
+                        canRedirectToUrl = true
+                    }
+                    if (toEnterPinScreen || useOtp) {
+                        redirectUrl = ""
+                        navController.navigateSingleTopTo(
+                            "${Route.PIN_SCREEN}/$paymentRef/$cvv/$cardNumber/$cardExpiryMonth/$cardExpiryYear/$toEnterPinScreen/$useOtp/$otpText/$linkingRef"
+                        )
+                        return@let
+                    } else if (canRedirectToUrl) {
+                        redirectUrl(redirectUrl = redirectUrl)
+                        transactionViewModel.queryTransaction(paymentRef)
+                        transactionViewModel.resetTransactionState()
+                        canRedirectToUrl = false
+                        showCircularProgressBar = true
+                        return@let
+                    }
                 }
-                if (toEnterPinScreen || useOtp) {
-                    redirectUrl = ""
-                    navController.navigateSingleTopTo(
-                        "${Route.PIN_SCREEN}/$paymentRef/$cvv/$cardNumber/$cardExpiryMonth/$cardExpiryYear/$toEnterPinScreen/$useOtp/$otpText/$linkingRef"
-                    )
-                    return@let
-                } else if (canRedirectToUrl) {
-                    redirectUrl(redirectUrl = redirectUrl)
-                    transactionViewModel.queryTransaction(paymentRef)
-                    transactionViewModel.resetTransactionState()
-                    canRedirectToUrl = false
-                    return@let
-                }
-                if (it.data?.code == "S100") {
+                else {
                     openDialog.value = true
+                    showCircularProgressBar = false
                     alertDialogHeaderMessage = "Error"
-                    alertDialogMessage = it.data.message ?: "Something went wrong"
+                    alertDialogMessage = it.data?.message ?: "Something went wrong"
                     transactionViewModel.resetTransactionState()
                     return@let
                 }
