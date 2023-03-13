@@ -16,6 +16,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -25,16 +26,14 @@ import com.example.seerbitsdk.ErrorDialog
 import com.example.seerbitsdk.R
 import com.example.seerbitsdk.card.AuthorizeButton
 import com.example.seerbitsdk.card.showCircularProgress
-import com.example.seerbitsdk.component.Dummy
-import com.example.seerbitsdk.component.Route
-import com.example.seerbitsdk.component.SeerbitPaymentDetailHeader
-import com.example.seerbitsdk.component.YES
+import com.example.seerbitsdk.component.*
 import com.example.seerbitsdk.models.RequiredFields
-import com.example.seerbitsdk.models.card.CardDTO
+import com.example.seerbitsdk.models.bankaccount.BankAccountDTO
 import com.example.seerbitsdk.navigateSingleTopNoSavedState
-import com.example.seerbitsdk.navigateSingleTopTo
+import com.example.seerbitsdk.screenstate.InitiateTransactionState
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.ui.theme.SeerBitTheme
+import com.example.seerbitsdk.ui.theme.SignalRed
 import com.example.seerbitsdk.viewmodels.TransactionViewModel
 import com.google.gson.Gson
 
@@ -51,10 +50,14 @@ fun BankAccountDOBScreen(
     bankName : String?,
 
 ) {
-
+    var showCircularProgressBar by remember { mutableStateOf(false) }
+    val openDialog = remember { mutableStateOf(false) }
+    var alertDialogMessage by remember { mutableStateOf("") }
+    var alertDialogHeaderMessage by remember { mutableStateOf("") }
+    var amount : String = "20.00"
+    var paymentRef = transactionViewModel.generateRandomReference()
     var dob by remember { mutableStateOf("") }
     var json by remember { mutableStateOf(Uri.encode(Gson().toJson(requiredFields))) }
-    var amount : String = "60,000"
     // if there is an error loading the report
     if (merchantDetailsState?.hasError!!) {
         ErrorDialog(message = merchantDetailsState.errorMessage ?: "Something went wrong")
@@ -79,13 +82,79 @@ fun BankAccountDOBScreen(
                 Spacer(modifier = Modifier.height(25.dp))
 
                 SeerbitPaymentDetailHeader(
-                    charges =  merchantDetailsData.payload?.vatFee?.toDouble()!!,
+                    charges =  merchantDetailsData.payload?.vatFee?.toDouble()?:0.0,
                     amount = "20.00",
-                    currencyText = merchantDetailsData.payload.defaultCurrency!!,
+                    currencyText = merchantDetailsData.payload?.defaultCurrency?:"",
                     "Please Enter your birthday",
-                    merchantDetailsData.payload.businessName!!,
-                    merchantDetailsData.payload.supportEmail!!
+                    merchantDetailsData.payload?.businessName?:"",
+                    merchantDetailsData.payload?.supportEmail?:""
                 )
+
+                val bankAccountDTO = BankAccountDTO(
+                    deviceType = "Android",
+                    country = merchantDetailsData.payload?.country?.countryCode?: "",
+                    bankCode = bankCode,
+                    amount = amount,
+                    redirectUrl = "http://localhost:3002/#/",
+                    productId = "",
+                    mobileNumber = merchantDetailsData.payload?.number,
+                    paymentReference = paymentRef,
+                    fee = merchantDetailsData.payload?.vatFee,
+                    fullName = "Amos Aorme",
+                    channelType = "$bankName",
+                    dateOfBirth = dob,
+                    publicKey = "SBPUBK_TCDUH6MNIDLHMJXJEJLBO6ZU2RNUUPHI",
+                    source = "",
+                    accountName = "Arome Amos",
+                    paymentType = "ACCOUNT",
+                    sourceIP = "128.0.0.1",
+                    currency = merchantDetailsData.payload?.defaultCurrency,
+                    bvn = Dummy,
+                    email = "sdk@gmail.com",
+                    productDescription = "",
+                    scheduleId = "",
+                    accountNumber = bankAccountNumber,
+                    retry = false
+                )
+
+                val initiateBankAccountPayment: InitiateTransactionState =
+                    transactionViewModel.initiateTransactionState.value
+                //enter payment states
+
+                showCircularProgressBar = initiateBankAccountPayment.isLoading
+
+                //enter payment states
+                if (initiateBankAccountPayment.hasError) {
+                    showCircularProgressBar = false
+                    openDialog.value = true
+                    alertDialogMessage =
+                        initiateBankAccountPayment.errorMessage ?: "Something went wrong"
+                    alertDialogHeaderMessage = "Failed"
+                    transactionViewModel.resetTransactionState()
+                }
+
+
+                initiateBankAccountPayment.data?.let {
+                    showCircularProgressBar = true
+                    if (initiateBankAccountPayment.data.data?.code== SUCCESS) {
+                        val linkingReference = it.data?.payments?.linkingReference
+
+                        navController.navigateSingleTopNoSavedState(
+                            "${Route.BANK_ACCOUNT_OTP_SCREEN}/$bankName/$json/$bankCode/$bankAccountNumber/$bvn/$dob/$linkingReference"
+                        )
+
+                    } else  {
+                        openDialog.value = true
+                        showCircularProgressBar = false
+                        alertDialogMessage =
+                            initiateBankAccountPayment.data.data?.message.toString()
+                        alertDialogHeaderMessage = "Failed"
+                        transactionViewModel.resetTransactionState()
+                        return@let
+                    }
+                }
+
+
 
                 Spacer(modifier = modifier.height(10.dp))
                 //Show Birthday
@@ -100,14 +169,56 @@ fun BankAccountDOBScreen(
                     onClick = {
 
                         if (dob.isNotEmpty()) {
-
-                            navController.navigateSingleTopNoSavedState(
-                                "${Route.BANK_ACCOUNT_OTP_SCREEN}/$bankName/$json/$bankCode/$bankAccountNumber/$bvn/$dob"
-                            )
-
+                            transactionViewModel.initiateTransaction(bankAccountDTO)
                         }
-                    }, true
+                    }, !showCircularProgressBar
                 )
+
+
+
+
+
+
+
+                //The alert dialog occurs here
+                if (openDialog.value) {
+                    AlertDialog(
+                        onDismissRequest = {
+                            openDialog.value = false
+                        },
+                        title = {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                Text(text = alertDialogHeaderMessage, textAlign = TextAlign.Center)
+                            }
+
+                        },
+                        text = {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                Text(alertDialogMessage, textAlign = TextAlign.Center)
+                            }
+                        },
+                        confirmButton = {
+                            Button(
+
+                                onClick = {
+                                    openDialog.value = false
+                                },
+                                colors = ButtonDefaults.buttonColors(
+                                    backgroundColor = SignalRed
+                                )
+                            ) {
+                                Text(text = "Close")
+
+                            }
+                        },
+                    )
+                }
 
 
             }

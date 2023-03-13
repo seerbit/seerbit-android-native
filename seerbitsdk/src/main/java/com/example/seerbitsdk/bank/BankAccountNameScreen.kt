@@ -70,12 +70,12 @@ fun BankAccountNameScreen(
 
                 SeerbitPaymentDetailHeader(
 
-                    charges =  merchantDetailsData.payload?.vatFee?.toDouble()!!,
+                    charges =  merchantDetailsData.payload?.vatFee?.toDouble()?:0.0,
                     amount = "20.00",
-                    currencyText = merchantDetailsData.payload.defaultCurrency!!,
+                    currencyText = merchantDetailsData.payload?.defaultCurrency?:"",
                     "Please Enter your Account Number",
-                    merchantDetailsData.payload.businessName!!,
-                    merchantDetailsData.payload.supportEmail!!
+                    merchantDetailsData.payload?.businessName?:"",
+                    merchantDetailsData.payload?.supportEmail?:""
                 )
 
 

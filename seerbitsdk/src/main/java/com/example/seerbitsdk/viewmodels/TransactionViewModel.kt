@@ -66,6 +66,7 @@ class TransactionViewModel : ViewModel() {
         _initiateTransactionState.value = InitiateTransactionState()
         _initiateTransactionState2.value = InitiateTransactionState()
         _queryTransactionState.value = QueryTransactionState()
+        _otpState.value = OTPState()
     }
 
 
@@ -208,6 +209,9 @@ class TransactionViewModel : ViewModel() {
         }
 
     }
+
+
+
 
     fun getPaymentReference(): String {
         val current = LocalDateTime.now()

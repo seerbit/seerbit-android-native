@@ -6,6 +6,7 @@ import com.example.seerbitsdk.models.GetBanksResponse
 import com.example.seerbitsdk.models.bankaccount.BankAccountDTO
 import com.example.seerbitsdk.models.card.CardResponse
 import com.example.seerbitsdk.models.home.MerchantDetailsResponse
+import com.example.seerbitsdk.models.momo.MomoNetworkResponse
 import com.example.seerbitsdk.models.query.QueryTransactionResponse
 import com.example.seerbitsdk.models.transfer.TransferDTO
 import com.example.seerbitsdk.models.ussd.UssdDTO
@@ -40,6 +41,9 @@ interface SeerBitService {
     @POST("checkout/initiates")
     suspend fun initiateTransfer(@Body transferDTO: TransferDTO): Response<CardResponse>
 
+    @POST("checkout/initiates")
+    suspend fun initiateMomo(@Body transferDTO: TransferDTO): Response<CardResponse>
+
     // using this here because the url points to live
     @POST("checkout/initiates")
     suspend fun initiateBankAccountMode(@Body bankAccountDTO: BankAccountDTO): Response<CardResponse>
@@ -47,8 +51,12 @@ interface SeerBitService {
     @GET("checkout/banks")
     suspend fun getBanks(): Response<GetBanksResponse>
 
+    @GET("tranmgt/networks/GH/00000103")
+    suspend fun getMomoNetworks(): Response<MomoNetworkResponse>
+
     @GET("checkout/bin/{firstSixDigit}")
     suspend fun getCardBin(@Path("firstSixDigit") firstSixDigit: String): Response<CardBinResponse>
+
 
 }
 
@@ -62,7 +70,7 @@ private val okHttpClient = OkHttpClient.Builder()
             .build()
         chain.proceed(request)
     })
-    .connectTimeout(30, TimeUnit.SECONDS)
+    .connectTimeout(60, TimeUnit.SECONDS)
     .readTimeout(30, TimeUnit.SECONDS)
     .writeTimeout(30, TimeUnit.SECONDS)
     .addInterceptor(logger())

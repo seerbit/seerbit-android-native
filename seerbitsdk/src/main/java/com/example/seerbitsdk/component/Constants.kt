@@ -9,6 +9,7 @@ const val KINDLY_ENTER_THE_OTP : String = "Kindly Enter the OTP"
 const val FAILED : String  = "SMV_N"
 
 const val YES : String = "YES"
+const val NO : String = "NO"
 const val Dummy = "-2234"
 
 const val SEERBIT_DEFAULT_EMAIL = "sdk@gmail.com"

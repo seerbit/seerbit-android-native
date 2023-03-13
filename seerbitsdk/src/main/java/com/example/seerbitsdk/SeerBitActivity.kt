@@ -52,6 +52,7 @@ import com.example.seerbitsdk.models.CardDetails
 import com.example.seerbitsdk.models.RequiredFields
 import com.example.seerbitsdk.models.card.CardDTO
 import com.example.seerbitsdk.component.OtherPaymentScreen
+import com.example.seerbitsdk.momo.MomoHomeScreen
 import com.example.seerbitsdk.screenstate.*
 import com.example.seerbitsdk.transfer.TransferHomeScreen
 import com.example.seerbitsdk.ui.theme.*
@@ -991,11 +992,12 @@ fun MyAppNavHost(
 
         //BANK ACCOUUT HOME SCREEN
         composable(route = BankAccount.route) {
+            transactionViewModel.resetTransactionState()
             BankAccountSelectBankScreen(
                 navigateToUssdHomeScreen = { /*TODO*/ },
                 currentDestination = currentDestination,
                 navController = navController,
-                onConfirmPaymentClicked = { /*TODO*/ },
+                transactionViewModel = transactionViewModel,
                 merchantDetailsState = merchantDetailsState,
                 selectBankViewModel = selectBankViewModel
             )
@@ -1105,7 +1107,7 @@ fun MyAppNavHost(
 
         //BANK ACCOUNT OTP SCREEN
         composable(
-            "${Route.BANK_ACCOUNT_OTP_SCREEN}/{bankName}/{requiredFields3}/{bankCode}/{accountNumber}/{bvn}/{birthday}",
+            "${Route.BANK_ACCOUNT_OTP_SCREEN}/{bankName}/{requiredFields3}/{bankCode}/{accountNumber}/{bvn}/{birthday}/{linkingReference}",
             arguments = listOf(
                 // declaring argument type
                 navArgument("requiredFields3") { type = NavType.StringType },
@@ -1114,6 +1116,7 @@ fun MyAppNavHost(
                 navArgument("accountNumber") { type = NavType.StringType },
                 navArgument("bvn") { type = NavType.StringType },
                 navArgument("birthday") { type = NavType.StringType },
+                navArgument("linkingReference") { type = NavType.StringType },
 
                 )
         ) { navBackStackEntry ->
@@ -1128,6 +1131,7 @@ fun MyAppNavHost(
             val accountNumber = navBackStackEntry.arguments?.getString("accountNumber")
             val bvn = navBackStackEntry.arguments?.getString("bvn")
             val birthday = navBackStackEntry.arguments?.getString("birthday")
+            val linkingReference =  navBackStackEntry.arguments?.getString("linkingReference")
             transactionViewModel.resetTransactionState()
             BankAccountOTPScreen(
                 navController = navController,
@@ -1138,7 +1142,29 @@ fun MyAppNavHost(
                 dob = birthday!!,
                 bvn = bvn!!,
                 requiredFields = requiredField,
-                bankName = bankName
+                bankName = bankName,
+                linkingReference = linkingReference
+            )
+        }
+
+        //BANK ACCOUNT redirect url SCREEN
+        composable(
+            "${Route.BANK_ACCOUNT_REDIRECT_URL_SCREEN}/{bankName}/{bankCode}",
+            arguments = listOf(
+                // declaring argument type
+                navArgument("bankCode") { type = NavType.StringType },
+                navArgument("bankName") { type = NavType.StringType },
+
+                )
+        ) { navBackStackEntry ->
+            val bankCode = navBackStackEntry.arguments?.getString("bankCode")
+            val bankName = navBackStackEntry.arguments?.getString("bankName")
+
+            BankRedirectUrlScreen(
+                merchantDetailsState = merchantDetailsState,
+                transactionViewModel = transactionViewModel,
+                bankCode = bankCode!!,
+                bankName = bankName!!
             )
         }
 
@@ -1206,6 +1232,18 @@ fun MyAppNavHost(
                 navController = navController,
                 merchantDetailsState = merchantDetailsState,
                 transactionViewModel = transactionViewModel
+            )
+
+        }
+
+        composable(MOMO.route) {
+            MomoHomeScreen(
+                navigateToUssdHomeScreen = {},
+                currentDestination = currentDestination ,
+                navController = navController,
+                onConfirmPaymentClicked = { /*TODO*/ },
+                merchantDetailsState = merchantDetailsState,
+                selectBankViewModel = selectBankViewModel
             )
 
         }

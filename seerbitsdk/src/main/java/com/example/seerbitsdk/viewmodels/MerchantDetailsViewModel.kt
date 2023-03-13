@@ -10,8 +10,6 @@ import androidx.lifecycle.ViewModel
 import com.example.seerbitsdk.models.Resource
 import com.example.seerbitsdk.screenstate.CardBinState
 import com.example.seerbitsdk.use_cases.GetMerchantDetailUseCase
-import com.example.seerbitsdk.use_cases.InitiateUseCase
-import com.example.seerbitsdk.screenstate.InitiateTransactionState
 import com.example.seerbitsdk.use_cases.CardBinUseCase
 
 class MerchantDetailsViewModel : ViewModel() {

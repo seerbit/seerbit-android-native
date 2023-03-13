@@ -23,13 +23,11 @@ import com.example.seerbitsdk.R
 
 import com.example.seerbitsdk.card.AuthorizeButton
 import com.example.seerbitsdk.card.showCircularProgress
-import com.example.seerbitsdk.component.Dummy
-import com.example.seerbitsdk.component.Route
-import com.example.seerbitsdk.component.SeerbitPaymentDetailHeader
-import com.example.seerbitsdk.component.YES
+import com.example.seerbitsdk.component.*
 import com.example.seerbitsdk.models.RequiredFields
+import com.example.seerbitsdk.models.bankaccount.BankAccountDTO
 import com.example.seerbitsdk.navigateSingleTopNoSavedState
-import com.example.seerbitsdk.navigateSingleTopTo
+import com.example.seerbitsdk.screenstate.InitiateTransactionState
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.ui.theme.SeerBitTheme
 import com.example.seerbitsdk.viewmodels.TransactionViewModel
@@ -51,8 +49,14 @@ fun BankAccountNumberScreen(
     var accountNumber by remember {
         mutableStateOf("")
     }
-    var amount : String = "60,000"
+    var amount : String = "20.00"
     var json by remember { mutableStateOf(Uri.encode(Gson().toJson(requiredFields))) }
+    var showCircularProgressBar by remember { mutableStateOf(false) }
+    val openDialog = remember { mutableStateOf(false) }
+    var alertDialogMessage by remember { mutableStateOf("") }
+    var alertDialogHeaderMessage by remember { mutableStateOf("") }
+    var paymentRef = transactionViewModel.generateRandomReference()
+
     // if there is an error loading the report
     if (merchantDetailsState?.hasError!!) {
         ErrorDialog(message = merchantDetailsState.errorMessage ?: "Something went wrong")
@@ -80,13 +84,83 @@ fun BankAccountNumberScreen(
 
                 SeerbitPaymentDetailHeader(
 
-                    charges =  merchantDetailsData.payload?.vatFee?.toDouble()!!,
+                    charges =  merchantDetailsData.payload?.vatFee?.toDouble()?:0.0,
                     amount = "20.00",
-                    currencyText = merchantDetailsData.payload.defaultCurrency!!,
+                    currencyText = merchantDetailsData.payload?.defaultCurrency?:"",
                     "Please Enter your Account Number",
-                    merchantDetailsData.payload.businessName!!,
-                    merchantDetailsData.payload.supportEmail!!
+                    merchantDetailsData.payload?.businessName?:"",
+                    merchantDetailsData.payload?.supportEmail?:""
                 )
+
+                val bankAccountDTO = BankAccountDTO(
+                    deviceType = "Android",
+                    country = merchantDetailsData.payload?.country?.countryCode?: "",
+                    bankCode = bankCode,
+                    amount = amount,
+                    redirectUrl = "http://localhost:3002/#/",
+                    productId = "",
+                    mobileNumber = merchantDetailsData.payload?.number,
+                    paymentReference = paymentRef,
+                    fee = merchantDetailsData.payload?.vatFee,
+                    fullName = "Amos Aorme",
+                    channelType = "$bankName",
+                    dateOfBirth = Dummy,
+                    publicKey = "SBPUBK_TCDUH6MNIDLHMJXJEJLBO6ZU2RNUUPHI",
+                    source = "",
+                    accountName = "Arome Amos",
+                    paymentType = "ACCOUNT",
+                    sourceIP = "128.0.0.1",
+                    currency = merchantDetailsData.payload?.defaultCurrency,
+                    bvn = Dummy,
+                    email = "sdk@gmail.com",
+                    productDescription = "",
+                    scheduleId = "",
+                    accountNumber = accountNumber,
+                    retry = false
+                )
+
+                if(showCircularProgressBar){
+                    showCircularProgress(showProgress = true)
+                }
+                val initiateBankAccountPayment: InitiateTransactionState =
+                    transactionViewModel.initiateTransactionState.value
+                //enter payment states
+
+                if(initiateBankAccountPayment.isLoading){
+                    showCircularProgressBar = true
+                }
+
+
+                //enter payment states
+                if (initiateBankAccountPayment.hasError) {
+                    showCircularProgressBar = false
+                    openDialog.value = true
+                    alertDialogMessage =
+                        initiateBankAccountPayment.errorMessage ?: "Something went wrong"
+                    alertDialogHeaderMessage = "Failed"
+                    transactionViewModel.resetTransactionState()
+                }
+
+
+                initiateBankAccountPayment.data?.let {
+
+                    if (initiateBankAccountPayment.data.data?.code== PENDING_CODE) {
+                        val linkingReference = it.data?.payments?.linkingReference
+                        showCircularProgressBar = false
+                        navController.navigateSingleTopNoSavedState(
+                            "${Route.BANK_ACCOUNT_OTP_SCREEN}/$bankName/$json/$bankCode/$accountNumber/$Dummy/$Dummy/$linkingReference"
+                        )
+
+                    } else  {
+                        openDialog.value = true
+                        showCircularProgressBar = false
+                        alertDialogMessage =
+                            initiateBankAccountPayment.data.data?.message.toString()
+                        alertDialogHeaderMessage = "Failed"
+                        transactionViewModel.resetTransactionState()
+                        return@let
+                    }
+                }
 
 
                 Spacer(modifier = Modifier.height(21.dp))
@@ -98,7 +172,7 @@ fun BankAccountNumberScreen(
 
                 Spacer(modifier = modifier.height(10.dp))
                 AuthorizeButton(
-                    buttonText = "Pay NGN$amount",
+                    buttonText = "Verify Account",
                     onClick = {
 
 
@@ -106,6 +180,10 @@ fun BankAccountNumberScreen(
 
                             requiredFields?.let {
 
+                                if(it.bvn == NO&&it.dateOfBirth == NO&&it.bvn == NO){
+                                    transactionViewModel.initiateTransaction(bankAccountDTO)
+                                    return@let
+                                }
                                 if (it.bvn == YES) {
                                     navController.navigateSingleTopNoSavedState(
                                         "${Route.BANK_ACCOUNT_BVN_SCREEN}/$bankName/$json/$bankCode/$accountNumber"
@@ -127,7 +205,7 @@ fun BankAccountNumberScreen(
                         }
 
 
-                    }, true
+                    }, !showCircularProgressBar
                 )
 
             }

@@ -3,7 +3,6 @@ package com.example.seerbitsdk.ussd
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import android.text.TextUtils
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -24,7 +23,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.seerbitsdk.Debit_CreditCard
@@ -32,9 +30,7 @@ import com.example.seerbitsdk.ErrorDialog
 import com.example.seerbitsdk.card.AuthorizeButton
 import com.example.seerbitsdk.card.showCircularProgress
 import com.example.seerbitsdk.component.*
-import com.example.seerbitsdk.models.ussd.UssdDTO
 import com.example.seerbitsdk.navigateSingleTopNoSavedState
-import com.example.seerbitsdk.screenstate.InitiateTransactionState
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.screenstate.QueryTransactionState
 import com.example.seerbitsdk.ui.theme.Faktpro

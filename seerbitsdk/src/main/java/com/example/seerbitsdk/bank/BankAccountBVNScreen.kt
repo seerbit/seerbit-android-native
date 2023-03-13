@@ -114,7 +114,7 @@ fun BankAccountBVNScreen(
                                 }
                                 else{
                                     navController.navigateSingleTopNoSavedState(
-                                        "${Route.BANK_ACCOUNT_OTP_SCREEN}/$bankName/$json/$bankCode/$bankAccountNumber/$bvn/$Dummy"
+                                        "${Route.BANK_ACCOUNT_OTP_SCREEN}/$bankName/$json/$bankCode/$bankAccountNumber/$bvn/$Dummy/$Dummy"
                                     )
                                 }
                             }

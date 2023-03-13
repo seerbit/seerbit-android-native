@@ -1,6 +1,5 @@
 package com.example.seerbitsdk.component
 
-import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -67,12 +66,12 @@ fun OtherPaymentScreen(
             ) {
                 Spacer(modifier = Modifier.height(25.dp))
                 SeerbitPaymentDetailHeader(
-                    charges = merchantDetailsData.payload?.vatFee?.toDouble()!!,
+                    charges = merchantDetailsData.payload?.vatFee?.toDouble() ?:0.0,
                     amount = "20.00",
-                    currencyText = merchantDetailsData.payload.defaultCurrency!!,
+                    currencyText = merchantDetailsData.payload?.defaultCurrency?:"",
                     "Other Payment Channels",
-                    merchantDetailsData.payload.businessName!!,
-                    merchantDetailsData.payload.supportEmail!!
+                    merchantDetailsData.payload?.businessName?:"",
+                    merchantDetailsData.payload?.supportEmail?:""
                 )
                 Spacer(modifier = Modifier.height(8.dp))
 

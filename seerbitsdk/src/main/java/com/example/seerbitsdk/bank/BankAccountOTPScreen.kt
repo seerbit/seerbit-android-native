@@ -19,10 +19,13 @@ import com.example.seerbitsdk.card.AuthorizeButton
 import com.example.seerbitsdk.card.OTPInputField
 import com.example.seerbitsdk.card.showCircularProgress
 import com.example.seerbitsdk.component.*
+import com.example.seerbitsdk.models.CardOTPDTO
 import com.example.seerbitsdk.models.RequiredFields
+import com.example.seerbitsdk.models.Transaction
 import com.example.seerbitsdk.models.bankaccount.BankAccountDTO
 import com.example.seerbitsdk.screenstate.InitiateTransactionState
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
+import com.example.seerbitsdk.screenstate.OTPState
 import com.example.seerbitsdk.screenstate.QueryTransactionState
 import com.example.seerbitsdk.ui.theme.SeerBitTheme
 import com.example.seerbitsdk.ui.theme.SignalRed
@@ -41,7 +44,7 @@ fun BankAccountOTPScreen(
     bankCode: String?,
     requiredFields: RequiredFields?,
     bankName: String?,
-
+    linkingReference: String?,
     ) {
 
     var otp by remember { mutableStateOf("") }
@@ -55,7 +58,7 @@ fun BankAccountOTPScreen(
     var paymentRef = transactionViewModel.generateRandomReference()
     myBVN = if (bvn == Dummy) "" else bvn
     dateOfBirth = if (dob == Dummy) "" else dob
-    var paymentReferenceAfterInitiate =""
+
 
 // if there is an error loading the report
     if (merchantDetailsState?.hasError!!) {
@@ -111,6 +114,7 @@ fun BankAccountOTPScreen(
                     accountNumber = bankAccountNumber,
                     retry = false
                 )
+
                 val maskedPhoneNumber = merchantDetailsData.payload?.number?.maskedPhoneNumber()
                 "******${merchantDetailsData.payload?.number?.substring(6)}"
                 val maskedEmailAddress = "A**************@gmail.com"
@@ -123,23 +127,27 @@ fun BankAccountOTPScreen(
                     merchantDetailsData.payload.supportEmail!!
                 )
 
+                val cardOTPDTO = CardOTPDTO( transaction = Transaction( linkingReference, otp) )
+
                 //HANDLES initiate query response
                 val queryTransactionStateState: QueryTransactionState =
                     transactionViewModel.queryTransactionState.value
 
                 //HANDLE INITIATE TRANSACTION RESPONSE
-                val initiateBankAccountPayment: InitiateTransactionState =
-                    transactionViewModel.initiateTransactionState.value
+                val otpState : OTPState =
+                    transactionViewModel.otpState.value
                 //enter payment states
 
-                showCircularProgressBar = initiateBankAccountPayment.isLoading
+
+
+                showCircularProgressBar = otpState.isLoading
 
                 //enter payment states
-                if (initiateBankAccountPayment.hasError) {
+                if (otpState.hasError) {
                     showCircularProgressBar = false
                     openDialog.value = true
                     alertDialogMessage =
-                        initiateBankAccountPayment.errorMessage ?: "Something went wrong"
+                        otpState.errorMessage ?: "Something went wrong"
                     alertDialogHeaderMessage = "Failed"
                     transactionViewModel.resetTransactionState()
                 }
@@ -154,10 +162,10 @@ fun BankAccountOTPScreen(
                     transactionViewModel.resetTransactionState()
                 }
 
-                initiateBankAccountPayment.data?.let {
+                otpState.data?.let {
                     showCircularProgressBar = true
-                    if (initiateBankAccountPayment.data.data?.code== SUCCESS) {
-                        paymentReferenceAfterInitiate = it.data?.payments?.paymentReference?:""
+                    if (otpState.data.data?.code== SUCCESS) {
+                        val paymentReferenceAfterInitiate = it.data?.payments?.paymentReference?:""
 
                         if (queryTransactionStateState.data != null) {
 
@@ -186,11 +194,11 @@ fun BankAccountOTPScreen(
                             }
 
                         } else transactionViewModel.queryTransaction(paymentReferenceAfterInitiate)
-                    } else if (initiateBankAccountPayment.data.data?.code== FAILED || initiateBankAccountPayment.data.data?.code == FAILED_CODE) {
+                    } else if (otpState.data.data?.code== FAILED || otpState.data.data?.code == FAILED_CODE) {
                         openDialog.value = true
                         showCircularProgressBar = false
                         alertDialogMessage =
-                            initiateBankAccountPayment.data.data.message.toString()
+                            otpState.data.data.message.toString()
                         alertDialogHeaderMessage = "Failed"
                         transactionViewModel.resetTransactionState()
                         return@let
@@ -247,7 +255,7 @@ fun BankAccountOTPScreen(
                             alertDialogMessage = "Error "
                             alertDialogHeaderMessage = "Invalid OTP"
                         } else {
-                            transactionViewModel.initiateTransaction(bankAccountDTO)
+                            transactionViewModel.sendOtp(cardOTPDTO)
 
                         }
                     }, !showCircularProgressBar

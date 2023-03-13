@@ -1,5 +1,6 @@
 package com.example.seerbitsdk.bank
 
+import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -28,15 +29,19 @@ import com.example.seerbitsdk.ErrorDialog
 import com.example.seerbitsdk.R
 import com.example.seerbitsdk.card.AuthorizeButton
 import com.example.seerbitsdk.card.showCircularProgress
+import com.example.seerbitsdk.component.Dummy
 import com.example.seerbitsdk.component.Route
 import com.example.seerbitsdk.component.SeerbitPaymentDetailHeader
 import com.example.seerbitsdk.models.MerchantBanksItem
 import com.example.seerbitsdk.models.RequiredFields
+import com.example.seerbitsdk.models.bankaccount.BankAccountDTO
 import com.example.seerbitsdk.navigateSingleTopNoSavedState
 import com.example.seerbitsdk.navigateSingleTopTo
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.ui.theme.SeerBitTheme
 import com.example.seerbitsdk.viewmodels.SelectBankViewModel
+import com.example.seerbitsdk.viewmodels.TransactionViewModel
+import com.google.gson.Gson
 
 @Composable
 fun BankAccountSelectBankScreen(
@@ -44,19 +49,24 @@ fun BankAccountSelectBankScreen(
     navigateToUssdHomeScreen: () -> Unit,
     currentDestination: NavDestination?,
     navController: NavHostController,
-    onConfirmPaymentClicked: () -> Unit,
+    transactionViewModel: TransactionViewModel,
     merchantDetailsState: MerchantDetailsState?,
     selectBankViewModel: SelectBankViewModel
 ) {
     var bankCode by remember { mutableStateOf("") }
     var bankName by remember { mutableStateOf("") }
 
-    var json : String = ""
+    var json: String = ""
     var showErrorDialog by remember { mutableStateOf(false) }
-    var showCircularProgressBar by remember { mutableStateOf(false) }
-    var requiredFields : RequiredFields = RequiredFields()
 
-    var amount : String = "60,000"
+    var requiredFields = RequiredFields()
+    var amount: String = "20.00"
+    var showCircularProgressBar by remember { mutableStateOf(false) }
+    val openDialog = remember { mutableStateOf(false) }
+    var alertDialogMessage by remember { mutableStateOf("") }
+    var alertDialogHeaderMessage by remember { mutableStateOf("") }
+
+
     // if there is an error loading the report
     if (merchantDetailsState?.hasError!!) {
         ErrorDialog(message = merchantDetailsState.errorMessage ?: "Something went wrong")
@@ -84,7 +94,7 @@ fun BankAccountSelectBankScreen(
                 Spacer(modifier = Modifier.height(25.dp))
 
                 SeerbitPaymentDetailHeader(
-                    charges =  merchantDetailsData.payload?.vatFee?.toDouble()!!,
+                    charges = merchantDetailsData.payload?.vatFee?.toDouble()!!,
                     amount = "20.00",
                     currencyText = merchantDetailsData.payload.defaultCurrency!!,
                     "Choose your bank to start this payment",
@@ -92,20 +102,19 @@ fun BankAccountSelectBankScreen(
                     merchantDetailsData.payload.supportEmail!!
                 )
 
+
                 Spacer(modifier = Modifier.height(10.dp))
 
-                if (showErrorDialog) {
-                    ErrorDialog(message = "Kindly Select a bank")
-                }
+
                 if (showCircularProgressBar) {
                     showCircularProgress(showProgress = true)
                 }
+                //HANDLE AVAILABLE BANK STATE
                 val availableBanksState = selectBankViewModel.availableBanksState.value
 
-                if(availableBanksState.data == null){
+                if (availableBanksState.data == null) {
                     selectBankViewModel.getBanks()
                 }
-
 
                 if (availableBanksState.hasError) {
                     showCircularProgressBar = false
@@ -114,13 +123,13 @@ fun BankAccountSelectBankScreen(
 
                 showCircularProgressBar = availableBanksState.isLoading
 
-
                 var merchantBankList: List<MerchantBanksItem?>? = listOf()
                 availableBanksState.data?.availableBankData?.let {
                     showCircularProgressBar = false
                     merchantBankList = it.merchantBanks!!
 
                 }
+
 
 
                 BankSelectBankButton(merchantBankList = merchantBankList) {
@@ -140,12 +149,17 @@ fun BankAccountSelectBankScreen(
                     buttonText = "Pay NGN$amount",
                     onClick = {
                         if (bankCode.isNotEmpty()) {
-                            if(requiredFields.accountNumber == "YES") {
+
+                            if (requiredFields.accountNumber == "YES") {
 
                                 navController.navigateSingleTopNoSavedState(
                                     "${Route.BANK_ACCOUNT_NUMBER_SCREEN}/$bankName/$json/$bankCode"
                                 )
                                 selectBankViewModel.resetTransactionState()
+                            } else { //this means it uses web redirect url link
+                                navController.navigateSingleTopNoSavedState(
+                                    "${Route.BANK_ACCOUNT_REDIRECT_URL_SCREEN}/$bankName/$bankCode"
+                                )
                             }
                         } else {
                             showErrorDialog = true
@@ -230,7 +244,7 @@ fun BankSelectBankButton(
             ) {
                 merchantBankList?.forEach { merchantBanksItem ->
                     DropdownMenuItem(onClick = {
-                      onMerchantBankSelected(merchantBanksItem)
+                        onMerchantBankSelected(merchantBanksItem)
                         selectedText = merchantBanksItem?.bankName!!
                         expanded = false
                     }) {
@@ -253,11 +267,12 @@ fun BankSelectBankButton(
 fun USSDSelectBankButtonPreview() {
     SeerBitTheme {
         val selectBankViewModel: SelectBankViewModel = SelectBankViewModel()
+        val transactionViewModel: TransactionViewModel = TransactionViewModel()
         BankAccountSelectBankScreen(
             navigateToUssdHomeScreen = { /*TODO*/ },
             currentDestination = null,
             navController = rememberNavController(),
-            onConfirmPaymentClicked = { /*TODO*/ },
+            transactionViewModel = transactionViewModel,
             merchantDetailsState = null,
             selectBankViewModel = selectBankViewModel
         )

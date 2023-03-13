@@ -7,11 +7,9 @@ import androidx.lifecycle.viewModelScope
 import com.example.seerbitsdk.models.CardOTPDTO
 import com.example.seerbitsdk.models.Resource
 import com.example.seerbitsdk.models.TransactionDTO
-import com.example.seerbitsdk.screenstate.AvailableBanksState
-import com.example.seerbitsdk.screenstate.InitiateTransactionState
-import com.example.seerbitsdk.screenstate.OTPState
-import com.example.seerbitsdk.screenstate.QueryTransactionState
+import com.example.seerbitsdk.screenstate.*
 import com.example.seerbitsdk.use_cases.GetBanksUseCase
+import com.example.seerbitsdk.use_cases.GetMomoNetworkUseCase
 import com.example.seerbitsdk.use_cases.InitiateUseCase
 import com.example.seerbitsdk.use_cases.OtpUseCase
 import kotlinx.coroutines.Dispatchers
@@ -25,9 +23,16 @@ class SelectBankViewModel: ViewModel() {
     val availableBanksState: State<AvailableBanksState>
         get() = _availableBanksState
 
+    private val getMomoNetworkUseCase : GetMomoNetworkUseCase = GetMomoNetworkUseCase()
+
+    private var _momoNetworkState = mutableStateOf(MomoNetworkState())
+    val momoNetworkState : State<MomoNetworkState>
+        get() = _momoNetworkState
+
 
     init {
         getBanks()
+        //getMomoNetworks()
     }
 
      fun resetTransactionState() {
@@ -55,6 +60,32 @@ class SelectBankViewModel: ViewModel() {
                     }
                     is Resource.Loading -> {
                         _availableBanksState.value = AvailableBanksState(
+                            isLoading = true
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    fun getMomoNetworks() {
+        _momoNetworkState.value = MomoNetworkState(isLoading = true)
+        viewModelScope.launch(Dispatchers.Main) {
+            getMomoNetworkUseCase().collect { resource ->
+                when (resource) {
+                    is Resource.Success -> {
+                        _momoNetworkState.value =
+                            MomoNetworkState(data = resource.data)
+                    }
+
+                    is Resource.Error -> {
+                        _momoNetworkState.value = MomoNetworkState(
+                            hasError = true,
+                            errorMessage = resource.message
+                        )
+                    }
+                    is Resource.Loading -> {
+                        _momoNetworkState.value = MomoNetworkState(
                             isLoading = true
                         )
                     }

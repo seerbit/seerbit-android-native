@@ -19,7 +19,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.*
-import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
 import com.example.seerbitsdk.ErrorDialog
 import com.example.seerbitsdk.R
@@ -27,15 +26,12 @@ import com.example.seerbitsdk.card.AuthorizeButton
 import com.example.seerbitsdk.card.showCircularProgress
 import com.example.seerbitsdk.component.Route
 import com.example.seerbitsdk.component.SeerbitPaymentDetailHeader
-import com.example.seerbitsdk.models.MerchantBanksItem
 import com.example.seerbitsdk.models.ussd.UssdBankData
 import com.example.seerbitsdk.models.ussd.UssdDTO
 import com.example.seerbitsdk.navigateSingleTopNoSavedState
-import com.example.seerbitsdk.navigateSingleTopTo
 import com.example.seerbitsdk.screenstate.InitiateTransactionState
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.ui.theme.SeerBitTheme
-import com.example.seerbitsdk.viewmodels.SelectBankViewModel
 import com.example.seerbitsdk.viewmodels.TransactionViewModel
 
 @Composable
