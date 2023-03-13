@@ -51,10 +51,11 @@ fun BankAccountOTPScreen(
     val openDialog = remember { mutableStateOf(false) }
     var alertDialogMessage by remember { mutableStateOf("") }
     var alertDialogHeaderMessage by remember { mutableStateOf("") }
-    var amount : String = "60,000"
-    var paymentRef = transactionViewModel.getPaymentReference()
+    var amount : String = "20.00"
+    var paymentRef = transactionViewModel.generateRandomReference()
     myBVN = if (bvn == Dummy) "" else bvn
     dateOfBirth = if (dob == Dummy) "" else dob
+    var paymentReferenceAfterInitiate =""
 
 // if there is an error loading the report
     if (merchantDetailsState?.hasError!!) {
@@ -86,36 +87,37 @@ fun BankAccountOTPScreen(
 
                 val bankAccountDTO = BankAccountDTO(
                     deviceType = "Android",
-                    country = merchantDetailsData.payload?.address?.country!!,
+                    country = merchantDetailsData.payload?.country?.countryCode?: "",
                     bankCode = bankCode,
-                    amount = "100",
+                    amount = amount,
                     redirectUrl = "http://localhost:3002/#/",
                     productId = "",
-                    mobileNumber = merchantDetailsData.payload.number,
+                    mobileNumber = merchantDetailsData.payload?.number,
                     paymentReference = paymentRef,
-                    fee = merchantDetailsData.payload.vatFee,
+                    fee = merchantDetailsData.payload?.vatFee,
                     fullName = "Amos Aorme",
                     channelType = "$bankName",
                     dateOfBirth = dateOfBirth,
-                    publicKey = merchantDetailsData.payload.testPublicKey,
+                    publicKey = "SBPUBK_TCDUH6MNIDLHMJXJEJLBO6ZU2RNUUPHI",
                     source = "",
                     accountName = "Arome Amos",
                     paymentType = "ACCOUNT",
-                    sourceIP = "0.0.0.1",
-                    currency = merchantDetailsData.payload.defaultCurrency,
+                    sourceIP = "128.0.0.1",
+                    currency = merchantDetailsData.payload?.defaultCurrency,
                     bvn = myBVN,
-                    email = "inspiron.amos@gmail.com",
+                    email = "sdk@gmail.com",
                     productDescription = "",
                     scheduleId = "",
                     accountNumber = bankAccountNumber,
                     retry = false
                 )
-                val maskedPhoneNumber = "******${merchantDetailsData.payload.number?.substring(6)}"
+                val maskedPhoneNumber = merchantDetailsData.payload?.number?.maskedPhoneNumber()
+                "******${merchantDetailsData.payload?.number?.substring(6)}"
                 val maskedEmailAddress = "A**************@gmail.com"
 
                 SeerbitPaymentDetailHeaderTwo(
                     charges =  merchantDetailsData.payload?.vatFee?.toDouble()!!,
-                    amount = "60,000.00",
+                    amount = amount,
                     currencyText = merchantDetailsData.payload.defaultCurrency!!,
                     merchantDetailsData.payload.businessName!!,
                     merchantDetailsData.payload.supportEmail!!
@@ -154,7 +156,9 @@ fun BankAccountOTPScreen(
 
                 initiateBankAccountPayment.data?.let {
                     showCircularProgressBar = true
-                    if (initiateBankAccountPayment.data.status == "SUCCESS") {
+                    if (initiateBankAccountPayment.data.data?.code== SUCCESS) {
+                        paymentReferenceAfterInitiate = it.data?.payments?.paymentReference?:""
+
                         if (queryTransactionStateState.data != null) {
 
                             when (queryTransactionStateState.data.data?.code) {
@@ -168,7 +172,7 @@ fun BankAccountOTPScreen(
                                     return@let
                                 }
                                 PENDING_CODE -> {
-                                    transactionViewModel.queryTransaction(bankAccountDTO.paymentReference!!)
+                                    transactionViewModel.queryTransaction(paymentReferenceAfterInitiate)
                                 }
                                 else -> {
                                     showCircularProgressBar = false
@@ -181,20 +185,23 @@ fun BankAccountOTPScreen(
                                 }
                             }
 
-                        } else transactionViewModel.queryTransaction(bankAccountDTO.paymentReference!!)
-                    } else if (initiateBankAccountPayment.data.status == FAILED || initiateBankAccountPayment.data.status == FAILED_CODE) {
+                        } else transactionViewModel.queryTransaction(paymentReferenceAfterInitiate)
+                    } else if (initiateBankAccountPayment.data.data?.code== FAILED || initiateBankAccountPayment.data.data?.code == FAILED_CODE) {
                         openDialog.value = true
                         showCircularProgressBar = false
                         alertDialogMessage =
-                            initiateBankAccountPayment.data.data?.message.toString()
+                            initiateBankAccountPayment.data.data.message.toString()
                         alertDialogHeaderMessage = "Failed"
                         transactionViewModel.resetTransactionState()
+                        return@let
                     }
                 }
 
 
 
-
+                if (showCircularProgressBar) {
+                    showCircularProgress(showProgress = true)
+                }
 
                 Spacer(modifier = Modifier.height(10.dp))
                 Row(
@@ -221,9 +228,7 @@ fun BankAccountOTPScreen(
                 OTPInputField(Modifier, "Enter OTP") {
                     otp = it
                 }
-                if (showCircularProgressBar) {
-                    showCircularProgress(showProgress = true)
-                }
+
                 Spacer(modifier = modifier.height(20.dp))
 
                 Row(

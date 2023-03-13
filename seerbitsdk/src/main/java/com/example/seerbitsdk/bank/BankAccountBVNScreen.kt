@@ -156,7 +156,7 @@ fun BVNInputField(
             OutlinedTextField(
                 value = value,
                 onValueChange = { newText ->
-                    if (newText.length <= 10)
+                    if (newText.length <= 11)
                         value = newText
                     onEnterBVN(newText)
                 },
