@@ -6,7 +6,7 @@ data class CardOTPDTO(
 
 	@field:SerializedName("transaction")
 	val transaction: Transaction? = null
-)
+): OtpDTO
 
 data class Transaction(
 

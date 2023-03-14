@@ -4,7 +4,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -19,11 +21,9 @@ import com.example.seerbitsdk.card.AuthorizeButton
 import com.example.seerbitsdk.card.OTPInputField
 import com.example.seerbitsdk.card.showCircularProgress
 import com.example.seerbitsdk.component.*
-import com.example.seerbitsdk.models.CardOTPDTO
+import com.example.seerbitsdk.models.BankAccountOtpDto
 import com.example.seerbitsdk.models.RequiredFields
-import com.example.seerbitsdk.models.Transaction
 import com.example.seerbitsdk.models.bankaccount.BankAccountDTO
-import com.example.seerbitsdk.screenstate.InitiateTransactionState
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.screenstate.OTPState
 import com.example.seerbitsdk.screenstate.QueryTransactionState
@@ -32,6 +32,7 @@ import com.example.seerbitsdk.ui.theme.SignalRed
 import com.example.seerbitsdk.viewmodels.TransactionViewModel
 
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun BankAccountOTPScreen(
     modifier: Modifier = Modifier,
@@ -58,6 +59,7 @@ fun BankAccountOTPScreen(
     var paymentRef = transactionViewModel.generateRandomReference()
     myBVN = if (bvn == Dummy) "" else bvn
     dateOfBirth = if (dob == Dummy) "" else dob
+    val keyboardController = LocalSoftwareKeyboardController.current
 
 
 // if there is an error loading the report
@@ -127,7 +129,7 @@ fun BankAccountOTPScreen(
                     merchantDetailsData.payload.supportEmail!!
                 )
 
-                val cardOTPDTO = CardOTPDTO( transaction = Transaction( linkingReference, otp) )
+                val bankAccountOtpDtO = BankAccountOtpDto(linkingReference, otp)
 
                 //HANDLES initiate query response
                 val queryTransactionStateState: QueryTransactionState =
@@ -250,12 +252,13 @@ fun BankAccountOTPScreen(
                 AuthorizeButton(
                     buttonText = "Authorize Payment",
                     onClick = {
+                        keyboardController?.hide()
                         if (otp.length < 6) {
                             openDialog.value = true
                             alertDialogMessage = "Error "
                             alertDialogHeaderMessage = "Invalid OTP"
                         } else {
-                            transactionViewModel.sendOtp(cardOTPDTO)
+                            transactionViewModel.sendOtp(bankAccountOtpDtO)
 
                         }
                     }, !showCircularProgressBar

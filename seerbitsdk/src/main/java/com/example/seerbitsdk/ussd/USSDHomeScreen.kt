@@ -88,12 +88,12 @@ fun USSDHomeScreen(
                 Spacer(modifier = Modifier.height(21.dp))
                 SeerbitPaymentDetailHeader(
 
-                    charges = merchantDetailsData.payload?.vatFee?.toDouble()!!,
+                    charges = merchantDetailsData.payload?.vatFee?.toDouble() ?: 0.0,
                     amount = "20.00",
-                    currencyText = merchantDetailsData.payload.defaultCurrency!!,
+                    currencyText = merchantDetailsData.payload?.defaultCurrency ?: "",
                     "",
-                    merchantDetailsData.payload.businessName!!,
-                    merchantDetailsData.payload.supportEmail!!
+                    merchantDetailsData.payload?.businessName ?: "",
+                    merchantDetailsData.payload?.supportEmail ?: ""
                 )
 
 
@@ -121,14 +121,13 @@ fun USSDHomeScreen(
                     if (queryTransactionStateState.data.data.code == SUCCESS) {
 
                         openDialog.value = true
-                        alertDialogMessage = queryTransactionStateState.data.data.message?:""
+                        alertDialogMessage = queryTransactionStateState.data.data.message ?: ""
                         alertDialogHeaderMessage = "Success"
                         showLoadingScreen = false
                         transactionViewModel.resetTransactionState()
                         return@let
 
-                    }
-                    if (queryTransactionStateState.data.data.code == "SM_X23" || queryTransactionStateState.data.data.code == "S12") {
+                    } else {
 
                         openDialog.value = true
                         alertDialogMessage = queryTransactionStateState.data.data.message!!
@@ -296,7 +295,7 @@ fun HeaderScreenPreview() {
             ussdCode = "",
             navController = rememberNavController()
 
-            )
+        )
     }
 }
 

@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.seerbitsdk.models.CardOTPDTO
+import com.example.seerbitsdk.models.OtpDTO
 import com.example.seerbitsdk.models.Resource
 import com.example.seerbitsdk.models.TransactionDTO
 import com.example.seerbitsdk.screenstate.InitiateTransactionState
@@ -100,11 +101,11 @@ class BankAccountViewModel: ViewModel() {
     }
 
 
-    fun sendOtp(cardOTPDTO: CardOTPDTO) {
+    fun sendOtp(otpDTO: OtpDTO) {
         _otpState.value = OTPState(isLoading = true)
         viewModelScope.launch(Dispatchers.Main) {
 
-            sendOtpUseCase(cardOTPDTO).collect { resource ->
+            sendOtpUseCase(otpDTO).collect { resource ->
                 when (resource) {
                     is Resource.Success -> {
                         _otpState.value = OTPState(data = resource.data)

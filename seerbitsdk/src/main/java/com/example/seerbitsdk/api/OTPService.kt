@@ -2,6 +2,7 @@ package com.example.seerbitsdk.api
 
 import com.example.seerbitsdk.BuildConfig
 import com.example.seerbitsdk.models.CardOTPDTO
+import com.example.seerbitsdk.models.OtpDTO
 import com.example.seerbitsdk.models.card.CardResponse
 import com.example.seerbitsdk.models.home.MerchantDetailsResponse
 import com.example.seerbitsdk.models.query.QueryTransactionResponse
@@ -20,7 +21,11 @@ import java.util.concurrent.TimeUnit
 interface OTPService {
 
     @POST("otp")
-    suspend fun sendOtp(@Body sendOTPDTO: CardOTPDTO)
+    suspend fun sendOtp(@Body otpDTO: OtpDTO)
+            : Response<CardResponse>
+
+    @POST("validate")
+    suspend fun sendOtpForBankAccount(@Body otpDTO: OtpDTO)
             : Response<CardResponse>
 }
 

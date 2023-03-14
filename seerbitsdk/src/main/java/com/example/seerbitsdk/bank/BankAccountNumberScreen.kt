@@ -7,8 +7,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
@@ -34,6 +36,7 @@ import com.example.seerbitsdk.viewmodels.TransactionViewModel
 import com.google.gson.Gson
 
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun BankAccountNumberScreen(
     modifier: Modifier = Modifier,
@@ -56,6 +59,7 @@ fun BankAccountNumberScreen(
     var alertDialogMessage by remember { mutableStateOf("") }
     var alertDialogHeaderMessage by remember { mutableStateOf("") }
     var paymentRef = transactionViewModel.generateRandomReference()
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     // if there is an error loading the report
     if (merchantDetailsState?.hasError!!) {
@@ -119,9 +123,7 @@ fun BankAccountNumberScreen(
                     retry = false
                 )
 
-                if(showCircularProgressBar){
-                    showCircularProgress(showProgress = true)
-                }
+
                 val initiateBankAccountPayment: InitiateTransactionState =
                     transactionViewModel.initiateTransactionState.value
                 //enter payment states
@@ -162,6 +164,9 @@ fun BankAccountNumberScreen(
                     }
                 }
 
+                if(showCircularProgressBar){
+                    showCircularProgress(showProgress = true)
+                }
 
                 Spacer(modifier = Modifier.height(21.dp))
                 BankAccountNumberField(Modifier, "10 Digit Bank Account Number") {
@@ -175,7 +180,7 @@ fun BankAccountNumberScreen(
                     buttonText = "Verify Account",
                     onClick = {
 
-
+                        keyboardController?.hide()
                         if (accountNumber.isNotEmpty() && accountNumber.length == 10) {
 
                             requiredFields?.let {

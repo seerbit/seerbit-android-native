@@ -36,7 +36,7 @@ class InitiateUseCase {
                             Objects.requireNonNull<ResponseBody>(apiResponse.errorBody()).string()
                         )
                         if (apiResponse.code() == 500)
-                            emit(Resource.Error(jsonObject.getString("error")))
+                            emit(Resource.Error(jsonObject.getString("message")))
                         else
                             emit(Resource.Error(jsonObject.getString("message")))
                     }
@@ -52,7 +52,7 @@ class InitiateUseCase {
                             Objects.requireNonNull<ResponseBody>(apiResponse.errorBody()).string()
                         )
                         if (apiResponse.code() == 500)
-                            emit(Resource.Error(jsonObject.getString("error")))
+                            emit(Resource.Error(jsonObject.getString("message")))
                         else
                             emit(Resource.Error(jsonObject.getString("message")))
                     }
@@ -69,7 +69,7 @@ class InitiateUseCase {
                             Objects.requireNonNull<ResponseBody>(apiResponse.errorBody()).string()
                         )
                         if (apiResponse.code() == 500)
-                            emit(Resource.Error(jsonObject.getString("error")))
+                            emit(Resource.Error(jsonObject.getString("message")))
                         else
                             emit(Resource.Error(jsonObject.getString("message")))
                     }
@@ -100,7 +100,7 @@ class InitiateUseCase {
                     Objects.requireNonNull<ResponseBody>(apiResponse.errorBody()).string()
                 )
                 if (apiResponse.code() == 500)
-                    emit(Resource.Error(jsonObject.getString("error")))
+                    emit(Resource.Error(jsonObject.getString("message")))
                 else
                     emit(Resource.Error(jsonObject.getString("message")))
             }
@@ -124,7 +124,14 @@ class InitiateUseCase {
                 val result = apiResponse.body()
                 emit(Resource.Success(result))
             } else {
-                emit(Resource.Error("Unsuccessful Responses"))
+
+                val jsonObject = JSONObject(
+                    Objects.requireNonNull<ResponseBody>(apiResponse.errorBody()).string()
+                )
+                if (apiResponse.code() == 500)
+                    emit(Resource.Error(jsonObject.getString("message")))
+                else
+                    emit(Resource.Error(jsonObject.getString("message")))
             }
 
         } catch (e: IOException) {

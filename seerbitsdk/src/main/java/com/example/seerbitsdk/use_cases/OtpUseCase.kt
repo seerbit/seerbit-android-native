@@ -1,12 +1,17 @@
 package com.example.seerbitsdk.use_cases
 
+import com.example.seerbitsdk.models.BankAccountOtpDto
 import com.example.seerbitsdk.models.CardOTPDTO
+import com.example.seerbitsdk.models.OtpDTO
 import com.example.seerbitsdk.models.Resource
 import com.example.seerbitsdk.repository.OTPRepository
 import com.example.seerbitsdk.repository.SeerMerchantDetailsRepository
 import kotlinx.coroutines.flow.flow
+import okhttp3.ResponseBody
 import okio.IOException
+import org.json.JSONObject
 import retrofit2.HttpException
+import java.util.*
 import java.util.concurrent.TimeoutException
 
 class OtpUseCase {
@@ -14,16 +19,45 @@ class OtpUseCase {
     private var otpRepository: OTPRepository =
         OTPRepository()
 
-    operator fun invoke(cardOTPDTO: CardOTPDTO) = flow {
+    operator fun invoke(otpDTO: OtpDTO) = flow {
         try {
             emit(Resource.Loading())
-            val apiResponse = otpRepository.sendOtp(cardOTPDTO)
+            when(otpDTO) {
+                    is CardOTPDTO -> {
+                        val apiResponse = otpRepository.sendOtp(otpDTO)
 
-            if (apiResponse.isSuccessful) {
-                val result = apiResponse.body()
-                emit(Resource.Success(result))
-            } else {
-                emit(Resource.Error("Unsuccessful Responses"))
+                        if (apiResponse.isSuccessful) {
+                            val result = apiResponse.body()
+                            emit(Resource.Success(result))
+                        } else {
+
+                            val jsonObject = JSONObject(
+                                Objects.requireNonNull<ResponseBody>(apiResponse.errorBody()).string()
+                            )
+                            if (apiResponse.code() == 500)
+                                emit(Resource.Error(jsonObject.getString("message")))
+                            else
+                                emit(Resource.Error(jsonObject.getString("message")))
+                        }
+                    }
+
+                is BankAccountOtpDto ->{
+                    val apiResponse = otpRepository.sendOtpForBankAccount(otpDTO)
+
+                    if (apiResponse.isSuccessful) {
+                        val result = apiResponse.body()
+                        emit(Resource.Success(result))
+                    } else {
+
+                        val jsonObject = JSONObject(
+                            Objects.requireNonNull<ResponseBody>(apiResponse.errorBody()).string()
+                        )
+                        if (apiResponse.code() == 500)
+                            emit(Resource.Error(jsonObject.getString("message")))
+                        else
+                            emit(Resource.Error(jsonObject.getString("message")))
+                    }
+                }
             }
 
         } catch (e: IOException) {

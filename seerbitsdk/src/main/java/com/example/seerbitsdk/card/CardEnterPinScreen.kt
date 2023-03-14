@@ -46,7 +46,7 @@ import com.example.seerbitsdk.viewmodels.MerchantDetailsViewModel
 @Composable
 fun showCircularProgress(showProgress: Boolean) {
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxWidth().padding(16.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
