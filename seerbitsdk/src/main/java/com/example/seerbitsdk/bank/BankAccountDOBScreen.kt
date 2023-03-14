@@ -109,7 +109,7 @@ fun BankAccountDOBScreen(
                     paymentType = "ACCOUNT",
                     sourceIP = "128.0.0.1",
                     currency = merchantDetailsData.payload?.defaultCurrency,
-                    bvn = Dummy,
+                    bvn = "",
                     email = "sdk@gmail.com",
                     productDescription = "",
                     scheduleId = "",
