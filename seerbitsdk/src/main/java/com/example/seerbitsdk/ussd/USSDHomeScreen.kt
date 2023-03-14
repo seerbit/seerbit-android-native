@@ -115,27 +115,29 @@ fun USSDHomeScreen(
 
                 queryTransactionStateState.data?.data?.let {
 
-                    if (queryTransactionStateState.data.data.code == PENDING_CODE) {
-                        transactionViewModel.queryTransaction(paymentReference!!)
-                    }
-                    if (queryTransactionStateState.data.data.code == SUCCESS) {
+                    when(queryTransactionStateState.data.data.code) {
+                        PENDING_CODE ->
+                        {
+                            transactionViewModel.queryTransaction(paymentReference!!)
+                        }
+                        SUCCESS -> {
+                            openDialog.value = true
+                            alertDialogMessage = queryTransactionStateState.data.data.message ?: ""
+                            alertDialogHeaderMessage = "Success"
+                            showLoadingScreen = false
+                            transactionViewModel.resetTransactionState()
+                            return@let
 
-                        openDialog.value = true
-                        alertDialogMessage = queryTransactionStateState.data.data.message ?: ""
-                        alertDialogHeaderMessage = "Success"
-                        showLoadingScreen = false
-                        transactionViewModel.resetTransactionState()
-                        return@let
+                        }
+                        else -> {
+                            openDialog.value = true
+                            alertDialogMessage = queryTransactionStateState.data.data.message!!
+                            alertDialogHeaderMessage = "Failed"
+                            showLoadingScreen = false
+                            transactionViewModel.resetTransactionState()
+                            return@let
 
-                    } else {
-
-                        openDialog.value = true
-                        alertDialogMessage = queryTransactionStateState.data.data.message!!
-                        alertDialogHeaderMessage = "Failed"
-                        showLoadingScreen = false
-                        transactionViewModel.resetTransactionState()
-                        return@let
-
+                        }
                     }
                 }
 

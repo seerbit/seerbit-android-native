@@ -39,7 +39,7 @@ fun BankRedirectUrlScreen(
 
     var json: String = ""
     var showErrorDialog by remember { mutableStateOf(false) }
-    var amount: String = "20.00"
+    var amount: String = "100.00"
     var showCircularProgressBar by remember { mutableStateOf(false) }
     val openDialog = remember { mutableStateOf(false) }
     var alertDialogMessage by remember { mutableStateOf("") }
@@ -49,16 +49,16 @@ fun BankRedirectUrlScreen(
 
 
     // if there is an error loading the report
-    if (merchantDetailsState?.hasError!!) {
+    if (merchantDetailsState?.hasError == true) {
         ErrorDialog(message = merchantDetailsState.errorMessage ?: "Something went wrong")
     }
 
-    if (merchantDetailsState.isLoading) {
+    if (merchantDetailsState?.isLoading == true) {
         showCircularProgress(showProgress = true)
     }
 
 
-    merchantDetailsState.data?.let { merchantDetailsData ->
+    merchantDetailsState?.data?.let { merchantDetailsData ->
 
         Column(modifier = modifier) {
 
@@ -111,12 +111,12 @@ fun BankRedirectUrlScreen(
                     mobileNumber = merchantDetailsData.payload?.number,
                     paymentReference = paymentRef,
                     fee = merchantDetailsData.payload?.vatFee,
-                    fullName = "Amos Aorme",
+                    fullName = "Adeife Taiwo",
                     channelType = bankName,
                     dateOfBirth = "",
                     publicKey = "SBPUBK_TCDUH6MNIDLHMJXJEJLBO6ZU2RNUUPHI",
                     source = "",
-                    accountName = "Arome Amos",
+                    accountName = "Adeife Taiwo",
                     paymentType = "ACCOUNT",
                     sourceIP = "128.0.0.1",
                     currency = merchantDetailsData.payload?.defaultCurrency,
