@@ -22,42 +22,47 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
-import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.seerbitsdk.ErrorDialog
 import com.example.seerbitsdk.R
 import com.example.seerbitsdk.card.AuthorizeButton
 import com.example.seerbitsdk.card.showCircularProgress
-import com.example.seerbitsdk.component.SeerbitPaymentDetailHeader
+import com.example.seerbitsdk.component.*
+import com.example.seerbitsdk.models.momo.MomoDTO
 import com.example.seerbitsdk.models.momo.MomoNetworkResponseItem
+import com.example.seerbitsdk.navigateSingleTopNoSavedState
+import com.example.seerbitsdk.screenstate.InitiateTransactionState
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
+import com.example.seerbitsdk.screenstate.QueryTransactionState
 import com.example.seerbitsdk.ui.theme.SeerBitTheme
+import com.example.seerbitsdk.ui.theme.SignalRed
 import com.example.seerbitsdk.viewmodels.SelectBankViewModel
+import com.example.seerbitsdk.viewmodels.TransactionViewModel
 
 
 @Composable
 fun MomoHomeScreen(
     modifier: Modifier = Modifier,
-    navigateToUssdHomeScreen: () -> Unit,
-    currentDestination: NavDestination?,
     navController: NavHostController,
-    onConfirmPaymentClicked: () -> Unit,
+    transactionViewModel: TransactionViewModel,
     merchantDetailsState: MerchantDetailsState?,
     selectBankViewModel: SelectBankViewModel
 ) {
-    var bankNetwork by remember { mutableStateOf("") }
-    var bankName by remember { mutableStateOf("") }
+    var momoNetwork by remember { mutableStateOf("") }
+    var accountNumber by remember { mutableStateOf("") }
 
-    var json: String = ""
-    var showErrorDialog by remember { mutableStateOf(false) }
     var showCircularProgressBar by remember { mutableStateOf(false) }
-
-    var amount: String = "20.00"
+    val openDialog = remember { mutableStateOf(false) }
+    var alertDialogMessage by remember { mutableStateOf("") }
+    var alertDialogHeaderMessage by remember { mutableStateOf("") }
+    var amount : String = "20.00"
+    var paymentRef = transactionViewModel.generateRandomReference()
     // if there is an error loading the report
     if (merchantDetailsState?.hasError!!) {
         ErrorDialog(message = merchantDetailsState.errorMessage ?: "Something went wrong")
@@ -85,54 +90,145 @@ fun MomoHomeScreen(
                 Spacer(modifier = Modifier.height(25.dp))
 
                 SeerbitPaymentDetailHeader(
-                    charges = merchantDetailsData.payload?.vatFee?.toDouble()!!,
+                    charges = merchantDetailsData.payload?.vatFee?.toDouble()?:0.0,
                     amount = "20.00",
-                    currencyText = merchantDetailsData.payload.defaultCurrency ?: "",
+                    currencyText = merchantDetailsData.payload?.defaultCurrency ?: "",
                     "Choose your bank to start this payment",
-                    merchantDetailsData.payload.businessName ?: "",
-                    merchantDetailsData.payload.supportEmail ?: ""
+                    merchantDetailsData.payload?.businessName ?: "",
+                    merchantDetailsData.payload?.supportEmail ?: ""
                 )
-
                 Spacer(modifier = Modifier.height(10.dp))
 
-                if (showErrorDialog) {
-                    ErrorDialog(message = "Kindly Select a bank")
-                }
+                val momoDTO: MomoDTO =
+                    MomoDTO(
+                        deviceType = "Android",
+                        country = merchantDetailsData.payload?.country?.countryCode ?: "",
+                        amount = amount,
+                        productId = "",
+                        redirectUrl = "",
+                        mobileNumber = merchantDetailsData.payload?.number,
+                        paymentReference = paymentRef,
+                        fee = merchantDetailsData.payload?.vatFee,
+                        fullName = merchantDetailsData.payload?.businessName,
+                        channelType = "wallet",
+                        publicKey = "SBPUBK_WWEQK6UVR1PNZEVVUOBNIQHEIEIM1HJC",
+                        source = "",
+                        paymentType = "MOMO",
+                        sourceIP = "102.88.63.64",
+                        currency = merchantDetailsData.payload?.defaultCurrency,
+                        productDescription = "",
+                        email = "sdk@gmail.com",
+                        retry = false,
+                        network = momoNetwork,
+                        voucherCode = ""
+
+                    )
+
+
                 if (showCircularProgressBar) {
                     showCircularProgress(showProgress = true)
                 }
                 val momoNetworkState = selectBankViewModel.momoNetworkState.value
 
-                if (momoNetworkState.data == null) {
-                    //selectBankViewModel.getMomoNetworks()
-                }
-
-
                 if (momoNetworkState.hasError) {
                     showCircularProgressBar = false
-                    showErrorDialog = true
                 }
 
                 if (momoNetworkState.isLoading) {
                     showCircularProgressBar = true
                 }
 
-
                 var momoNetworkList: List<MomoNetworkResponseItem?>? = listOf()
-                momoNetworkState.data?.momoNetworkResponse.let {
+                momoNetworkState.data?.let {
                     showCircularProgressBar = false
                     momoNetworkList = it
                 }
 
-                MomoInputAccountNumberField(Modifier, "10 Digit Bank Account Number") {
-                    bankNetwork = it
+
+                val initiateMomoPayment: InitiateTransactionState =
+                    transactionViewModel.initiateTransactionState.value
+                //enter payment states
+                //HANDLES initiate query response
+                val queryTransactionStateState: QueryTransactionState =
+                    transactionViewModel.queryTransactionState.value
+
+                showCircularProgressBar = initiateMomoPayment.isLoading
+
+                //enter payment states
+                if (initiateMomoPayment.hasError) {
+                    showCircularProgressBar = false
+                    openDialog.value = true
+                    alertDialogMessage =
+                        initiateMomoPayment.errorMessage ?: "Something went wrong"
+                    alertDialogHeaderMessage = "Failed"
+                    transactionViewModel.resetTransactionState()
                 }
 
+
+                initiateMomoPayment.data?.let {
+                    showCircularProgressBar = true
+                    val linkingReference = it.data?.payments?.linkingReference?:""
+                    if (initiateMomoPayment.data.data?.code== PENDING_CODE) {
+
+                        val paymentReference = it.data?.payments?.paymentReference?:""
+
+                        if (queryTransactionStateState.data != null) {
+
+                            when (queryTransactionStateState.data.data?.code) {
+                                SUCCESS -> {
+                                    showCircularProgressBar = false
+                                    openDialog.value = true
+                                    alertDialogMessage =
+                                        queryTransactionStateState.data.data.payments?.reason?:""
+                                    alertDialogHeaderMessage = "Success"
+                                    transactionViewModel.resetTransactionState()
+                                    return@let
+                                }
+                                PENDING_CODE -> {
+                                    transactionViewModel.queryTransaction(paymentReference)
+                                }
+                                else -> {
+                                    showCircularProgressBar = false
+                                    openDialog.value = true
+                                    alertDialogMessage =
+                                        queryTransactionStateState.errorMessage?: "Something went wrong"
+                                    alertDialogHeaderMessage = "Failed"
+                                    transactionViewModel.resetTransactionState()
+                                    return@let
+                                }
+                            }
+
+                        } else transactionViewModel.queryTransaction(paymentReference)
+
+
+
+                    } else if(initiateMomoPayment.data.data?.code== "INP") {
+                        showCircularProgressBar = false
+                        navController.navigateSingleTopNoSavedState(
+                            "${Route.MOMO_OTP_SCREEN}/$linkingReference"
+                        )
+                    }
+                    else {
+                        showCircularProgressBar = false
+                        openDialog.value = true
+                        alertDialogMessage =
+                            initiateMomoPayment.data.message?: "Something went wrong"
+                        alertDialogHeaderMessage = "Failed"
+                        transactionViewModel.resetTransactionState()
+                        return@let
+                    }
+                }
+
+
+
+                MomoInputAccountNumberField(Modifier, "0 500 000 000") {
+                    accountNumber = it
+                }
                 Spacer(modifier = modifier.height(20.dp))
 
                 SelectProviderButton(momoNetworkList = momoNetworkList) {
                     it?.let {
-
+                        momoNetwork = it.networks ?: ""
                     }
 
                 }
@@ -142,9 +238,62 @@ fun MomoHomeScreen(
                 AuthorizeButton(
                     buttonText = "Continue",
                     onClick = {
+                        if (momoNetwork.isNotEmpty() && accountNumber.isNotEmpty()) {
+                            transactionViewModel.initiateTransaction(momoDTO)
+                        }
+                        else {
+                            showCircularProgressBar = false
+                            openDialog.value = true
+                            alertDialogMessage =
+                             " Invalid Details, Something went wrong"
+                            alertDialogHeaderMessage = "Error Occured"
+                        }
 
                     }, !showCircularProgressBar
                 )
+
+                //The alert dialog occurs here
+                if (openDialog.value) {
+                    AlertDialog(
+                        onDismissRequest = {
+                            openDialog.value = false
+                        },
+                        title = {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                Text(text = alertDialogHeaderMessage, textAlign = TextAlign.Center)
+                            }
+
+                        },
+                        text = {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                Text(alertDialogMessage, textAlign = TextAlign.Center)
+                            }
+                        },
+                        confirmButton = {
+                            Button(
+
+                                onClick = {
+                                    openDialog.value = false
+                                },
+                                colors = ButtonDefaults.buttonColors(
+                                    backgroundColor = SignalRed
+                                )
+                            ) {
+                                Text(text = "Close")
+
+                            }
+                        },
+                    )
+                }
+
+
+
 
             }
         }
@@ -224,10 +373,10 @@ fun SelectProviderButton(
                 momoNetworkList?.forEach { momoNetworks ->
                     DropdownMenuItem(onClick = {
                         onMomoNetworkSelected(momoNetworks)
-                        selectedText = momoNetworks?.networkCode ?: ""
+                        selectedText = momoNetworks?.networks ?: ""
                         expanded = false
                     }) {
-                        Text(text = momoNetworks?.networkCode ?: "")
+                        Text(text = momoNetworks?.networks ?: "")
                     }
                 }
 
@@ -241,17 +390,15 @@ fun SelectProviderButton(
 }
 
 
-
 @Preview(showBackground = true, widthDp = 400)
 @Composable
 fun USSDSelectBankButtonPreview() {
     SeerBitTheme {
         val selectBankViewModel: SelectBankViewModel = SelectBankViewModel()
+        val transactionViewModel = TransactionViewModel()
         MomoHomeScreen(
-            navigateToUssdHomeScreen = { /*TODO*/ },
-            currentDestination = null,
             navController = rememberNavController(),
-            onConfirmPaymentClicked = { /*TODO*/ },
+            transactionViewModel = transactionViewModel,
             merchantDetailsState = null,
             selectBankViewModel = selectBankViewModel
         )
@@ -276,8 +423,8 @@ fun MomoInputAccountNumberField(
             OutlinedTextField(
                 value = value,
                 onValueChange = { newText ->
-                    if (newText.length <= 10)
-                        value = newText
+
+                    value = newText
                     onEnterBVN(newText)
                 },
 

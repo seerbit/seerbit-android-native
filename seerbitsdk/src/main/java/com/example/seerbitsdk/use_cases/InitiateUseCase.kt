@@ -5,6 +5,7 @@ import com.example.seerbitsdk.models.Resource
 import com.example.seerbitsdk.models.TransactionDTO
 import com.example.seerbitsdk.models.bankaccount.BankAccountDTO
 import com.example.seerbitsdk.models.card.CardDTO
+import com.example.seerbitsdk.models.momo.MomoDTO
 import com.example.seerbitsdk.models.transfer.TransferDTO
 import com.example.seerbitsdk.models.ussd.UssdDTO
 import com.example.seerbitsdk.repository.InitiateTransactionRepository
@@ -61,6 +62,23 @@ class InitiateUseCase {
                 is BankAccountDTO -> {
                     val apiResponse =
                         initiateTransactionRepository.initiateBankAccountMode(transactionDTO)
+                    if (apiResponse.isSuccessful) {
+                        val result = apiResponse.body()
+                        emit(Resource.Success(result))
+                    } else {
+                        val jsonObject = JSONObject(
+                            Objects.requireNonNull<ResponseBody>(apiResponse.errorBody()).string()
+                        )
+                        if (apiResponse.code() == 500)
+                            emit(Resource.Error(jsonObject.getString("message")))
+                        else
+                            emit(Resource.Error(jsonObject.getString("message")))
+                    }
+                }
+
+                is MomoDTO -> {
+                    val apiResponse =
+                        initiateTransactionRepository.initiateMOMO(transactionDTO)
                     if (apiResponse.isSuccessful) {
                         val result = apiResponse.body()
                         emit(Resource.Success(result))

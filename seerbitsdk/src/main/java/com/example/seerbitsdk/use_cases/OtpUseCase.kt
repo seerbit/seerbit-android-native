@@ -4,6 +4,7 @@ import com.example.seerbitsdk.models.BankAccountOtpDto
 import com.example.seerbitsdk.models.CardOTPDTO
 import com.example.seerbitsdk.models.OtpDTO
 import com.example.seerbitsdk.models.Resource
+import com.example.seerbitsdk.models.otp.MomoOtpDto
 import com.example.seerbitsdk.repository.OTPRepository
 import com.example.seerbitsdk.repository.SeerMerchantDetailsRepository
 import kotlinx.coroutines.flow.flow
@@ -43,6 +44,23 @@ class OtpUseCase {
 
                 is BankAccountOtpDto ->{
                     val apiResponse = otpRepository.sendOtpForBankAccount(otpDTO)
+
+                    if (apiResponse.isSuccessful) {
+                        val result = apiResponse.body()
+                        emit(Resource.Success(result))
+                    } else {
+
+                        val jsonObject = JSONObject(
+                            Objects.requireNonNull<ResponseBody>(apiResponse.errorBody()).string()
+                        )
+                        if (apiResponse.code() == 500)
+                            emit(Resource.Error(jsonObject.getString("message")))
+                        else
+                            emit(Resource.Error(jsonObject.getString("message")))
+                    }
+                }
+                is MomoOtpDto ->{
+                    val apiResponse = otpRepository.sendOtpMomo(otpDTO)
 
                     if (apiResponse.isSuccessful) {
                         val result = apiResponse.body()

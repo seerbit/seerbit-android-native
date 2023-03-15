@@ -124,9 +124,9 @@ fun BankAccountOTPScreen(
                 SeerbitPaymentDetailHeaderTwo(
                     charges =  merchantDetailsData.payload?.vatFee?.toDouble()!!,
                     amount = amount,
-                    currencyText = merchantDetailsData.payload.defaultCurrency!!,
-                    merchantDetailsData.payload.businessName!!,
-                    merchantDetailsData.payload.supportEmail!!
+                    currencyText = merchantDetailsData.payload.defaultCurrency?:"",
+                    merchantDetailsData.payload.businessName?:"",
+                    merchantDetailsData.payload.supportEmail?:""
                 )
 
                 val bankAccountOtpDtO = BankAccountOtpDto(linkingReference, otp)

@@ -54,6 +54,7 @@ import com.example.seerbitsdk.models.card.CardDTO
 import com.example.seerbitsdk.component.OtherPaymentScreen
 import com.example.seerbitsdk.helper.TransactionType
 import com.example.seerbitsdk.helper.displayPaymentMethod
+import com.example.seerbitsdk.momo.MOMOOTPScreen
 import com.example.seerbitsdk.momo.MomoHomeScreen
 import com.example.seerbitsdk.screenstate.*
 import com.example.seerbitsdk.transfer.TransferHomeScreen
@@ -1252,13 +1253,27 @@ fun MyAppNavHost(
 
         composable(MOMO.route) {
             MomoHomeScreen(
-                navigateToUssdHomeScreen = {},
-                currentDestination = currentDestination ,
                 navController = navController,
-                onConfirmPaymentClicked = { /*TODO*/ },
+                transactionViewModel = transactionViewModel,
                 merchantDetailsState = merchantDetailsState,
                 selectBankViewModel = selectBankViewModel
             )
+
+        }
+
+        composable("${Route.MOMO_OTP_SCREEN}/{linkingReference}",
+            arguments = listOf(
+                // declaring argument type
+                navArgument("linkingReference") { type = NavType.StringType })
+        ){ navBackStackEntry ->
+
+            val linkingReference = navBackStackEntry.arguments?.getString("linkingReference")
+            MOMOOTPScreen(
+               navController = navController,
+               merchantDetailsState = merchantDetailsState,
+               transactionViewModel = transactionViewModel,
+               linkingReference = linkingReference
+           )
 
         }
 

@@ -27,6 +27,10 @@ interface OTPService {
     @POST("validate")
     suspend fun sendOtpForBankAccount(@Body otpDTO: OtpDTO)
             : Response<CardResponse>
+
+    @POST("momo/otp")
+    suspend fun sendOtpMomo(@Body otpDTO: OtpDTO)
+            : Response<CardResponse>
 }
 
 

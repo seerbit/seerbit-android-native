@@ -47,7 +47,7 @@ object PhoneNumber : SeerBitDestination {
 }
 
 object MOMO : SeerBitDestination {
-    override val name = "Cash"
+    override val name = "MOMO"
     override val attachedDescription = "Nearest Mobile Agent"
     override val route: String = "Cash"
 }

@@ -5,6 +5,7 @@ import com.example.seerbitsdk.models.GetBanksResponse
 import com.example.seerbitsdk.models.card.CardResponse
 import com.example.seerbitsdk.models.home.MerchantDetailsResponse
 import com.example.seerbitsdk.models.momo.MomoNetworkResponse
+import com.example.seerbitsdk.models.momo.MomoNetworkResponseItem
 import com.example.seerbitsdk.models.query.QueryTransactionResponse
 
 data class MerchantDetailsState(
@@ -50,7 +51,7 @@ data class AvailableBanksState(
 )
 
 data class MomoNetworkState(
-    val data: MomoNetworkResponse? = null,
+    val data: List<MomoNetworkResponseItem>? = null,
     val isLoading: Boolean = false,
     val hasError: Boolean = false,
     val errorMessage: String? = null

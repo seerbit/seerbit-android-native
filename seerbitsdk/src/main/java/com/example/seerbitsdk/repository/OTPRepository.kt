@@ -18,5 +18,9 @@ class OTPRepository {
         return OtpApiService.retrofitService.sendOtpForBankAccount(otpDTO)
     }
 
+    suspend fun sendOtpMomo(otpDTO: OtpDTO): Response<CardResponse> {
+        return OtpApiService.retrofitService.sendOtpMomo(otpDTO)
+    }
+
 
 }

@@ -6,7 +6,9 @@ import com.example.seerbitsdk.models.GetBanksResponse
 import com.example.seerbitsdk.models.bankaccount.BankAccountDTO
 import com.example.seerbitsdk.models.card.CardResponse
 import com.example.seerbitsdk.models.home.MerchantDetailsResponse
+import com.example.seerbitsdk.models.momo.MomoDTO
 import com.example.seerbitsdk.models.momo.MomoNetworkResponse
+import com.example.seerbitsdk.models.momo.MomoNetworkResponseItem
 import com.example.seerbitsdk.models.query.QueryTransactionResponse
 import com.example.seerbitsdk.models.transfer.TransferDTO
 import com.example.seerbitsdk.models.ussd.UssdDTO
@@ -26,7 +28,7 @@ import javax.inject.Singleton
 @Singleton
 interface SeerBitService {
 
-    @GET("merchant/verify/?key=SBPUBK_TCDUH6MNIDLHMJXJEJLBO6ZU2RNUUPHI&sbcp=uFWgBWF8OB56oCSJudCxKYqNm8Cttss4&partner-id=1")
+    @GET("merchant/verify/?key=SBPUBK_WWEQK6UVR1PNZEVVUOBNIQHEIEIM1HJC&sbcp=uFWgBWF8OB56oCSJudCxKYqNm8Cttss4&partner-id=1")
     suspend fun merchantDetails(): Response<MerchantDetailsResponse>
 
     @GET("checkout/query/{paymentReference}")
@@ -48,11 +50,15 @@ interface SeerBitService {
     @POST("checkout/initiates")
     suspend fun initiateBankAccountMode(@Body bankAccountDTO: BankAccountDTO): Response<CardResponse>
 
+    // using this here because the url points to live
+    @POST("checkout/initiates")
+    suspend fun initiateMomo(@Body momoDTO: MomoDTO): Response<CardResponse>
+
     @GET("checkout/banks")
     suspend fun getBanks(): Response<GetBanksResponse>
 
     @GET("tranmgt/networks/GH/00000103")
-    suspend fun getMomoNetworks(): Response<MomoNetworkResponse>
+    suspend fun getMomoNetworks(): Response<List<MomoNetworkResponseItem>>
 
     @GET("checkout/bin/{firstSixDigit}")
     suspend fun getCardBin(@Path("firstSixDigit") firstSixDigit: String): Response<CardBinResponse>

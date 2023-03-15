@@ -32,11 +32,13 @@ class SelectBankViewModel: ViewModel() {
 
     init {
         getBanks()
-        //getMomoNetworks()
+        getMomoNetworks()
     }
 
      fun resetTransactionState() {
         _availableBanksState.value = AvailableBanksState()
+         _momoState.value = AvailableBanksState()
+         
     }
 
 

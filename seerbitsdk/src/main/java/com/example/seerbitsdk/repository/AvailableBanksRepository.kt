@@ -5,6 +5,7 @@ import com.example.seerbitsdk.models.GetBanksResponse
 import com.example.seerbitsdk.models.bankaccount.BankAccountDTO
 import com.example.seerbitsdk.models.home.MerchantDetailsResponse
 import com.example.seerbitsdk.models.momo.MomoNetworkResponse
+import com.example.seerbitsdk.models.momo.MomoNetworkResponseItem
 import retrofit2.Response
 
 class AvailableBanksRepository {
@@ -13,7 +14,7 @@ class AvailableBanksRepository {
         return MerchantServiceApi.retrofitService.getBanks()
     }
 
-    suspend fun getMomoNetworks(): Response<MomoNetworkResponse> {
+    suspend fun getMomoNetworks(): Response<List<MomoNetworkResponseItem>> {
         return MerchantServiceApi.retrofitService.getMomoNetworks()
     }
 

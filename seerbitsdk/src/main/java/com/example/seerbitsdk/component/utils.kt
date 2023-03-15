@@ -1,5 +1,10 @@
 package com.example.seerbitsdk.component
 
+import android.content.Context
+import android.widget.Toast
+import androidx.compose.material.Snackbar
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import java.text.DecimalFormat
 import java.util.*
 
@@ -56,3 +61,9 @@ fun generateRandomReference(): String {
 
 private val AccountDecimalFormat = DecimalFormat("####")
 private val AmountDecimalFormat = DecimalFormat("#,###.##")
+
+
+@Composable
+fun showSnackBar(context : Context = LocalContext.current, toastMessage : String){
+   Toast.makeText(context, toastMessage, Toast.LENGTH_SHORT).show()
+}

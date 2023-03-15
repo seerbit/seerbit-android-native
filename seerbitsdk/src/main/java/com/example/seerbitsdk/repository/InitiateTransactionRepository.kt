@@ -5,6 +5,7 @@ import com.example.seerbitsdk.api.MerchantServiceApi
 import com.example.seerbitsdk.models.bankaccount.BankAccountDTO
 import com.example.seerbitsdk.models.card.CardDTO
 import com.example.seerbitsdk.models.card.CardResponse
+import com.example.seerbitsdk.models.momo.MomoDTO
 import com.example.seerbitsdk.models.query.QueryTransactionResponse
 import com.example.seerbitsdk.models.transfer.TransferDTO
 import com.example.seerbitsdk.models.ussd.UssdDTO
@@ -26,6 +27,9 @@ class InitiateTransactionRepository {
 
     suspend fun initiateBankAccountMode(bankAccountDTO: BankAccountDTO): Response<CardResponse> {
         return MerchantServiceApi.retrofitService.initiateBankAccountMode(bankAccountDTO)
+    }
+    suspend fun initiateMOMO(momoDTO: MomoDTO): Response<CardResponse> {
+        return MerchantServiceApi.retrofitService.initiateMomo(momoDTO)
     }
 
     //todo move this later
