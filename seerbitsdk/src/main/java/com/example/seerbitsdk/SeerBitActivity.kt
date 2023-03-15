@@ -52,6 +52,8 @@ import com.example.seerbitsdk.models.CardDetails
 import com.example.seerbitsdk.models.RequiredFields
 import com.example.seerbitsdk.models.card.CardDTO
 import com.example.seerbitsdk.component.OtherPaymentScreen
+import com.example.seerbitsdk.helper.TransactionType
+import com.example.seerbitsdk.helper.displayPaymentMethod
 import com.example.seerbitsdk.momo.MomoHomeScreen
 import com.example.seerbitsdk.screenstate.*
 import com.example.seerbitsdk.transfer.TransferHomeScreen
@@ -126,6 +128,12 @@ fun SeerBitApp(
             val activity = LocalContext.current as Activity
 
             activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+
+
+            val addedButtons: ArrayList<SeerBitDestination> = arrayListOf()
+
+
+
 
             MyAppNavHost(
                 navController = navController,
@@ -458,7 +466,7 @@ fun CardHomeScreen(
 
             transactionState.data?.let {
 
-                if(it.data?.code == SUCCESS) {
+                if(it.data?.code == SUCCESS || it.data?.code == PENDING_CODE) {
                     showCircularProgressBar = false
                     paymentRef = transactionState.data.data?.payments?.paymentReference ?: ""
                     val linkingRef = transactionState.data.data?.payments?.linkingReference ?: ""
@@ -912,10 +920,16 @@ fun MyAppNavHost(
     selectBankViewModel: SelectBankViewModel,
     merchantDetailsViewModel: MerchantDetailsViewModel
 ) {
+    var mStartDestination: String = Debit_CreditCard.route
+    if(!displayPaymentMethod(TransactionType.CARD.type, merchantDetailsState.data))
+        mStartDestination = Route.OTHER_PAYMENT_SCREEN
+
+
+
     NavHost(
         modifier = modifier,
         navController = navController,
-        startDestination = startDestination
+        startDestination = mStartDestination
     ) {
 
         composable(Route.OTHER_PAYMENT_SCREEN) {

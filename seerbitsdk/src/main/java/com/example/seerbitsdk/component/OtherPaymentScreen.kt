@@ -21,6 +21,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.seerbitsdk.*
+import com.example.seerbitsdk.helper.TransactionType
+import com.example.seerbitsdk.helper.displayPaymentMethod
 import com.example.seerbitsdk.models.home.MerchantDetailsResponse
 import com.example.seerbitsdk.models.transfer.TransferDTO
 import com.example.seerbitsdk.screenstate.InitiateTransactionState
@@ -76,27 +78,13 @@ fun OtherPaymentScreen(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 val addedButtons: ArrayList<SeerBitDestination> = arrayListOf()
-                merchantDetailsState.data.payload?.country?.defaultPaymentOptions?.forEach {
+                if(displayPaymentMethod(TransactionType.CARD.type, merchantDetailsData))addedButtons.add(Debit_CreditCard)
+                if(displayPaymentMethod(TransactionType.USSD.type, merchantDetailsData))addedButtons.add(UssdSelectBank)
+                if(displayPaymentMethod(TransactionType.MOMO.type, merchantDetailsData))addedButtons.add(MOMO)
+                if(displayPaymentMethod(TransactionType.TRANSFER.type, merchantDetailsData))addedButtons.add(Transfer)
+                if(displayPaymentMethod(TransactionType.ACCOUNT.type, merchantDetailsData))addedButtons.add(BankAccount)
 
-                    if (it?.code == "CARD" && it.status == "ACTIVE") {
-                        addedButtons.add(Debit_CreditCard)
-                    }
-                    if (it?.code == "TRANSFER" && it.status == "ACTIVE") {
-                        addedButtons.add(Transfer)
-                    }
-                    if (it?.code == "USSD" && it.status == "ACTIVE") {
-                        addedButtons.add(UssdSelectBank)
-                    }
-                    if (it?.code == "ACCOUNT" && it.status == "ACTIVE") {
-                        addedButtons.add(BankAccount)
-                    }
-                    if (it?.code == "MOMO" && it.status == "ACTIVE") {
-                        addedButtons.add(MOMO)
-                    }
-                    if (it?.code == "POS" && it.status == "ACTIVE") {
-                        //addedButtons.add(MOMO)
-                    }
-                }
+
                 if(showCircularProgressBar){
                     showCircularProgress(showProgress = true)
                 }
