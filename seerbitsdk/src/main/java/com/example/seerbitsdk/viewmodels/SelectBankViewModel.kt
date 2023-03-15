@@ -37,7 +37,7 @@ class SelectBankViewModel: ViewModel() {
 
      fun resetTransactionState() {
         _availableBanksState.value = AvailableBanksState()
-         _momoState.value = AvailableBanksState()
+         _momoNetworkState.value = MomoNetworkState()
          
     }
 
