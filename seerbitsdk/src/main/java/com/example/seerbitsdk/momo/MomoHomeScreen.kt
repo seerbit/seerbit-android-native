@@ -62,7 +62,7 @@ fun MomoHomeScreen(
     var alertDialogMessage by remember { mutableStateOf("") }
     var alertDialogHeaderMessage by remember { mutableStateOf("") }
     var amount : String = "20.00"
-    var paymentRef = transactionViewModel.generateRandomReference()
+    var paymentRef = transactionViewModel.generateRandomReferenceTwo()
     // if there is an error loading the report
     if (merchantDetailsState?.hasError!!) {
         ErrorDialog(message = merchantDetailsState.errorMessage ?: "Something went wrong")
@@ -105,11 +105,11 @@ fun MomoHomeScreen(
                         country = merchantDetailsData.payload?.country?.countryCode ?: "",
                         amount = amount,
                         productId = "",
-                        redirectUrl = "",
-                        mobileNumber = merchantDetailsData.payload?.number,
+                        redirectUrl = "http://localhost:3002/#/",
+                        mobileNumber = accountNumber,
                         paymentReference = paymentRef,
                         fee = merchantDetailsData.payload?.vatFee,
-                        fullName = merchantDetailsData.payload?.businessName,
+                        fullName = "amom omure",
                         channelType = "wallet",
                         publicKey = "SBPUBK_WWEQK6UVR1PNZEVVUOBNIQHEIEIM1HJC",
                         source = "",
@@ -121,7 +121,6 @@ fun MomoHomeScreen(
                         retry = false,
                         network = momoNetwork,
                         voucherCode = ""
-
                     )
 
 
@@ -212,7 +211,7 @@ fun MomoHomeScreen(
                         showCircularProgressBar = false
                         openDialog.value = true
                         alertDialogMessage =
-                            initiateMomoPayment.data.message?: "Something went wrong"
+                            initiateMomoPayment.data.data?.message?: "Something went wrong"
                         alertDialogHeaderMessage = "Failed"
                         transactionViewModel.resetTransactionState()
                         return@let

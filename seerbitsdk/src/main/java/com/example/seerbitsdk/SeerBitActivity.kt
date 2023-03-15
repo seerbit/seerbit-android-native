@@ -1268,6 +1268,7 @@ fun MyAppNavHost(
         ){ navBackStackEntry ->
 
             val linkingReference = navBackStackEntry.arguments?.getString("linkingReference")
+            transactionViewModel.resetTransactionState()
             MOMOOTPScreen(
                navController = navController,
                merchantDetailsState = merchantDetailsState,
