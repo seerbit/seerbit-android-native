@@ -1,10 +1,13 @@
 package com.example.seerbitsdk.repository
 
+import com.example.seerbitsdk.api.FeeApiService
 import com.example.seerbitsdk.api.InitiateTransactionApiService
 import com.example.seerbitsdk.api.MerchantServiceApi
 import com.example.seerbitsdk.models.bankaccount.BankAccountDTO
 import com.example.seerbitsdk.models.card.CardDTO
 import com.example.seerbitsdk.models.card.CardResponse
+import com.example.seerbitsdk.models.fee.FeeDto
+import com.example.seerbitsdk.models.fee.FeeResponse
 import com.example.seerbitsdk.models.momo.MomoDTO
 import com.example.seerbitsdk.models.query.QueryTransactionResponse
 import com.example.seerbitsdk.models.transfer.TransferDTO
@@ -35,5 +38,10 @@ class InitiateTransactionRepository {
     //todo move this later
     suspend fun queryTransaction(paymentReference: String): Response<QueryTransactionResponse> {
         return MerchantServiceApi.retrofitService.queryTransaction(paymentReference)
+    }
+
+    //todo move this later
+    suspend fun getFee(feeDto: FeeDto): Response<FeeResponse> {
+        return FeeApiService.retrofitService.getFee(feeDto)
     }
 }

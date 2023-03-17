@@ -74,12 +74,11 @@ class SeerBitActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            val viewModel: MerchantDetailsViewModel by viewModels()
+            val merchantDetailsViewModel: MerchantDetailsViewModel by viewModels()
             val cardEnterPinViewModel: CardEnterPinViewModel by viewModels()
             val transactionViewModel: TransactionViewModel by viewModels()
             val selectBankViewModel: SelectBankViewModel by viewModels()
-            SeerBitApp(viewModel, transactionViewModel, cardEnterPinViewModel, selectBankViewModel)
-
+            SeerBitApp(merchantDetailsViewModel, transactionViewModel, cardEnterPinViewModel, selectBankViewModel)
         }
     }
 }
@@ -129,11 +128,6 @@ fun SeerBitApp(
             val activity = LocalContext.current as Activity
 
             activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-
-
-            val addedButtons: ArrayList<SeerBitDestination> = arrayListOf()
-
-
 
 
             MyAppNavHost(

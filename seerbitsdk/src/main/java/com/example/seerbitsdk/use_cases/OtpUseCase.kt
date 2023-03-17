@@ -1,12 +1,11 @@
 package com.example.seerbitsdk.use_cases
 
-import com.example.seerbitsdk.models.BankAccountOtpDto
+import com.example.seerbitsdk.models.otp.BankAccountOtpDto
 import com.example.seerbitsdk.models.CardOTPDTO
 import com.example.seerbitsdk.models.OtpDTO
 import com.example.seerbitsdk.models.Resource
 import com.example.seerbitsdk.models.otp.MomoOtpDto
 import com.example.seerbitsdk.repository.OTPRepository
-import com.example.seerbitsdk.repository.SeerMerchantDetailsRepository
 import kotlinx.coroutines.flow.flow
 import okhttp3.ResponseBody
 import okio.IOException

@@ -21,7 +21,7 @@ import com.example.seerbitsdk.card.AuthorizeButton
 import com.example.seerbitsdk.card.OTPInputField
 import com.example.seerbitsdk.card.showCircularProgress
 import com.example.seerbitsdk.component.*
-import com.example.seerbitsdk.models.BankAccountOtpDto
+import com.example.seerbitsdk.models.otp.BankAccountOtpDto
 import com.example.seerbitsdk.models.RequiredFields
 import com.example.seerbitsdk.models.bankaccount.BankAccountDTO
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
@@ -90,32 +90,6 @@ fun BankAccountOTPScreen(
             ) {
                 Spacer(modifier = Modifier.height(25.dp))
 
-                val bankAccountDTO = BankAccountDTO(
-                    deviceType = "Android",
-                    country = merchantDetailsData.payload?.country?.countryCode?: "",
-                    bankCode = bankCode,
-                    amount = amount,
-                    redirectUrl = "http://localhost:3002/#/",
-                    productId = "",
-                    mobileNumber = merchantDetailsData.payload?.number,
-                    paymentReference = paymentRef,
-                    fee = merchantDetailsData.payload?.vatFee,
-                    fullName = "Amos Aorme",
-                    channelType = "$bankName",
-                    dateOfBirth = dateOfBirth,
-                    publicKey = "SBPUBK_TCDUH6MNIDLHMJXJEJLBO6ZU2RNUUPHI",
-                    source = "",
-                    accountName = "Arome Amos",
-                    paymentType = "ACCOUNT",
-                    sourceIP = "128.0.0.1",
-                    currency = merchantDetailsData.payload?.defaultCurrency,
-                    bvn = myBVN,
-                    email = "sdk@gmail.com",
-                    productDescription = "",
-                    scheduleId = "",
-                    accountNumber = bankAccountNumber,
-                    retry = false
-                )
 
                 val maskedPhoneNumber = merchantDetailsData.payload?.number?.maskedPhoneNumber()
                 "******${merchantDetailsData.payload?.number?.substring(6)}"

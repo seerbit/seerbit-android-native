@@ -48,8 +48,6 @@ data class MerchantBanksItem(
 
 ){
 	fun requiredFieldJson() : String = Uri.encode(Gson().toJson(requiredFields))
-
-
 }
 
 data class AvailableBankData(

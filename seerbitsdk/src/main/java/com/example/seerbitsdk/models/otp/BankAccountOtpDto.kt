@@ -1,5 +1,6 @@
-package com.example.seerbitsdk.models
+package com.example.seerbitsdk.models.otp
 
+import com.example.seerbitsdk.models.OtpDTO
 import com.google.gson.annotations.SerializedName
 
 data class BankAccountOtpDto(

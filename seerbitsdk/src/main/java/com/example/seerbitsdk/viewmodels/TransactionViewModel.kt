@@ -212,14 +212,6 @@ class TransactionViewModel : ViewModel() {
     }
 
 
-
-
-    fun getPaymentReference(): String {
-        val current = LocalDateTime.now()
-        val formatter = DateTimeFormatter.BASIC_ISO_DATE
-        return "SBT-T${current.format(formatter)}"
-    }
-
     fun generateRandomReference(): String {
 
         val str = "ABCDEFGHIJKLMNOPQRSTNVabcdef6ghijklmnopqrstuvwxyzABCD123456789"
