@@ -1,4 +1,4 @@
-package com.example.seerbitsdk.card
+package com.example.seerbit_sdk
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -16,26 +16,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.seerbit_sdk.OtpLibraryScreen
-import com.example.seerbitsdk.R
-import com.example.seerbitsdk.component.OtherPaymentButtonComponent
-import com.example.seerbitsdk.component.SeerbitPaymentDetailHeader
-import com.example.seerbitsdk.ui.theme.Faktpro
-import com.example.seerbitsdk.ui.theme.SeerBitTheme
-
 
 @Composable
-fun OTPScreen(
+fun OtpLibraryScreen(
     modifier: Modifier = Modifier,
     onPaymentMethodClick: (String) -> Unit
 ) {
     var showPinScreen by remember { mutableStateOf(false) }
     Column(modifier = modifier) {
 
-        OtpLibraryScreen(onPaymentMethodClick = {})
 
         Column(
             modifier = modifier
@@ -48,14 +39,7 @@ fun OTPScreen(
         ) {
             Spacer(modifier = Modifier.height(25.dp))
 
-            SeerbitPaymentDetailHeader(
-                charges = 0.45,
-                amount = "60,000.00",
-                currencyText = "NGN",
-                "",
-                "",
-                ""
-            )
+
 
             Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
                 Text(
@@ -90,9 +74,6 @@ fun OTPScreen(
             Spacer(modifier = Modifier.height(16.dp))
             Spacer(modifier = Modifier.height(60.dp))
 
-            OtherPaymentButtonComponent(
-                onOtherPaymentButtonClicked = { /*TODO*/ },
-                onCancelButtonClicked = {}, enable = true)
 
         }
 
@@ -101,15 +82,6 @@ fun OTPScreen(
 }
 
 
-@Preview(showBackground = true, widthDp = 400, heightDp = 700)
-@Composable
-fun OTPScreenPreview() {
-    SeerBitTheme {
-        OTPScreen(
-            onPaymentMethodClick = {}
-        )
-    }
-}
 
 
 @Composable
@@ -121,7 +93,7 @@ fun OTPInputField(
         Card(modifier = modifier, elevation = 1.dp) {
             var value by remember { mutableStateOf("") }
             Image(
-                painter = painterResource(id = R.drawable.filled_bg_white),
+                painter = painterResource(id = com.google.accompanist.systemuicontroller.R.drawable.notification_action_background),
                 contentDescription = null
             )
             OutlinedTextField(
@@ -179,11 +151,12 @@ fun AuthorizeButton(
     ) {
         Text(text = buttonText, color = Color.White,
             style = TextStyle(
-            fontSize = 12.sp,
-            fontFamily = Faktpro,
-            fontWeight = FontWeight.Normal,
-            lineHeight = 10.sp
-        ))
+                fontSize = 12.sp,
+                fontFamily = FontFamily.SansSerif,
+                fontWeight = FontWeight.Normal,
+                lineHeight = 10.sp
+            ))
     }
 
 }
+
