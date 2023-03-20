@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace 'com.example.seerbit_sdk'
+    namespace 'com.example.seerbit_sdk_test'
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.example.seerbit_sdk"
+        applicationId "com.example.seerbit_sdk_test"
         minSdk 21
         targetSdk 33
 
