@@ -66,10 +66,10 @@ fun goToPaymentGateway(context: Context = LocalContext.current) {
             startSeerBitSDK(
                 context,
                 "30",
-                "08147638190",
+                "08035764450",
                 "SBPUBK_TCDUH6MNIDLHMJXJEJLBO6ZU2RNUUPHI",
-                "Adeife Taiwo",
-                "adeifeTaiwo50@gmail.com"
+                "Bamigbaye Bukola",
+                "bukkyize@gmail.com"
             )
 
         }, modifier = Modifier.width(100.dp).align(Alignment.CenterHorizontally)) {
