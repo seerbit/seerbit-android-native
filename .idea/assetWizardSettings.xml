@@ -3,6 +3,11 @@
   <component name="WizardSettings">
     <option name="children">
       <map>
+        <entry key="imageWizard">
+          <value>
+            <PersistentState />
+          </value>
+        </entry>
         <entry key="vectorWizard">
           <value>
             <PersistentState>
@@ -14,8 +19,8 @@
                         <option name="values">
                           <map>
                             <entry key="assetSourceType" value="FILE" />
-                            <entry key="outputName" value="horizontal_line" />
-                            <entry key="sourceFile" value="C:\Users\Adeife Taiwo\Downloads\Line 3.svg" />
+                            <entry key="outputName" value="visa" />
+                            <entry key="sourceFile" value="C:\Users\Adeife Taiwo\Downloads\Visa.svg" />
                           </map>
                         </option>
                       </PersistentState>

@@ -15,3 +15,4 @@ dependencyResolutionManagement {
 rootProject.name = "SeerBit"
 include ':app'
 include ':seerbitsdk'
+include ':seerbit_sdk'
