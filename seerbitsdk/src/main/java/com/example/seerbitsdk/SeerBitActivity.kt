@@ -70,38 +70,72 @@ import com.google.gson.Gson
 class SeerBitActivity : ComponentActivity() {
     private val viewModel: MerchantDetailsViewModel by viewModels()
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+
+
         setContent {
             val merchantDetailsViewModel: MerchantDetailsViewModel by viewModels()
             val cardEnterPinViewModel: CardEnterPinViewModel by viewModels()
             val transactionViewModel: TransactionViewModel by viewModels()
             val selectBankViewModel: SelectBankViewModel by viewModels()
-            SeerBitApp(merchantDetailsViewModel, transactionViewModel, cardEnterPinViewModel, selectBankViewModel)
+
+            val amount = intent.extras!!.getString("amount")
+            val publicKey = intent.extras?.getString("publicKey")
+            val phoneNumber = intent.extras?.getString("mobile_number")
+            val fullName = intent.extras?.getString("fullName")
+            val emailAddress = intent.extras?.getString("emailAddress")
+
+            SeerBitApp(
+                merchantDetailsViewModel,
+                transactionViewModel,
+                cardEnterPinViewModel,
+                selectBankViewModel,
+                amount ?: "",
+                publicKey ?: "",
+                phoneNumber ?: "",
+                fullName ?: "",
+                emailAddress ?: ""
+            )
         }
     }
 }
 
-@Composable
-fun Greeting(name: String) {
-    Text(text = "Hello $name!")
+
+fun startSeerBitSDK(
+    context: Context,
+    amount: String,
+    phoneNumber: String,
+    publicKey: String,
+    fullName: String,
+    emailAddress: String
+) {
+
+    val intent = Intent(context, SeerBitActivity::class.java)
+
+    intent.putExtra("amount", amount)
+    intent.putExtra("mobile_number", phoneNumber)
+    intent.putExtra("publicKey", publicKey)
+    intent.putExtra("fullName", fullName)
+    intent.putExtra("emailAddress", emailAddress)
+
+    context.startActivity(intent)
+
 }
 
-//@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    SeerBitTheme {
-        Greeting("Android")
-    }
-}
 
 @Composable
 fun SeerBitApp(
     viewModel: MerchantDetailsViewModel,
     transactionViewModel: TransactionViewModel,
     cardEnterPinViewModel: CardEnterPinViewModel,
-    selectBankViewModel: SelectBankViewModel
+    selectBankViewModel: SelectBankViewModel,
+    amount: String,
+    publicKey: String,
+    phoneNumber: String,
+    fullName: String,
+    emailAddress: String
 ) {
     SeerBitTheme {
         // A surface container using the 'background' color from the theme
@@ -130,6 +164,15 @@ fun SeerBitApp(
             activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
 
+            viewModel.merchantState.value.data?.payload?.userFullName = fullName
+            viewModel.merchantState.value.data?.payload?.userPhoneNumber = phoneNumber
+            viewModel.merchantState.value.data?.payload?.publicKey = publicKey
+            viewModel.merchantState.value.data?.payload?.amount = amount
+            viewModel.merchantState.value.data?.payload?.emailAddress = emailAddress
+
+            viewModel.setPublicKey(publicKey)
+            PUBLIC_KEY = publicKey
+
             MyAppNavHost(
                 navController = navController,
                 modifier = Modifier.padding(8.dp),
@@ -138,8 +181,10 @@ fun SeerBitApp(
                 transactionViewModel = transactionViewModel,
                 cardEnterPinViewModel = cardEnterPinViewModel,
                 selectBankViewModel = selectBankViewModel,
-                merchantDetailsViewModel = viewModel
+                merchantDetailsViewModel = viewModel,
+                startDestination = Debit_CreditCard.route,
             )
+
 
         }
     }
@@ -223,8 +268,6 @@ fun CardHomeScreen(
     var trailingIcon by rememberSaveable { mutableStateOf(0) }
 
 
-
-
     //determines if to show progress bar when loading
     var showCircularProgressBar by remember { mutableStateOf(false) }
     var paymentRef by remember { mutableStateOf("") }
@@ -262,17 +305,17 @@ fun CardHomeScreen(
             val cardDTO = CardDTO(
                 deviceType = "Android",
                 country = merchantDetailsData.payload?.country?.countryCode ?: "",
-                20.0,
+                amount = merchantDetailsData.payload?.amount?.toDouble(),
                 cvv = cvv,
                 redirectUrl = "http://localhost:3002/#/",
                 productId = "",
-                mobileNumber = merchantDetailsData.payload?.number,
+                mobileNumber = merchantDetailsData.payload?.userPhoneNumber,
                 paymentReference = paymentReference,
                 fee = merchantDetailsData.payload?.vatFee,
                 expiryMonth = cardExpiryMonth,
-                fullName = merchantDetailsData.payload?.businessName,
+                fullName = merchantDetailsData.payload?.userFullName,
                 "MASTERCARD",
-                publicKey = "SBPUBK_TCDUH6MNIDLHMJXJEJLBO6ZU2RNUUPHI",
+                publicKey = merchantDetailsData.payload?.publicKey,
                 expiryYear = cardExpiryYear,
                 source = "",
                 paymentType = "CARD",
@@ -281,7 +324,7 @@ fun CardHomeScreen(
                 currency = merchantDetailsData.payload?.defaultCurrency,
                 "LOCAL",
                 false,
-                email = "sdk@gmail.com",
+                email = merchantDetailsData.payload?.emailAddress,
                 cardNumber = cardNumber,
                 retry = false
             )
@@ -412,8 +455,8 @@ fun CardHomeScreen(
                 alertDialogHeaderMessage = "Error Occurred"
                 transactionViewModel.resetTransactionState()
             }
-            
-            if(transactionState.isLoading){
+
+            if (transactionState.isLoading) {
                 showCircularProgressBar = true
             }
 
@@ -428,40 +471,40 @@ fun CardHomeScreen(
 
             }
             if (queryTransactionStateState.isLoading) {
-                
+
             }
 
             queryTransactionStateState.data?.data?.let {
 
-                when(it.code){
-                   PENDING_CODE -> {
-                       transactionViewModel.queryTransaction(paymentRef)
-                   }
-                   SUCCESS -> {
-                       showCircularProgressBar = false
-                       openDialog.value = true
-                       alertDialogHeaderMessage = "Successful"
-                       alertDialogMessage = it.message ?: ""
-                       transactionViewModel.resetTransactionState()
-                       return@let
-                   }
-                   else -> {
-                       showCircularProgressBar = false
-                       openDialog.value = true
-                       alertDialogHeaderMessage = "Error"
-                       alertDialogMessage = it.message ?: "Something went wrong"
-                       transactionViewModel.resetTransactionState()
-                       return@let
-                   }
+                when (it.code) {
+                    PENDING_CODE -> {
+                        transactionViewModel.queryTransaction(paymentRef)
+                    }
+                    SUCCESS -> {
+                        showCircularProgressBar = false
+                        openDialog.value = true
+                        alertDialogHeaderMessage = "Successful"
+                        alertDialogMessage = it.message ?: ""
+                        transactionViewModel.resetTransactionState()
+                        return@let
+                    }
+                    else -> {
+                        showCircularProgressBar = false
+                        openDialog.value = true
+                        alertDialogHeaderMessage = "Error"
+                        alertDialogMessage = it.message ?: "Something went wrong"
+                        transactionViewModel.resetTransactionState()
+                        return@let
+                    }
 
-               }
+                }
             }
 
 
 
             transactionState.data?.let {
 
-                if(it.data?.code == SUCCESS || it.data?.code == PENDING_CODE) {
+                if (it.data?.code == SUCCESS || it.data?.code == PENDING_CODE) {
                     showCircularProgressBar = false
                     paymentRef = transactionState.data.data?.payments?.paymentReference ?: ""
                     val linkingRef = transactionState.data.data?.payments?.linkingReference ?: ""
@@ -488,8 +531,7 @@ fun CardHomeScreen(
                         showCircularProgressBar = true
                         return@let
                     }
-                }
-                else {
+                } else {
                     openDialog.value = true
                     showCircularProgressBar = false
                     alertDialogHeaderMessage = "Error"
@@ -503,7 +545,8 @@ fun CardHomeScreen(
 
             OtherPaymentButtonComponent(
                 onOtherPaymentButtonClicked = onOtherPaymentButtonClicked,
-                onCancelButtonClicked = {navController.navigateSingleTopTo(Debit_CreditCard.route)}, enable = !showCircularProgressBar
+                onCancelButtonClicked = { navController.navigateSingleTopTo(Debit_CreditCard.route) },
+                enable = !showCircularProgressBar
             )
 
             Spacer(modifier = Modifier.height(100.dp))
@@ -580,7 +623,17 @@ fun HeaderScreenPreview() {
     val transactionViewModel: TransactionViewModel = viewModel()
     val cardEnterPinViewModel: CardEnterPinViewModel = viewModel()
     val selectBankViewModel: SelectBankViewModel = viewModel()
-    SeerBitApp(viewModel, transactionViewModel, cardEnterPinViewModel, selectBankViewModel)
+    SeerBitApp(
+        viewModel,
+        transactionViewModel,
+        cardEnterPinViewModel,
+        selectBankViewModel,
+        publicKey = "",
+        phoneNumber = "",
+        fullName = "",
+        amount = "",
+        emailAddress = ""
+    )
 }
 
 
@@ -913,10 +966,10 @@ fun MyAppNavHost(
     transactionViewModel: TransactionViewModel,
     cardEnterPinViewModel: CardEnterPinViewModel,
     selectBankViewModel: SelectBankViewModel,
-    merchantDetailsViewModel: MerchantDetailsViewModel
+    merchantDetailsViewModel: MerchantDetailsViewModel,
 ) {
     var mStartDestination: String = Debit_CreditCard.route
-    if(!displayPaymentMethod(TransactionType.CARD.type, merchantDetailsState.data))
+    if (!displayPaymentMethod(TransactionType.CARD.type, merchantDetailsState.data))
         mStartDestination = Route.OTHER_PAYMENT_SCREEN
 
 
@@ -1140,7 +1193,7 @@ fun MyAppNavHost(
             val accountNumber = navBackStackEntry.arguments?.getString("accountNumber")
             val bvn = navBackStackEntry.arguments?.getString("bvn")
             val birthday = navBackStackEntry.arguments?.getString("birthday")
-            val linkingReference =  navBackStackEntry.arguments?.getString("linkingReference")
+            val linkingReference = navBackStackEntry.arguments?.getString("linkingReference")
             transactionViewModel.resetTransactionState()
             BankAccountOTPScreen(
                 navController = navController,
@@ -1255,20 +1308,21 @@ fun MyAppNavHost(
 
         }
 
-        composable("${Route.MOMO_OTP_SCREEN}/{linkingReference}",
+        composable(
+            "${Route.MOMO_OTP_SCREEN}/{linkingReference}",
             arguments = listOf(
                 // declaring argument type
                 navArgument("linkingReference") { type = NavType.StringType })
-        ){ navBackStackEntry ->
+        ) { navBackStackEntry ->
 
             val linkingReference = navBackStackEntry.arguments?.getString("linkingReference")
             transactionViewModel.resetTransactionState()
             MOMOOTPScreen(
-               navController = navController,
-               merchantDetailsState = merchantDetailsState,
-               transactionViewModel = transactionViewModel,
-               linkingReference = linkingReference
-           )
+                navController = navController,
+                merchantDetailsState = merchantDetailsState,
+                transactionViewModel = transactionViewModel,
+                linkingReference = linkingReference
+            )
 
         }
 

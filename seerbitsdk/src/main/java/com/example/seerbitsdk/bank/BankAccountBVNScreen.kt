@@ -48,7 +48,6 @@ fun BankAccountBVNScreen(
 
     var bvn by remember { mutableStateOf("") }
     var json by remember { mutableStateOf(Uri.encode(Gson().toJson(requiredFields))) }
-    var amount : String = "60,000"
 
     // if there is an error loading the report
     if (merchantDetailsState?.hasError!!) {
@@ -72,11 +71,12 @@ fun BankAccountBVNScreen(
                     .weight(1f)
             ) {
                 Spacer(modifier = Modifier.height(25.dp))
+                var amount: String = merchantDetailsData.payload?.amount ?: ""
 
                 SeerbitPaymentDetailHeader(
 
                     charges =  merchantDetailsData.payload?.vatFee?.toDouble()!!,
-                    amount = "60,000.00",
+                    amount = amount,
                     currencyText = merchantDetailsData.payload.defaultCurrency!!,
                     "Kindly Enter your BVN",
                     merchantDetailsData.payload.businessName!!,

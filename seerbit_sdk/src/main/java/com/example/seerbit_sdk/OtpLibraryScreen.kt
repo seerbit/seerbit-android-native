@@ -1,162 +1,44 @@
 package com.example.seerbit_sdk
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.*
-import androidx.compose.runtime.*
+import android.content.Context
+import android.content.Intent
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.Button
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-
-@Composable
-fun OtpLibraryScreen(
-    modifier: Modifier = Modifier,
-    onPaymentMethodClick: (String) -> Unit
-) {
-    var showPinScreen by remember { mutableStateOf(false) }
-    Column(modifier = modifier) {
+import com.example.seerbitsdk.SeerBitActivity
 
 
-        Column(
-            modifier = modifier
-                .padding(
-                    start = 21.dp,
-                    end = 21.dp
-                )
-                .fillMaxWidth()
-                .weight(1f)
-        ) {
-            Spacer(modifier = Modifier.height(25.dp))
+class SeerBitActivity2 : ComponentActivity() {
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
 
+        setContent {
 
-            Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    text = "Kindly enter the OTP sent to *******9502 and\n" +
-                            "o***********@gmail.com or enter the OTP genrates on your hardware token device",
-                    style = TextStyle(
-                        fontSize = 14.sp,
-                        fontFamily = FontFamily.SansSerif,
-                        fontWeight = FontWeight.Normal,
-                        lineHeight = 14.sp,
-                        textAlign = TextAlign.Center
-
-                    ),
-                    modifier = Modifier
-                        .align(alignment = Alignment.CenterVertically)
-                        .padding(10.dp)
-                )
-            }
-            Spacer(modifier = Modifier.height(20.dp))
-            OTPInputField(Modifier, "Enter OTP") {
-
-            }
-            Spacer(modifier = modifier.height(20.dp))
-
-            Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
-                Text(text = "Resend OTP")
-            }
-            Spacer(modifier = modifier.height(10.dp))
-            AuthorizeButton(buttonText = "Authorize Payment",
-                onClick = { showPinScreen = true }, true
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Spacer(modifier = Modifier.height(60.dp))
-
-
+            goToPaymentGateway()
         }
 
 
+
     }
+
+
 }
 
 
 
 
-@Composable
-fun OTPInputField(
-    modifier: Modifier = Modifier, placeholder: String,
-    onEnterOTP: (String) -> Unit
-) {
-    Column {
-        Card(modifier = modifier, elevation = 1.dp) {
-            var value by remember { mutableStateOf("") }
-            Image(
-                painter = painterResource(id = com.google.accompanist.systemuicontroller.R.drawable.notification_action_background),
-                contentDescription = null
-            )
-            OutlinedTextField(
-                value = value,
-                onValueChange = { newText ->
-                    if (newText.length <= 8)
-                        value = newText
-                    onEnterOTP(newText)
-                },
-
-                colors = TextFieldDefaults.textFieldColors(
-                    backgroundColor = MaterialTheme.colors.surface,
-                    disabledIndicatorColor = Color.Transparent,
-                    disabledLabelColor = Color.Transparent,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    cursorColor = Color.Gray
-
-                ),
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.NumberPassword,
-                    imeAction = ImeAction.Send
-                ),
-                shape = RoundedCornerShape(8.dp),
-                placeholder = {
-                    Text(
-                        text = placeholder,
-                        style = TextStyle(fontSize = 14.sp),
-                        color = Color.LightGray
-                    )
-                },
-                modifier = modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-            )
-        }
-    }
-}
 
 
-@Composable
-fun AuthorizeButton(
-    buttonText: String,
-    onClick: () -> Unit, enableButton : Boolean
-) {
-    Button(
-        onClick = onClick,
-        colors = ButtonDefaults.buttonColors(backgroundColor = Color.Black),
-        shape = RoundedCornerShape(8.dp),
-        enabled = enableButton,
-        modifier = Modifier
-            .height(56.dp)
-            .fillMaxWidth()
-
-    ) {
-        Text(text = buttonText, color = Color.White,
-            style = TextStyle(
-                fontSize = 12.sp,
-                fontFamily = FontFamily.SansSerif,
-                fontWeight = FontWeight.Normal,
-                lineHeight = 10.sp
-            ))
-    }
-
-}
 

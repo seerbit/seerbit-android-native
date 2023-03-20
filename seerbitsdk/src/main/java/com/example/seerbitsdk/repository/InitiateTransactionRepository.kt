@@ -2,7 +2,7 @@ package com.example.seerbitsdk.repository
 
 import com.example.seerbitsdk.api.FeeApiService
 import com.example.seerbitsdk.api.InitiateTransactionApiService
-import com.example.seerbitsdk.api.MerchantServiceApi
+import com.example.seerbitsdk.api.InitiateTransactionServiceApi
 import com.example.seerbitsdk.models.bankaccount.BankAccountDTO
 import com.example.seerbitsdk.models.card.CardDTO
 import com.example.seerbitsdk.models.card.CardResponse
@@ -21,23 +21,23 @@ class InitiateTransactionRepository {
     }
 
     suspend fun initiateUssd(ussdDTO: UssdDTO): Response<CardResponse> {
-        return MerchantServiceApi.retrofitService.initiateUssd(ussdDTO)
+        return InitiateTransactionServiceApi.retrofitService.initiateUssd(ussdDTO)
     }
 
     suspend fun initiateTransfer(transferDTO: TransferDTO): Response<CardResponse> {
-        return MerchantServiceApi.retrofitService.initiateTransfer(transferDTO)
+        return InitiateTransactionServiceApi.retrofitService.initiateTransfer(transferDTO)
     }
 
     suspend fun initiateBankAccountMode(bankAccountDTO: BankAccountDTO): Response<CardResponse> {
-        return MerchantServiceApi.retrofitService.initiateBankAccountMode(bankAccountDTO)
+        return InitiateTransactionServiceApi.retrofitService.initiateBankAccountMode(bankAccountDTO)
     }
     suspend fun initiateMOMO(momoDTO: MomoDTO): Response<CardResponse> {
-        return MerchantServiceApi.retrofitService.initiateMomo(momoDTO)
+        return InitiateTransactionServiceApi.retrofitService.initiateMomo(momoDTO)
     }
 
     //todo move this later
     suspend fun queryTransaction(paymentReference: String): Response<QueryTransactionResponse> {
-        return MerchantServiceApi.retrofitService.queryTransaction(paymentReference)
+        return InitiateTransactionServiceApi.retrofitService.queryTransaction(paymentReference)
     }
 
     //todo move this later

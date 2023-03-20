@@ -52,7 +52,7 @@ fun BankAccountNumberScreen(
     var accountNumber by remember {
         mutableStateOf("")
     }
-    var amount : String = "20.00"
+
     var json by remember { mutableStateOf(Uri.encode(Gson().toJson(requiredFields))) }
     var showCircularProgressBar by remember { mutableStateOf(false) }
     val openDialog = remember { mutableStateOf(false) }
@@ -86,15 +86,17 @@ fun BankAccountNumberScreen(
             ) {
                 Spacer(modifier = Modifier.height(25.dp))
 
+                var amount : String = merchantDetailsData.payload?.amount?:""
                 SeerbitPaymentDetailHeader(
 
                     charges =  merchantDetailsData.payload?.vatFee?.toDouble()?:0.0,
-                    amount = "20.00",
+                    amount = amount,
                     currencyText = merchantDetailsData.payload?.defaultCurrency?:"",
                     "Please Enter your Account Number",
                     merchantDetailsData.payload?.businessName?:"",
                     merchantDetailsData.payload?.supportEmail?:""
                 )
+
 
                 val bankAccountDTO = BankAccountDTO(
                     deviceType = "Android",
@@ -103,20 +105,20 @@ fun BankAccountNumberScreen(
                     amount = amount,
                     redirectUrl = "http://localhost:3002/#/",
                     productId = "",
-                    mobileNumber = merchantDetailsData.payload?.number,
+                    mobileNumber = merchantDetailsData.payload?.userPhoneNumber,
                     paymentReference = paymentRef,
                     fee = merchantDetailsData.payload?.vatFee,
-                    fullName = "Amos Aorme",
+                    fullName = merchantDetailsData.payload?.userFullName,
                     channelType = "$bankName",
                     dateOfBirth = "",
-                    publicKey = "SBPUBK_TCDUH6MNIDLHMJXJEJLBO6ZU2RNUUPHI",
+                    publicKey = merchantDetailsData.payload?.publicKey,
                     source = "",
-                    accountName = "Arome Amos",
+                    accountName = merchantDetailsData.payload?.userFullName,
                     paymentType = "ACCOUNT",
                     sourceIP = "128.0.0.1",
                     currency = merchantDetailsData.payload?.defaultCurrency,
                     bvn = "",
-                    email = "sdk@gmail.com",
+                    email = merchantDetailsData.payload?.emailAddress,
                     productDescription = "",
                     scheduleId = "",
                     accountNumber = accountNumber,

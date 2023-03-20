@@ -67,9 +67,11 @@ fun OtherPaymentScreen(
 
             ) {
                 Spacer(modifier = Modifier.height(25.dp))
+                var amount: String = merchantDetailsData.payload?.amount ?: ""
+
                 SeerbitPaymentDetailHeader(
                     charges = merchantDetailsData.payload?.vatFee?.toDouble() ?:0.0,
-                    amount = "20.00",
+                    amount = amount,
                     currencyText = merchantDetailsData.payload?.defaultCurrency?:"",
                     "Other Payment Channels",
                     merchantDetailsData.payload?.businessName?:"",
@@ -172,24 +174,25 @@ fun OtherPaymentScreen(
 }
 
 fun generateTransferDTO(merchantDetailsData: MerchantDetailsResponse) : TransferDTO {
+    var amount: String = merchantDetailsData.payload?.amount ?: ""
 
     return TransferDTO(
         country = merchantDetailsData.payload?.country?.countryCode ?: "",
         bankCode = "044",
-        amount = "20.0",
+        amount = amount,
         productId = "",
-        mobileNumber = merchantDetailsData.payload?.number,
+        mobileNumber = merchantDetailsData.payload?.userPhoneNumber,
         paymentReference = generateRandomReference(),
         fee = merchantDetailsData.payload?.vatFee,
-        fullName = merchantDetailsData.payload?.businessName,
+        fullName = merchantDetailsData.payload?.userFullName,
         channelType = "Transfer",
-        publicKey = "SBPUBK_TCDUH6MNIDLHMJXJEJLBO6ZU2RNUUPHI",
+        publicKey = merchantDetailsData.payload?.publicKey,
         source = "",
         paymentType = "TRANSFER",
         sourceIP = "102.88.63.64",
         currency = merchantDetailsData.payload?.defaultCurrency,
         productDescription = "",
-        email = "sdk@gmail.com",
+        email = merchantDetailsData.payload?.emailAddress,
         retry = false,
         deviceType = "Android",
         amountControl = "FIXEDAMOUNT",

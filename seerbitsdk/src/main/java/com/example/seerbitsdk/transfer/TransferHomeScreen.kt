@@ -91,12 +91,13 @@ fun TransferHomeScreen(
             //enter payment states
             transferAmount = formatAmount(20.00)
             val defaultCurrency : String = merchantDetailsData.payload?.defaultCurrency?: ""
+            var amount: String = merchantDetailsData.payload?.amount ?: ""
 
             Spacer(modifier = Modifier.height(21.dp))
 
             SeerbitPaymentDetailHeaderTwo(
                 charges =  merchantDetailsData.payload?.vatFee?.toDouble()!!,
-                amount = transferAmount,
+                amount = amount,
                 currencyText = defaultCurrency,
                 businessName = merchantDetailsData.payload.businessName!!,
                 email = merchantDetailsData.payload.supportEmail!!

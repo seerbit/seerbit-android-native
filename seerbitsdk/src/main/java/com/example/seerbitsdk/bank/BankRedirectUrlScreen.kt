@@ -39,7 +39,7 @@ fun BankRedirectUrlScreen(
 
     var json: String = ""
     var showErrorDialog by remember { mutableStateOf(false) }
-    var amount: String = "100.00"
+
     var showCircularProgressBar by remember { mutableStateOf(false) }
     val openDialog = remember { mutableStateOf(false) }
     var alertDialogMessage by remember { mutableStateOf("") }
@@ -73,10 +73,12 @@ fun BankRedirectUrlScreen(
                     .weight(1f)
             ) {
                 Spacer(modifier = Modifier.height(25.dp))
+                var amount: String = merchantDetailsData.payload?.amount ?: ""
+
 
                 SeerbitPaymentDetailHeaderTwo(
                     charges = merchantDetailsData.payload?.vatFee?.toDouble() ?: 0.0,
-                    amount = "20.00",
+                    amount =amount,
                     currencyText = merchantDetailsData.payload?.defaultCurrency ?: "",
                     merchantDetailsData.payload?.businessName ?: "",
                     merchantDetailsData.payload?.supportEmail ?: ""
@@ -108,20 +110,20 @@ fun BankRedirectUrlScreen(
                     amount = amount,
                     redirectUrl = "http://localhost:3002/#/",
                     productId = "",
-                    mobileNumber = merchantDetailsData.payload?.number,
+                    mobileNumber = merchantDetailsData.payload?.userPhoneNumber,
                     paymentReference = paymentRef,
                     fee = merchantDetailsData.payload?.vatFee,
-                    fullName = "Adeife Taiwo",
+                    fullName =  merchantDetailsData.payload?.userFullName,
                     channelType = bankName,
                     dateOfBirth = "",
-                    publicKey = "SBPUBK_TCDUH6MNIDLHMJXJEJLBO6ZU2RNUUPHI",
+                    publicKey =  merchantDetailsData.payload?.publicKey,
                     source = "",
-                    accountName = "Adeife Taiwo",
+                    accountName =  merchantDetailsData.payload?.userFullName,
                     paymentType = "ACCOUNT",
                     sourceIP = "128.0.0.1",
                     currency = merchantDetailsData.payload?.defaultCurrency,
                     bvn = "",
-                    email = "sdk@gmail.com",
+                    email =  merchantDetailsData.payload?.emailAddress,
                     productDescription = "",
                     scheduleId = "",
                     accountNumber = "",

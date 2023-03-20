@@ -7,6 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.State
 import androidx.lifecycle.ViewModel
+import com.example.seerbitsdk.component.PUBLIC_KEY
 import com.example.seerbitsdk.models.Resource
 import com.example.seerbitsdk.models.fee.FeeDto
 import com.example.seerbitsdk.screenstate.CardBinState
@@ -133,5 +134,9 @@ class MerchantDetailsViewModel : ViewModel() {
 
     }
 
+    fun setPublicKey(publicKey : String){
+        PUBLIC_KEY = publicKey
+    }
 
 }
+

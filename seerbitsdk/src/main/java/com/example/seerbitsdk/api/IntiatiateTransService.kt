@@ -22,19 +22,46 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
-import retrofit2.http.Query
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
-
 @Singleton
-interface MerchantDetailsService {
+interface SeerBitService {
 
-    @GET("merchant/verify/")
-    suspend fun merchantDetails(@Query("key") key : String = PUBLIC_KEY,
-                                @Query("sbcp") sbcp : String = "uFWgBWF8OB56oCSJudCxKYqNm8Cttss4",
-                                @Query("partner-id") partner_id : String = "1"
-    ): Response<MerchantDetailsResponse>
+    @GET("merchant/verify/?key=SBPUBK_WWEQK6UVR1PNZEVVUOBNIQHEIEIM1HJC&sbcp=uFWgBWF8OB56oCSJudCxKYqNm8Cttss4&partner-id=1")
+    suspend fun merchantDetails(): Response<MerchantDetailsResponse>
+
+    @GET("checkout/query/{paymentReference}")
+    suspend fun queryTransaction(@Path("paymentReference") paymentReference: String)
+            : Response<QueryTransactionResponse>
+
+    // using this here because the url points to live
+    @POST("checkout/initiates")
+    suspend fun initiateUssd(@Body ussdDTO: UssdDTO): Response<CardResponse>
+
+    // using this here because the url points to live
+    @POST("checkout/initiates")
+    suspend fun initiateTransfer(@Body transferDTO: TransferDTO): Response<CardResponse>
+
+    @POST("checkout/initiates")
+    suspend fun initiateMomo(@Body transferDTO: TransferDTO): Response<CardResponse>
+
+    // using this here because the url points to live
+    @POST("checkout/initiates")
+    suspend fun initiateBankAccountMode(@Body bankAccountDTO: BankAccountDTO): Response<CardResponse>
+
+    // using this here because the url points to live
+    @POST("checkout/initiates")
+    suspend fun initiateMomo(@Body momoDTO: MomoDTO): Response<CardResponse>
+
+    @GET("checkout/banks")
+    suspend fun getBanks(): Response<GetBanksResponse>
+
+    @GET("tranmgt/networks/GH/00000103")
+    suspend fun getMomoNetworks(): Response<List<MomoNetworkResponseItem>>
+
+    @GET("checkout/bin/{firstSixDigit}")
+    suspend fun getCardBin(@Path("firstSixDigit") firstSixDigit: String): Response<CardBinResponse>
 
 
 }
@@ -65,19 +92,18 @@ private fun logger(): HttpLoggingInterceptor {
 }
 
 private val publicKey = PUBLIC_KEY
-const val baseUrl = "https://seerbitapi.com/"
+//SBPUBK_WWEQK6UVR1PNZEVVUOBNIQHEIEIM1HJC
+
 
 private val retrofit = Retrofit.Builder()
-
-    .baseUrl(baseUrl)
+    .baseUrl("https://seerbitapi.com/")
     .client(okHttpClient.build())
     .addConverterFactory(GsonConverterFactory.create())
     .build()
 
 
-object MerchantServiceApi {
-    val retrofitService: MerchantDetailsService by lazy {
-        retrofit.create(MerchantDetailsService::class.java)
+object InitiateTransactionServiceApi {
+    val retrofitService: SeerBitService by lazy {
+        retrofit.create(SeerBitService::class.java)
     }
 }
-

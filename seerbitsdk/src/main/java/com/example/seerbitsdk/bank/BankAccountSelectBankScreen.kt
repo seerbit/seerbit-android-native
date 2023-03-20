@@ -55,7 +55,7 @@ fun BankAccountSelectBankScreen(
     var showErrorDialog by remember { mutableStateOf(false) }
 
     var requiredFields = RequiredFields()
-    var amount: String = "20.00"
+
     var showCircularProgressBar by remember { mutableStateOf(false) }
     val openDialog = remember { mutableStateOf(false) }
     var alertDialogMessage by remember { mutableStateOf("") }
@@ -88,9 +88,11 @@ fun BankAccountSelectBankScreen(
             ) {
                 Spacer(modifier = Modifier.height(25.dp))
 
+                var amount: String = merchantDetailsData.payload?.amount ?: ""
+
                 SeerbitPaymentDetailHeader(
                     charges = merchantDetailsData.payload?.vatFee?.toDouble()!!,
-                    amount = "20.00",
+                    amount = amount,
                     currencyText = merchantDetailsData.payload.defaultCurrency!!,
                     "Choose your bank to start this payment",
                     merchantDetailsData.payload.businessName!!,

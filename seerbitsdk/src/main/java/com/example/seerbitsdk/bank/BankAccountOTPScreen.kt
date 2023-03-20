@@ -55,7 +55,6 @@ fun BankAccountOTPScreen(
     val openDialog = remember { mutableStateOf(false) }
     var alertDialogMessage by remember { mutableStateOf("") }
     var alertDialogHeaderMessage by remember { mutableStateOf("") }
-    var amount : String = "20.00"
     var paymentRef = transactionViewModel.generateRandomReference()
     myBVN = if (bvn == Dummy) "" else bvn
     dateOfBirth = if (dob == Dummy) "" else dob
@@ -94,6 +93,7 @@ fun BankAccountOTPScreen(
                 val maskedPhoneNumber = merchantDetailsData.payload?.number?.maskedPhoneNumber()
                 "******${merchantDetailsData.payload?.number?.substring(6)}"
                 val maskedEmailAddress = "A**************@gmail.com"
+                var amount: String = merchantDetailsData.payload?.amount ?: ""
 
                 SeerbitPaymentDetailHeaderTwo(
                     charges =  merchantDetailsData.payload?.vatFee?.toDouble()!!,

@@ -19,7 +19,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.seerbit_sdk.OtpLibraryScreen
 import com.example.seerbitsdk.R
 import com.example.seerbitsdk.component.OtherPaymentButtonComponent
 import com.example.seerbitsdk.component.SeerbitPaymentDetailHeader
@@ -34,8 +33,6 @@ fun OTPScreen(
 ) {
     var showPinScreen by remember { mutableStateOf(false) }
     Column(modifier = modifier) {
-
-        OtpLibraryScreen(onPaymentMethodClick = {})
 
         Column(
             modifier = modifier

@@ -121,7 +121,7 @@ fun CardEnterPinScreen(
                 val queryTransactionStateState: QueryTransactionState =
                     cardEnterPinViewModel.queryTransactionState.value
                 val openDialog = remember { mutableStateOf(false) }
-                var amount: String = "20.0"
+                var amount: String =  merchantDetailsData.payload?.amount?:""
 
 
                 if(useOtp){
@@ -159,15 +159,15 @@ fun CardEnterPinScreen(
                 val cardDTO = CardDTO(
                     deviceType = "Android",
                     country = merchantDetailsData.payload?.country?.countryCode ?: "",
-                    amount = 20.0,
+                    amount = merchantDetailsData.payload.amount?.toDouble()?:0.0,
                     cvv = cvv,
                     redirectUrl = "http://localhost:3002/#/",
                     productId = "",
-                    mobileNumber = merchantDetailsData.payload.number,
+                    mobileNumber = merchantDetailsData.payload.userPhoneNumber,
                     paymentReference = paymentReference,
                     fee = merchantDetailsData.payload.vatFee,
                     expiryMonth = cardExpiryMonth,
-                    fullName = merchantDetailsData.payload?.businessName,
+                    fullName = merchantDetailsData.payload.userFullName,
                     "MASTERCARD",
                     publicKey = "SBPUBK_TCDUH6MNIDLHMJXJEJLBO6ZU2RNUUPHI",
                     expiryYear = cardExpiryYear,
@@ -178,7 +178,7 @@ fun CardEnterPinScreen(
                     currency = merchantDetailsData.payload.defaultCurrency,
                     "LOCAL",
                     false,
-                    email = "sdk@gmail.com",
+                    email = merchantDetailsData.payload.emailAddress,
                     cardNumber = cardNumber,
                     retry = false
                 )

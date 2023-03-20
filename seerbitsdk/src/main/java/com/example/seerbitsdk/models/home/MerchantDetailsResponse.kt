@@ -549,7 +549,13 @@ data class Payload(
 	val defaultCurrency: String? = null,
 
 	@field:SerializedName("businessType")
-	val businessType: String? = null
+	val businessType: String? = null,
+
+	var userFullName : String? = null,
+	var publicKey : String? = null,
+	var userPhoneNumber : String? = null,
+	var amount : String? = null,
+    var emailAddress : String? = null
 )
 
 data class InternationalPaymentOptionCapStatus(

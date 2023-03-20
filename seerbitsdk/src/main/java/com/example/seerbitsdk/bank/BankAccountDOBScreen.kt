@@ -54,7 +54,6 @@ fun BankAccountDOBScreen(
     val openDialog = remember { mutableStateOf(false) }
     var alertDialogMessage by remember { mutableStateOf("") }
     var alertDialogHeaderMessage by remember { mutableStateOf("") }
-    var amount : String = "20.00"
     var paymentRef = transactionViewModel.generateRandomReference()
     var dob by remember { mutableStateOf("") }
     var json by remember { mutableStateOf(Uri.encode(Gson().toJson(requiredFields))) }
@@ -81,9 +80,10 @@ fun BankAccountDOBScreen(
             ) {
                 Spacer(modifier = Modifier.height(25.dp))
 
+                var amount: String = merchantDetailsData.payload?.amount ?: ""
                 SeerbitPaymentDetailHeader(
                     charges =  merchantDetailsData.payload?.vatFee?.toDouble()?:0.0,
-                    amount = "20.00",
+                    amount = amount,
                     currencyText = merchantDetailsData.payload?.defaultCurrency?:"",
                     "Please Enter your birthday",
                     merchantDetailsData.payload?.businessName?:"",
@@ -97,25 +97,29 @@ fun BankAccountDOBScreen(
                     amount = amount,
                     redirectUrl = "http://localhost:3002/#/",
                     productId = "",
-                    mobileNumber = merchantDetailsData.payload?.number,
+                    mobileNumber = merchantDetailsData.payload?.userPhoneNumber,
                     paymentReference = paymentRef,
                     fee = merchantDetailsData.payload?.vatFee,
                     fullName = "Amos Aorme",
                     channelType = "$bankName",
                     dateOfBirth = dob,
-                    publicKey = "SBPUBK_TCDUH6MNIDLHMJXJEJLBO6ZU2RNUUPHI",
+                    publicKey = merchantDetailsData.payload?.publicKey,
                     source = "",
-                    accountName = "Arome Amos",
+                    accountName = merchantDetailsData.payload?.userFullName,
                     paymentType = "ACCOUNT",
                     sourceIP = "128.0.0.1",
                     currency = merchantDetailsData.payload?.defaultCurrency,
                     bvn = "",
-                    email = "sdk@gmail.com",
+                    email = merchantDetailsData.payload?.emailAddress,
                     productDescription = "",
                     scheduleId = "",
                     accountNumber = bankAccountNumber,
                     retry = false
                 )
+
+                if(showCircularProgressBar){
+                    showCircularProgress(showProgress = true)
+                }
 
                 val initiateBankAccountPayment: InitiateTransactionState =
                     transactionViewModel.initiateTransactionState.value

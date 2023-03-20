@@ -46,8 +46,7 @@ fun USSDSelectBanksScreen(
     var showCircularProgressBar by remember { mutableStateOf(false) }
     var paymentRef by  remember { mutableStateOf("") }
     var ussdCode by  remember { mutableStateOf("") }
-    var amount : String = "20" //todo this would later be parsed from the developer
-    var defaultCurrency : String = ""
+   var defaultCurrency : String = ""
 
     // if there is an error loading the report
     if (merchantDetailsState?.hasError!!) {
@@ -77,6 +76,7 @@ fun USSDSelectBanksScreen(
                 Spacer(modifier = Modifier.height(25.dp))
 
                 defaultCurrency = merchantDetailsData.payload?.defaultCurrency?:""
+                var amount: String = merchantDetailsData.payload?.amount ?: ""
 
                 SeerbitPaymentDetailHeader(
                     charges =  merchantDetailsData.payload?.vatFee?.toDouble()?: 0.00,
@@ -110,15 +110,15 @@ fun USSDSelectBanksScreen(
                     mobileNumber = merchantDetailsData.payload?.number,
                     paymentReference = transactionViewModel.generateRandomReference(),
                     fee = merchantDetailsData.payload?.vatFee,
-                    fullName = merchantDetailsData.payload?.businessName,
+                    fullName = merchantDetailsData.payload?.userFullName,
                     channelType = "ussd",
-                    publicKey = "SBPUBK_TCDUH6MNIDLHMJXJEJLBO6ZU2RNUUPHI",
+                    publicKey =  merchantDetailsData.payload?.publicKey,
                     source = "",
                     paymentType = "USSD",
                     sourceIP = "102.88.63.64",
                     currency = merchantDetailsData.payload?.defaultCurrency,
                     productDescription = "",
-                    email = "sdk@gmail.com",
+                    email =  merchantDetailsData.payload?.emailAddress,
                     retry = false,
                     ddeviceType = "Android"
                 )

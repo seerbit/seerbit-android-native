@@ -84,12 +84,13 @@ fun USSDHomeScreen(
 
             ) {
 
+                var amount: String = merchantDetailsData.payload?.amount ?: ""
 
                 Spacer(modifier = Modifier.height(21.dp))
                 SeerbitPaymentDetailHeader(
 
                     charges = merchantDetailsData.payload?.vatFee?.toDouble() ?: 0.0,
-                    amount = "20.00",
+                    amount = amount,
                     currencyText = merchantDetailsData.payload?.defaultCurrency ?: "",
                     "",
                     merchantDetailsData.payload?.businessName ?: "",

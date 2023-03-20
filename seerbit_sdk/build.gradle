@@ -1,7 +1,6 @@
 plugins {
-    id 'com.android.library'
+    id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
-    id 'maven-publish'
 }
 
 android {
@@ -9,15 +8,20 @@ android {
     compileSdk 33
 
     defaultConfig {
+        applicationId "com.example.seerbit_sdk"
         minSdk 21
         targetSdk 33
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
+        vectorDrawables {
+            useSupportLibrary true
+        }
     }
 
     buildTypes {
         release {
+            debuggable true
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
@@ -64,18 +68,7 @@ dependencies {
     implementation "androidx.navigation:navigation-compose:2.5.3"
     implementation "com.google.accompanist:accompanist-systemuicontroller:0.27.0"
 
+    implementation project(':seerbitsdk')
+
 }
 
-afterEvaluate {
-    publishing {
-        publications {
-            release(MavenPublication) {
-                from components.release
-
-                groupId = 'com.github.seerbit-android-native'
-                artifactId = 'seerbit-android-sdk'
-                version = '1.0'
-            }
-        }
-    }
-}

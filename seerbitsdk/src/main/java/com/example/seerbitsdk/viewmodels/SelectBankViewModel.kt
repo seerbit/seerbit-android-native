@@ -1,5 +1,6 @@
 package com.example.seerbitsdk.viewmodels
 
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -28,6 +29,7 @@ class SelectBankViewModel: ViewModel() {
     private var _momoNetworkState = mutableStateOf(MomoNetworkState())
     val momoNetworkState : State<MomoNetworkState>
         get() = _momoNetworkState
+
 
 
     init {

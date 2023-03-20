@@ -61,7 +61,6 @@ fun MomoHomeScreen(
     val openDialog = remember { mutableStateOf(false) }
     var alertDialogMessage by remember { mutableStateOf("") }
     var alertDialogHeaderMessage by remember { mutableStateOf("") }
-    var amount : String = "20.00"
     var paymentRef = transactionViewModel.generateRandomReferenceTwo()
     // if there is an error loading the report
     if (merchantDetailsState?.hasError!!) {
@@ -75,7 +74,11 @@ fun MomoHomeScreen(
 
     merchantDetailsState.data?.let { merchantDetailsData ->
 
+
         Column(modifier = modifier) {
+
+            var amount: String = merchantDetailsData.payload?.amount ?: ""
+
 
 
             Column(
@@ -90,8 +93,8 @@ fun MomoHomeScreen(
                 Spacer(modifier = Modifier.height(25.dp))
 
                 SeerbitPaymentDetailHeader(
-                    charges = merchantDetailsData.payload?.vatFee?.toDouble()?:0.0,
-                    amount = "20.00",
+                    charges = merchantDetailsData.payload?.vatFee?.toDouble() ?: 0.0,
+                    amount = amount,
                     currencyText = merchantDetailsData.payload?.defaultCurrency ?: "",
                     "Choose your bank to start this payment",
                     merchantDetailsData.payload?.businessName ?: "",
@@ -109,15 +112,15 @@ fun MomoHomeScreen(
                         mobileNumber = accountNumber,
                         paymentReference = paymentRef,
                         fee = merchantDetailsData.payload?.vatFee,
-                        fullName = "amom omure",
+                        fullName = merchantDetailsData.payload?.userFullName,
                         channelType = "wallet",
-                        publicKey = "SBPUBK_WWEQK6UVR1PNZEVVUOBNIQHEIEIM1HJC",
+                        publicKey = merchantDetailsData.payload?.publicKey,
                         source = "",
                         paymentType = "MOMO",
                         sourceIP = "102.88.63.64",
                         currency = merchantDetailsData.payload?.defaultCurrency,
                         productDescription = "",
-                        email = "sdk@gmail.com",
+                        email = merchantDetailsData.payload?.emailAddress,
                         retry = false,
                         network = momoNetwork,
                         voucherCode = ""
@@ -166,10 +169,10 @@ fun MomoHomeScreen(
 
                 initiateMomoPayment.data?.let {
                     showCircularProgressBar = true
-                    val linkingReference = it.data?.payments?.linkingReference?:""
-                    if (initiateMomoPayment.data.data?.code== PENDING_CODE) {
+                    val linkingReference = it.data?.payments?.linkingReference ?: ""
+                    if (initiateMomoPayment.data.data?.code == PENDING_CODE) {
 
-                        val paymentReference = it.data?.payments?.paymentReference?:""
+                        val paymentReference = it.data?.payments?.paymentReference ?: ""
 
                         if (queryTransactionStateState.data != null) {
 
@@ -178,7 +181,7 @@ fun MomoHomeScreen(
                                     showCircularProgressBar = false
                                     openDialog.value = true
                                     alertDialogMessage =
-                                        queryTransactionStateState.data.data.payments?.reason?:""
+                                        queryTransactionStateState.data.data.payments?.reason ?: ""
                                     alertDialogHeaderMessage = "Success"
                                     transactionViewModel.resetTransactionState()
                                     return@let
@@ -190,7 +193,8 @@ fun MomoHomeScreen(
                                     showCircularProgressBar = false
                                     openDialog.value = true
                                     alertDialogMessage =
-                                        queryTransactionStateState.errorMessage?: "Something went wrong"
+                                        queryTransactionStateState.errorMessage
+                                            ?: "Something went wrong"
                                     alertDialogHeaderMessage = "Failed"
                                     transactionViewModel.resetTransactionState()
                                     return@let
@@ -200,18 +204,16 @@ fun MomoHomeScreen(
                         } else transactionViewModel.queryTransaction(paymentReference)
 
 
-
-                    } else if(initiateMomoPayment.data.data?.code== "INP") {
+                    } else if (initiateMomoPayment.data.data?.code == "INP") {
                         showCircularProgressBar = false
                         navController.navigateSingleTopNoSavedState(
                             "${Route.MOMO_OTP_SCREEN}/$linkingReference"
                         )
-                    }
-                    else {
+                    } else {
                         showCircularProgressBar = false
                         openDialog.value = true
                         alertDialogMessage =
-                            initiateMomoPayment.data.data?.message?: "Something went wrong"
+                            initiateMomoPayment.data.data?.message ?: "Something went wrong"
                         alertDialogHeaderMessage = "Failed"
                         transactionViewModel.resetTransactionState()
                         return@let
@@ -239,12 +241,11 @@ fun MomoHomeScreen(
                     onClick = {
                         if (momoNetwork.isNotEmpty() && accountNumber.isNotEmpty()) {
                             transactionViewModel.initiateTransaction(momoDTO)
-                        }
-                        else {
+                        } else {
                             showCircularProgressBar = false
                             openDialog.value = true
                             alertDialogMessage =
-                             " Invalid Details, Something went wrong"
+                                " Invalid Details, Something went wrong"
                             alertDialogHeaderMessage = "Error Occured"
                         }
 
@@ -290,8 +291,6 @@ fun MomoHomeScreen(
                         },
                     )
                 }
-
-
 
 
             }

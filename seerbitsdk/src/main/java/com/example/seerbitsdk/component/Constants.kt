@@ -15,3 +15,4 @@ const val Dummy = "-2234"
 const val SEERBIT_DEFAULT_EMAIL = "sdk@gmail.com"
 const val MOMO_SNACK_BAR_TEXT =
     "You will be prompted to enter your Mobile Money PIN to complete this payment."
+ var PUBLIC_KEY = ""
