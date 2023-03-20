@@ -89,10 +89,10 @@ fun TransferHomeScreen(
             //HANDLE INITIATE TRANSACTION RESPONSE
 
             //enter payment states
-            transferAmount = formatAmount(20.00)
+
             val defaultCurrency : String = merchantDetailsData.payload?.defaultCurrency?: ""
             var amount: String = merchantDetailsData.payload?.amount ?: ""
-
+            transferAmount = formatAmount(amount = amount.toDouble())
             Spacer(modifier = Modifier.height(21.dp))
 
             SeerbitPaymentDetailHeaderTwo(
