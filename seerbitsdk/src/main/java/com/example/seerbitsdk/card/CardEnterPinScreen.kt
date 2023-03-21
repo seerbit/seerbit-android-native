@@ -158,7 +158,7 @@ fun CardEnterPinScreen(
 
                 val cardDTO = CardDTO(
                     deviceType = "Android",
-                    country = merchantDetailsData.payload?.country?.countryCode ?: "",
+                    country = merchantDetailsData.payload.country?.countryCode ?: "",
                     amount = merchantDetailsData.payload.amount?.toDouble()?:0.0,
                     cvv = cvv,
                     redirectUrl = "http://localhost:3002/#/",
@@ -169,7 +169,7 @@ fun CardEnterPinScreen(
                     expiryMonth = cardExpiryMonth,
                     fullName = merchantDetailsData.payload.userFullName,
                     "MASTERCARD",
-                    publicKey = "SBPUBK_TCDUH6MNIDLHMJXJEJLBO6ZU2RNUUPHI",
+                    publicKey = merchantDetailsData.payload.publicKey,
                     expiryYear = cardExpiryYear,
                     source = "MODAL",
                     paymentType = "CARD",

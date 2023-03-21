@@ -2,6 +2,7 @@ package com.example.seerbitsdk.transfer
 
 import android.content.Context
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -45,7 +46,7 @@ fun TransferHomeScreen(
     merchantDetailsState: MerchantDetailsState?,
     transactionViewModel: TransactionViewModel = viewModel(),
     paymentRef: String?,
-    navController : NavHostController,
+    navController: NavHostController,
     walletName: String?,
     bankName: String?,
     accountNumber: String?
@@ -56,7 +57,7 @@ fun TransferHomeScreen(
     val openDialog = remember { mutableStateOf(false) }
     var alertDialogMessage by remember { mutableStateOf("") }
     var alertDialogHeaderMessage by remember { mutableStateOf("") }
-
+    val enableBackButton = remember { mutableStateOf(false) }
 
 
     // if there is an error loading the report
@@ -82,6 +83,9 @@ fun TransferHomeScreen(
         ) {
 
 
+            if (enableBackButton.value) {
+                BackHandler(enabled = true) {}
+            } else BackHandler(enabled = false) {}
 
             //HANDLES initiate query response
             val queryTransactionStateState: QueryTransactionState =
@@ -90,13 +94,13 @@ fun TransferHomeScreen(
 
             //enter payment states
 
-            val defaultCurrency : String = merchantDetailsData.payload?.defaultCurrency?: ""
+            val defaultCurrency: String = merchantDetailsData.payload?.defaultCurrency ?: ""
             var amount: String = merchantDetailsData.payload?.amount ?: ""
             transferAmount = formatAmount(amount = amount.toDouble())
             Spacer(modifier = Modifier.height(21.dp))
 
             SeerbitPaymentDetailHeaderTwo(
-                charges =  merchantDetailsData.payload?.vatFee?.toDouble()!!,
+                charges = merchantDetailsData.payload?.vatFee?.toDouble()!!,
                 amount = amount,
                 currencyText = defaultCurrency,
                 businessName = merchantDetailsData.payload.businessName!!,
@@ -108,7 +112,8 @@ fun TransferHomeScreen(
                 showCircularProgressBar = false
                 openDialog.value = true
                 alertDialogMessage =
-                    queryTransactionStateState.data?.data?.message ?: "Could not retrieve bank details"
+                    queryTransactionStateState.data?.data?.message
+                        ?: "Could not retrieve bank details"
                 alertDialogHeaderMessage = "Failed"
                 transactionViewModel.resetTransactionState()
 
@@ -120,16 +125,17 @@ fun TransferHomeScreen(
 
 
             if (queryTransactionStateState.data?.data != null) {
-
+                enableBackButton.value = true
                 if (queryTransactionStateState.data.data.code == PENDING_CODE) {
                     showCircularProgressBar = true
-                    transactionViewModel.queryTransaction(paymentRef?:"")
+                    transactionViewModel.queryTransaction(paymentRef ?: "")
                 }
                 if (queryTransactionStateState.data.data.code == SUCCESS) {
                     alertDialogHeaderMessage = "Successful"
                     openDialog.value = true
                     alertDialogMessage = queryTransactionStateState.data.data.payments?.reason!!
                     showCircularProgressBar = false
+                    enableBackButton.value = true
                     transactionViewModel.resetTransactionState()
                 }
 
@@ -138,6 +144,7 @@ fun TransferHomeScreen(
                     openDialog.value = true
                     alertDialogMessage = queryTransactionStateState.data.data.payments?.reason!!
                     showCircularProgressBar = false
+                    enableBackButton.value = true
                     transactionViewModel.resetTransactionState()
                 }
             }
@@ -175,9 +182,9 @@ fun TransferHomeScreen(
                 modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
             )
 
-                Row(modifier.padding(12.dp)) {
-                    AccountDetailsSurfaceView(accountNumber?:"", bankName?:"", walletName?:"")
-                }
+            Row(modifier.padding(12.dp)) {
+                AccountDetailsSurfaceView(accountNumber ?: "", bankName ?: "", walletName ?: "")
+            }
 
 
             Text(
@@ -205,7 +212,8 @@ fun TransferHomeScreen(
             AuthorizeButton(
                 buttonText = "I have completed this bank transfer",
                 onClick = {
-                        transactionViewModel.queryTransaction(paymentRef?:"")
+                    transactionViewModel.queryTransaction(paymentRef ?: "")
+                    enableBackButton.value = true
 
                 }, !showCircularProgressBar
             )
@@ -253,7 +261,6 @@ fun TransferHomeScreen(
                     },
                 )
             }
-
 
 
         }

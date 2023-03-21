@@ -48,7 +48,7 @@ fun MOMOOTPScreen(
     val openDialog = remember { mutableStateOf(false) }
     var alertDialogMessage by remember { mutableStateOf("") }
     var alertDialogHeaderMessage by remember { mutableStateOf("") }
-    var amount: String = "20.00"
+
     val keyboardController = LocalSoftwareKeyboardController.current
 
 
@@ -81,7 +81,7 @@ fun MOMOOTPScreen(
                 Spacer(modifier = Modifier.height(25.dp))
 
 
-
+                var amount: String = merchantDetailsData.payload?.amount ?: ""
                 SeerbitPaymentDetailHeaderTwo(
                     charges = merchantDetailsData.payload?.vatFee?.toDouble()!!,
                     amount = amount,
@@ -216,7 +216,7 @@ fun MOMOOTPScreen(
                     buttonText = "Authorize Payment",
                     onClick = {
                         keyboardController?.hide()
-                        if (otp.length < 6) {
+                        if (otp.isEmpty()) {
                             openDialog.value = true
                             alertDialogMessage = "Error "
                             alertDialogHeaderMessage = "Invalid OTP"
