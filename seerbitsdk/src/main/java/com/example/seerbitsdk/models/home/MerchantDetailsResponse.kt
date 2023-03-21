@@ -555,7 +555,8 @@ data class Payload(
 	var publicKey : String? = null,
 	var userPhoneNumber : String? = null,
 	var amount : String? = null,
-    var emailAddress : String? = null
+    var emailAddress : String? = null,
+	var paymentReference : String? = null
 )
 
 data class InternationalPaymentOptionCapStatus(

@@ -58,7 +58,6 @@ fun USSDHomeScreen(
     val openDialog = remember { mutableStateOf(false) }
     var alertDialogMessage by remember { mutableStateOf("") }
     var alertDialogHeaderMessage by remember { mutableStateOf("") }
-    var enableBackButton by remember { mutableStateOf(false) }
 
 
 
@@ -99,9 +98,6 @@ fun USSDHomeScreen(
                     merchantDetailsData.payload?.supportEmail ?: ""
                 )
 
-                if (enableBackButton) {
-                    BackHandler(enabled = true) {}
-                } else BackHandler(enabled = false) {}
 
                 //HANDLES initiate query response
                 val queryTransactionStateState: QueryTransactionState =
@@ -124,7 +120,6 @@ fun USSDHomeScreen(
                     when(queryTransactionStateState.data.data.code) {
                         PENDING_CODE ->
                         {
-                            enableBackButton = false
                             transactionViewModel.queryTransaction(paymentReference!!)
                         }
                         SUCCESS -> {
@@ -132,7 +127,6 @@ fun USSDHomeScreen(
                             alertDialogMessage = queryTransactionStateState.data.data.message ?: ""
                             alertDialogHeaderMessage = "Success"
                             showLoadingScreen = false
-                            enableBackButton = true
                             transactionViewModel.resetTransactionState()
                             return@let
 
@@ -142,7 +136,6 @@ fun USSDHomeScreen(
                             alertDialogMessage = queryTransactionStateState.data.data.message!!
                             alertDialogHeaderMessage = "Failed"
                             showLoadingScreen = false
-                            enableBackButton = true
                             transactionViewModel.resetTransactionState()
                             return@let
 

@@ -46,7 +46,6 @@ fun OtherPaymentScreen(
     var wallet by remember { mutableStateOf("") }
     var bankName by remember { mutableStateOf("") }
     var accountNumber by remember { mutableStateOf("") }
-    var isSuccesfulResponse by remember { mutableStateOf(false) }
     var showCircularProgressBar by rememberSaveable { mutableStateOf(false) }
 
     merchantDetailsState?.data?.let { merchantDetailsData ->
@@ -107,6 +106,7 @@ fun OtherPaymentScreen(
 
                 initiateTransferPayment.data?.let {
                     paymentRef = it.data?.payments?.paymentReference?:""
+                    transactionViewModel.setRetry(true)
                     showCircularProgressBar = false
                     wallet = it.data?.payments?.wallet!!
                         walletName = it.data.payments.walletName?:""
@@ -122,7 +122,8 @@ fun OtherPaymentScreen(
                     allButtons = addedButtons,
                     onButtonSelected = { newScreen ->
                         if(newScreen.route == Transfer.route){
-                            transactionViewModel.initiateTransaction(generateTransferDTO(merchantDetailsData))
+                            transactionViewModel.initiateTransaction(generateTransferDTO(merchantDetailsData, transactionViewModel))
+
                         }
                         else
                             navController.navigateSingleTopNoSavedState(newScreen.route)
@@ -173,7 +174,7 @@ fun OtherPaymentScreen(
     }
 }
 
-fun generateTransferDTO(merchantDetailsData: MerchantDetailsResponse) : TransferDTO {
+fun generateTransferDTO(merchantDetailsData: MerchantDetailsResponse, transactionViewModel: TransactionViewModel) : TransferDTO {
     var amount: String = merchantDetailsData.payload?.amount ?: ""
 
     return TransferDTO(
@@ -182,7 +183,7 @@ fun generateTransferDTO(merchantDetailsData: MerchantDetailsResponse) : Transfer
         amount = amount,
         productId = "",
         mobileNumber = merchantDetailsData.payload?.userPhoneNumber,
-        paymentReference = generateRandomReference(),
+        paymentReference = merchantDetailsData.payload?.paymentReference,
         fee = merchantDetailsData.payload?.vatFee,
         fullName = merchantDetailsData.payload?.userFullName,
         channelType = "Transfer",
@@ -193,7 +194,7 @@ fun generateTransferDTO(merchantDetailsData: MerchantDetailsResponse) : Transfer
         currency = merchantDetailsData.payload?.defaultCurrency,
         productDescription = "",
         email = merchantDetailsData.payload?.emailAddress,
-        retry = false,
+        retry = transactionViewModel.retry.value,
         deviceType = "Android",
         amountControl = "FIXEDAMOUNT",
         walletDaysActive = "1"

@@ -74,7 +74,7 @@ fun USSDSelectBanksScreen(
                     .weight(1f)
             ) {
                 Spacer(modifier = Modifier.height(25.dp))
-
+                var paymentReference = merchantDetailsData.payload?.paymentReference?:""
                 defaultCurrency = merchantDetailsData.payload?.defaultCurrency?:""
                 var amount: String = merchantDetailsData.payload?.amount ?: ""
 
@@ -101,6 +101,7 @@ fun USSDSelectBanksScreen(
                     bankCode = it
                 }
 
+
                 val ussdDTO = UssdDTO(
                     country = merchantDetailsData.payload?.country?.nameCode ?: "",
                     bankCode = bankCode,
@@ -108,7 +109,7 @@ fun USSDSelectBanksScreen(
                     redirectUrl = "http://localhost:3002/#/",
                     productId = "",
                     mobileNumber = merchantDetailsData.payload?.number,
-                    paymentReference = transactionViewModel.generateRandomReference(),
+                    paymentReference = paymentReference,
                     fee = merchantDetailsData.payload?.vatFee,
                     fullName = merchantDetailsData.payload?.userFullName,
                     channelType = "ussd",
@@ -119,7 +120,7 @@ fun USSDSelectBanksScreen(
                     currency = merchantDetailsData.payload?.defaultCurrency,
                     productDescription = "",
                     email =  merchantDetailsData.payload?.emailAddress,
-                    retry = false,
+                    retry = transactionViewModel.retry.value,
                     ddeviceType = "Android"
                 )
 
@@ -139,6 +140,7 @@ fun USSDSelectBanksScreen(
                 }
 
                 initiateUssdPayment.data?.let {
+                    transactionViewModel.setRetry(true)
                     paymentRef = it.data?.payments?.paymentReference ?: ""
                     ussdCode = it.data?.payments?.ussdDailCode?: ""
                     Log.d("ussdCodesss", ussdCode)

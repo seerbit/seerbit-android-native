@@ -1,5 +1,6 @@
 package com.example.seerbitsdk.viewmodels
 
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -47,20 +48,32 @@ class TransactionViewModel : ViewModel() {
     val cardBinState: State<CardBinState>
         get() = _cardBinState
 
-    private var _paymentRefState = mutableStateOf("")
-    val paymentRefState: State<String>
-        get() = _paymentRefState
+    private var _paymentRef = mutableStateOf("")
+    val paymentRef: State<String>
+        get() = _paymentRef
 
 
     private var _initiateTransactionState2 = mutableStateOf(InitiateTransactionState())
     val initiateTransactionState2: State<InitiateTransactionState>
         get() = _initiateTransactionState2
 
+    private var _retry = mutableStateOf(false)
+    val retry: State<Boolean>
+        get() = _retry
+
+
+
+    fun setRetry(setRetry: Boolean) {
+        _retry.value = setRetry
+    }
+
 
     init {
+        if(_paymentRef.value.isEmpty()){
+            _paymentRef.value = generateRandomReference()
+        }
         clearCardBinState()
         resetTransactionState()
-        _paymentRefState.value = generateRandomReference()
     }
 
     fun resetTransactionState() {
@@ -231,7 +244,6 @@ class TransactionViewModel : ViewModel() {
         }
         return "SBT-T" + UUID.randomUUID().toString().substring(0..15)
     }
-
 
 
 }

@@ -44,7 +44,6 @@ fun BankRedirectUrlScreen(
     val openDialog = remember { mutableStateOf(false) }
     var alertDialogMessage by remember { mutableStateOf("") }
     var alertDialogHeaderMessage by remember { mutableStateOf("") }
-    var paymentRef = transactionViewModel.generateRandomReference()
     var redirectUrl = ""
 
 
@@ -74,6 +73,7 @@ fun BankRedirectUrlScreen(
             ) {
                 Spacer(modifier = Modifier.height(25.dp))
                 var amount: String = merchantDetailsData.payload?.amount ?: ""
+                val paymentRef = merchantDetailsData.payload?.paymentReference ?: ""
 
 
                 SeerbitPaymentDetailHeaderTwo(
@@ -127,7 +127,7 @@ fun BankRedirectUrlScreen(
                     productDescription = "",
                     scheduleId = "",
                     accountNumber = "",
-                    retry = false
+                    retry = transactionViewModel.retry.value
                 )
 
                 Spacer(modifier = Modifier.height(10.dp))
@@ -174,7 +174,7 @@ fun BankRedirectUrlScreen(
                             it.data?.payments?.paymentReference ?: ""
                         redirectUrl = it.data?.payments?.redirectUrl ?: ""
                         redirectUrl(redirectUrl = redirectUrl)
-
+                        transactionViewModel.setRetry(true)
                         if (queryTransactionStateState.data != null) {
 
                             when (queryTransactionStateState.data.data?.code) {

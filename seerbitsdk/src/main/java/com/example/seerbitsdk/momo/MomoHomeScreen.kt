@@ -61,7 +61,6 @@ fun MomoHomeScreen(
     val openDialog = remember { mutableStateOf(false) }
     var alertDialogMessage by remember { mutableStateOf("") }
     var alertDialogHeaderMessage by remember { mutableStateOf("") }
-    var paymentRef = transactionViewModel.generateRandomReferenceTwo()
     // if there is an error loading the report
     if (merchantDetailsState?.hasError!!) {
         ErrorDialog(message = merchantDetailsState.errorMessage ?: "Something went wrong")
@@ -101,7 +100,7 @@ fun MomoHomeScreen(
                     merchantDetailsData.payload?.supportEmail ?: ""
                 )
                 Spacer(modifier = Modifier.height(10.dp))
-
+                val paymentRef = merchantDetailsData.payload?.paymentReference ?: ""
                 val momoDTO: MomoDTO =
                     MomoDTO(
                         deviceType = "Android",
@@ -121,7 +120,7 @@ fun MomoHomeScreen(
                         currency = merchantDetailsData.payload?.defaultCurrency,
                         productDescription = "",
                         email = merchantDetailsData.payload?.emailAddress,
-                        retry = false,
+                        retry = transactionViewModel.retry.value,
                         network = momoNetwork,
                         voucherCode = ""
                     )
@@ -169,6 +168,7 @@ fun MomoHomeScreen(
 
                 initiateMomoPayment.data?.let {
                     showCircularProgressBar = true
+                    transactionViewModel.setRetry(true)
                     val linkingReference = it.data?.payments?.linkingReference ?: ""
                     if (initiateMomoPayment.data.data?.code == PENDING_CODE) {
 

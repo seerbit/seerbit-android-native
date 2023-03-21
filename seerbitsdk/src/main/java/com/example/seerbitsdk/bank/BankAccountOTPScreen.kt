@@ -105,7 +105,7 @@ fun BankAccountOTPScreen(
 
                 val bankAccountOtpDtO = BankAccountOtpDto(linkingReference, otp)
 
-                //HANDLES initiate query response
+                 //HANDLES initiate query response
                 val queryTransactionStateState: QueryTransactionState =
                     transactionViewModel.queryTransactionState.value
 

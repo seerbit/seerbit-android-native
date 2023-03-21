@@ -50,14 +50,17 @@ fun formatAmount(amount: Double?): String {
     return AmountDecimalFormat.format(amount)
 }
 
-fun generateRandomReference(): String {
+
+fun generateRandomReferenceTwo(): String {
+
     val str = "ABCDEFGHIJKLMNOPQRSTNVabcdef6ghijklmnopqrstuvwxyzABCD123456789"
     var password = ""
     for (i in 1..8) {
         password += str.random()
     }
-    return "SBT-T" + UUID.randomUUID().toString()
+    return "SBT-T" + UUID.randomUUID().toString().substring(0..15)
 }
+
 
 private val AccountDecimalFormat = DecimalFormat("####")
 private val AmountDecimalFormat = DecimalFormat("#,###.##")

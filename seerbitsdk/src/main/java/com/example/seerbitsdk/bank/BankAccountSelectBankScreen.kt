@@ -91,12 +91,12 @@ fun BankAccountSelectBankScreen(
                 var amount: String = merchantDetailsData.payload?.amount ?: ""
 
                 SeerbitPaymentDetailHeader(
-                    charges = merchantDetailsData.payload?.vatFee?.toDouble()!!,
+                    charges = merchantDetailsData.payload?.vatFee?.toDouble()?:0.0,
                     amount = amount,
-                    currencyText = merchantDetailsData.payload.defaultCurrency!!,
+                    currencyText = merchantDetailsData.payload?.defaultCurrency?:"",
                     "Choose your bank to start this payment",
-                    merchantDetailsData.payload.businessName!!,
-                    merchantDetailsData.payload.supportEmail!!
+                    merchantDetailsData.payload?.businessName?:"",
+                    merchantDetailsData.payload?.supportEmail?:""
                 )
 
 

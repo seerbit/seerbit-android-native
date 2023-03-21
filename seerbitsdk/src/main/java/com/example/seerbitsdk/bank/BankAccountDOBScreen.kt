@@ -47,14 +47,13 @@ fun BankAccountDOBScreen(
     bvn: String,
     bankCode: String,
     requiredFields: RequiredFields?,
-    bankName : String?,
+    bankName: String?,
 
-) {
+    ) {
     var showCircularProgressBar by remember { mutableStateOf(false) }
     val openDialog = remember { mutableStateOf(false) }
     var alertDialogMessage by remember { mutableStateOf("") }
     var alertDialogHeaderMessage by remember { mutableStateOf("") }
-    var paymentRef = transactionViewModel.generateRandomReference()
     var dob by remember { mutableStateOf("") }
     var json by remember { mutableStateOf(Uri.encode(Gson().toJson(requiredFields))) }
     // if there is an error loading the report
@@ -82,17 +81,18 @@ fun BankAccountDOBScreen(
 
                 var amount: String = merchantDetailsData.payload?.amount ?: ""
                 SeerbitPaymentDetailHeader(
-                    charges =  merchantDetailsData.payload?.vatFee?.toDouble()?:0.0,
+                    charges = merchantDetailsData.payload?.vatFee?.toDouble() ?: 0.0,
                     amount = amount,
-                    currencyText = merchantDetailsData.payload?.defaultCurrency?:"",
+                    currencyText = merchantDetailsData.payload?.defaultCurrency ?: "",
                     "Please Enter your birthday",
-                    merchantDetailsData.payload?.businessName?:"",
-                    merchantDetailsData.payload?.supportEmail?:""
+                    merchantDetailsData.payload?.businessName ?: "",
+                    merchantDetailsData.payload?.supportEmail ?: ""
                 )
 
+                val paymentRef = merchantDetailsData.payload?.paymentReference ?: ""
                 val bankAccountDTO = BankAccountDTO(
                     deviceType = "Android",
-                    country = merchantDetailsData.payload?.country?.countryCode?: "",
+                    country = merchantDetailsData.payload?.country?.countryCode ?: "",
                     bankCode = bankCode,
                     amount = amount,
                     redirectUrl = "http://localhost:3002/#/",
@@ -100,7 +100,7 @@ fun BankAccountDOBScreen(
                     mobileNumber = merchantDetailsData.payload?.userPhoneNumber,
                     paymentReference = paymentRef,
                     fee = merchantDetailsData.payload?.vatFee,
-                    fullName =  merchantDetailsData.payload?.userFullName,
+                    fullName = merchantDetailsData.payload?.userFullName,
                     channelType = "$bankName",
                     dateOfBirth = dob,
                     publicKey = merchantDetailsData.payload?.publicKey,
@@ -114,10 +114,10 @@ fun BankAccountDOBScreen(
                     productDescription = "",
                     scheduleId = "",
                     accountNumber = bankAccountNumber,
-                    retry = false
+                    retry = transactionViewModel.retry.value
                 )
 
-                if(showCircularProgressBar){
+                if (showCircularProgressBar) {
                     showCircularProgress(showProgress = true)
                 }
 
@@ -140,14 +140,14 @@ fun BankAccountDOBScreen(
 
                 initiateBankAccountPayment.data?.let {
                     showCircularProgressBar = true
-                    if (initiateBankAccountPayment.data.data?.code== SUCCESS) {
+                    if (initiateBankAccountPayment.data.data?.code == SUCCESS) {
                         val linkingReference = it.data?.payments?.linkingReference
-
+                        transactionViewModel.setRetry(true)
                         navController.navigateSingleTopNoSavedState(
                             "${Route.BANK_ACCOUNT_OTP_SCREEN}/$bankName/$json/$bankCode/$bankAccountNumber/$bvn/$dob/$linkingReference"
                         )
 
-                    } else  {
+                    } else {
                         openDialog.value = true
                         showCircularProgressBar = false
                         alertDialogMessage =
@@ -177,11 +177,6 @@ fun BankAccountDOBScreen(
                         }
                     }, !showCircularProgressBar
                 )
-
-
-
-
-
 
 
                 //The alert dialog occurs here
@@ -320,7 +315,7 @@ fun birthdayInputFormat(text: AnnotatedString): TransformedText {
         override fun transformedToOriginal(offset: Int): Int {
             if (offset <= 1) return offset
             if (offset <= 3) return offset - 1
-            if (offset <= 7) return offset -2
+            if (offset <= 7) return offset - 2
             return 8
         }
     }

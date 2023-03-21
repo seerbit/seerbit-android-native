@@ -169,6 +169,7 @@ fun SeerBitApp(
             viewModel.merchantState.value.data?.payload?.publicKey = publicKey
             viewModel.merchantState.value.data?.payload?.amount = amount
             viewModel.merchantState.value.data?.payload?.emailAddress = emailAddress
+            viewModel.merchantState.value.data?.payload?.paymentReference = transactionViewModel.paymentRef.value
 
             viewModel.setPublicKey(publicKey)
             PUBLIC_KEY = publicKey
@@ -274,7 +275,7 @@ fun CardHomeScreen(
     var alertDialogMessage by remember { mutableStateOf("") }
     var alertDialogHeaderMessage by remember { mutableStateOf("") }
     val openDialog = remember { mutableStateOf(false) }
-    var paymentReference = transactionViewModel.generateRandomReference()
+
 
     if (merchantDetailsState.hasError) {
         ErrorDialog(message = merchantDetailsState.errorMessage ?: "Something went wrong")
@@ -302,6 +303,8 @@ fun CardHomeScreen(
 
             ) {
 
+            var paymentReference = merchantDetailsData.payload?.paymentReference?:""
+
             val cardDTO = CardDTO(
                 deviceType = "Android",
                 country = merchantDetailsData.payload?.country?.countryCode ?: "",
@@ -326,7 +329,7 @@ fun CardHomeScreen(
                 false,
                 email = merchantDetailsData.payload?.emailAddress,
                 cardNumber = cardNumber,
-                retry = false
+                retry = transactionViewModel.retry.value
             )
             Spacer(modifier = Modifier.height(25.dp))
 
@@ -430,6 +433,7 @@ fun CardHomeScreen(
                             )
                         ) {
                             onNavigateToPinScreen(cardDTO)
+
                         } else {
                             openDialog.value = true
                             alertDialogMessage = "Invalid Card Details"
@@ -506,6 +510,7 @@ fun CardHomeScreen(
 
                 if (it.data?.code == SUCCESS || it.data?.code == PENDING_CODE) {
                     showCircularProgressBar = false
+                    transactionViewModel.setRetry(true)
                     paymentRef = transactionState.data.data?.payments?.paymentReference ?: ""
                     val linkingRef = transactionState.data.data?.payments?.linkingReference ?: ""
                     val toEnterPinScreen = transactionState.data.data?.message == KINDLY_ENTER_PIN

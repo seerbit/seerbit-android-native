@@ -45,7 +45,7 @@ fun BankAccountNumberScreen(
     transactionViewModel: TransactionViewModel,
     bankCode: String?,
     requiredFields: RequiredFields?,
-    bankName : String?
+    bankName: String?
 ) {
 
 
@@ -58,7 +58,7 @@ fun BankAccountNumberScreen(
     val openDialog = remember { mutableStateOf(false) }
     var alertDialogMessage by remember { mutableStateOf("") }
     var alertDialogHeaderMessage by remember { mutableStateOf("") }
-    var paymentRef = transactionViewModel.generateRandomReference()
+
     val keyboardController = LocalSoftwareKeyboardController.current
 
     // if there is an error loading the report
@@ -86,21 +86,21 @@ fun BankAccountNumberScreen(
             ) {
                 Spacer(modifier = Modifier.height(25.dp))
 
-                var amount : String = merchantDetailsData.payload?.amount?:""
+                var amount: String = merchantDetailsData.payload?.amount ?: ""
                 SeerbitPaymentDetailHeader(
 
-                    charges =  merchantDetailsData.payload?.vatFee?.toDouble()?:0.0,
+                    charges = merchantDetailsData.payload?.vatFee?.toDouble() ?: 0.0,
                     amount = amount,
-                    currencyText = merchantDetailsData.payload?.defaultCurrency?:"",
+                    currencyText = merchantDetailsData.payload?.defaultCurrency ?: "",
                     "Please Enter your Account Number",
-                    merchantDetailsData.payload?.businessName?:"",
-                    merchantDetailsData.payload?.supportEmail?:""
+                    merchantDetailsData.payload?.businessName ?: "",
+                    merchantDetailsData.payload?.supportEmail ?: ""
                 )
-
+                val paymentRef = merchantDetailsData.payload?.paymentReference ?: ""
 
                 val bankAccountDTO = BankAccountDTO(
                     deviceType = "Android",
-                    country = merchantDetailsData.payload?.country?.countryCode?: "",
+                    country = merchantDetailsData.payload?.country?.countryCode ?: "",
                     bankCode = bankCode,
                     amount = amount,
                     redirectUrl = "http://localhost:3002/#/",
@@ -122,7 +122,7 @@ fun BankAccountNumberScreen(
                     productDescription = "",
                     scheduleId = "",
                     accountNumber = accountNumber,
-                    retry = false
+                    retry = transactionViewModel.retry.value
                 )
 
 
@@ -130,7 +130,7 @@ fun BankAccountNumberScreen(
                     transactionViewModel.initiateTransactionState.value
                 //enter payment states
 
-                if(initiateBankAccountPayment.isLoading){
+                if (initiateBankAccountPayment.isLoading) {
                     showCircularProgressBar = true
                 }
 
@@ -148,14 +148,15 @@ fun BankAccountNumberScreen(
 
                 initiateBankAccountPayment.data?.let {
 
-                    if (initiateBankAccountPayment.data.data?.code== PENDING_CODE) {
+                    if (initiateBankAccountPayment.data.data?.code == PENDING_CODE) {
                         val linkingReference = it.data?.payments?.linkingReference
                         showCircularProgressBar = false
+                        transactionViewModel.setRetry(true)
                         navController.navigateSingleTopNoSavedState(
                             "${Route.BANK_ACCOUNT_OTP_SCREEN}/$bankName/$json/$bankCode/$accountNumber/$Dummy/$Dummy/$linkingReference"
                         )
 
-                    } else  {
+                    } else {
                         openDialog.value = true
                         showCircularProgressBar = false
                         alertDialogMessage =
@@ -166,7 +167,7 @@ fun BankAccountNumberScreen(
                     }
                 }
 
-                if(showCircularProgressBar){
+                if (showCircularProgressBar) {
                     showCircularProgress(showProgress = true)
                 }
 
@@ -187,7 +188,7 @@ fun BankAccountNumberScreen(
 
                             requiredFields?.let {
 
-                                if(it.bvn == NO&&it.dateOfBirth == NO&&it.bvn == NO){
+                                if (it.bvn == NO && it.dateOfBirth == NO && it.bvn == NO) {
                                     transactionViewModel.initiateTransaction(bankAccountDTO)
                                     return@let
                                 }
@@ -195,13 +196,11 @@ fun BankAccountNumberScreen(
                                     navController.navigateSingleTopNoSavedState(
                                         "${Route.BANK_ACCOUNT_BVN_SCREEN}/$bankName/$json/$bankCode/$accountNumber"
                                     )
-                                }
-                                else if (it.dateOfBirth == YES){
+                                } else if (it.dateOfBirth == YES) {
                                     navController.navigateSingleTopNoSavedState(
                                         "${Route.BANK_ACCOUNT_DOB_SCREEN}/$bankName/$json/$bankCode/$accountNumber/$Dummy"
                                     )
-                                }
-                                else{
+                                } else {
                                     navController.navigateSingleTopNoSavedState(
                                         "${Route.BANK_ACCOUNT_OTP_SCREEN}/$bankName/$json/$bankCode/$accountNumber/$Dummy/$Dummy"
                                     )

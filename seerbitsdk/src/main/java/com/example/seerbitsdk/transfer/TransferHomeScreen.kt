@@ -57,7 +57,6 @@ fun TransferHomeScreen(
     val openDialog = remember { mutableStateOf(false) }
     var alertDialogMessage by remember { mutableStateOf("") }
     var alertDialogHeaderMessage by remember { mutableStateOf("") }
-    val enableBackButton = remember { mutableStateOf(false) }
 
 
     // if there is an error loading the report
@@ -82,10 +81,6 @@ fun TransferHomeScreen(
                 .fillMaxWidth()
         ) {
 
-
-            if (enableBackButton.value) {
-                BackHandler(enabled = true) {}
-            } else BackHandler(enabled = false) {}
 
             //HANDLES initiate query response
             val queryTransactionStateState: QueryTransactionState =
@@ -125,7 +120,6 @@ fun TransferHomeScreen(
 
 
             if (queryTransactionStateState.data?.data != null) {
-                enableBackButton.value = true
                 if (queryTransactionStateState.data.data.code == PENDING_CODE) {
                     showCircularProgressBar = true
                     transactionViewModel.queryTransaction(paymentRef ?: "")
@@ -135,7 +129,6 @@ fun TransferHomeScreen(
                     openDialog.value = true
                     alertDialogMessage = queryTransactionStateState.data.data.payments?.reason!!
                     showCircularProgressBar = false
-                    enableBackButton.value = true
                     transactionViewModel.resetTransactionState()
                 }
 
@@ -144,7 +137,6 @@ fun TransferHomeScreen(
                     openDialog.value = true
                     alertDialogMessage = queryTransactionStateState.data.data.payments?.reason!!
                     showCircularProgressBar = false
-                    enableBackButton.value = true
                     transactionViewModel.resetTransactionState()
                 }
             }
@@ -213,7 +205,6 @@ fun TransferHomeScreen(
                 buttonText = "I have completed this bank transfer",
                 onClick = {
                     transactionViewModel.queryTransaction(paymentRef ?: "")
-                    enableBackButton.value = true
 
                 }, !showCircularProgressBar
             )

@@ -111,7 +111,7 @@ fun CardEnterPinScreen(
                 var otp by remember { mutableStateOf("") }
                 var alertDialogMessage  by remember { mutableStateOf("") }
                 var alertDialogHeaderMessage  by remember { mutableStateOf("") }
-
+                val paymentRef= merchantDetailsData.payload?.paymentReference?:""
                 //HANDLE ENTER OTP STATE
                 val otpState: OTPState = cardEnterPinViewModel.otpState.value
                 //HANDLE INITIATE TRANSACTION RESPONSE
@@ -164,7 +164,7 @@ fun CardEnterPinScreen(
                     redirectUrl = "http://localhost:3002/#/",
                     productId = "",
                     mobileNumber = merchantDetailsData.payload.userPhoneNumber,
-                    paymentReference = paymentReference,
+                    paymentReference = paymentRef,
                     fee = merchantDetailsData.payload.vatFee,
                     expiryMonth = cardExpiryMonth,
                     fullName = merchantDetailsData.payload.userFullName,
@@ -180,10 +180,10 @@ fun CardEnterPinScreen(
                     false,
                     email = merchantDetailsData.payload.emailAddress,
                     cardNumber = cardNumber,
-                    retry = false
+                    retry = true
                 )
-                val cardOTPDTO = CardOTPDTO( transaction = Transaction( linkingReference, otp) )
 
+                val cardOTPDTO = CardOTPDTO( transaction = Transaction( linkingReference, otp) )
                 var otpHeaderText : String = ""
                 val alternativeOTPText : String = "Kindly enter the OTP sent to ${merchantDetailsData.payload.number?.maskedPhoneNumber()} and\n" +
                         "o***********@gmail.com or enter the OTP generates on your hardware token device"
