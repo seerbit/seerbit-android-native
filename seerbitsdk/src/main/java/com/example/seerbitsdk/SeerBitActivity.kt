@@ -444,6 +444,7 @@ fun CardHomeScreen(
                             )
                         ) {
                             onNavigateToPinScreen(cardDTO)
+                            transactionViewModel.setRetry(true)
 
                         } else {
                             openDialog.value = true

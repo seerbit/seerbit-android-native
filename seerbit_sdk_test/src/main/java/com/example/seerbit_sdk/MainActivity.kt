@@ -70,7 +70,7 @@ fun goToPaymentGateway(context: Context = LocalContext.current) {
                 "SBPUBK_0HSRUO39Y4WZABLHEFMHTTLKYYJ52MTS",
                 "Bamigbaye Bukola",
                 "bukkyize@gmail.com",
-                optionalPaymentReference = "sbt-fyieriooeuou"
+                optionalPaymentReference = "sbt-fyieriooe686uou"
             )
 
         }, modifier = Modifier.width(100.dp).align(Alignment.CenterHorizontally)) {
