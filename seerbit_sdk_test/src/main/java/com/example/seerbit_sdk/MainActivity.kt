@@ -67,9 +67,10 @@ fun goToPaymentGateway(context: Context = LocalContext.current) {
                 context,
                 "30",
                 "08035764450",
-                "SBPUBK_TCDUH6MNIDLHMJXJEJLBO6ZU2RNUUPHI",
+                "SBPUBK_0HSRUO39Y4WZABLHEFMHTTLKYYJ52MTS",
                 "Bamigbaye Bukola",
-                "bukkyize@gmail.com"
+                "bukkyize@gmail.com",
+                optionalPaymentReference = "sbt-fyieriooeuou"
             )
 
         }, modifier = Modifier.width(100.dp).align(Alignment.CenterHorizontally)) {

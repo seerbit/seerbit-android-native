@@ -86,6 +86,7 @@ class SeerBitActivity : ComponentActivity() {
             val phoneNumber = intent.extras?.getString("mobile_number")
             val fullName = intent.extras?.getString("fullName")
             val emailAddress = intent.extras?.getString("emailAddress")
+            val paymentRef = intent.extras?.getString("paymentRef")
 
             SeerBitApp(
                 merchantDetailsViewModel,
@@ -96,7 +97,8 @@ class SeerBitActivity : ComponentActivity() {
                 publicKey ?: "",
                 phoneNumber ?: "",
                 fullName ?: "",
-                emailAddress ?: ""
+                emailAddress ?: "",
+                paymentRef ?: ""
             )
         }
     }
@@ -109,7 +111,8 @@ fun startSeerBitSDK(
     phoneNumber: String,
     publicKey: String,
     fullName: String,
-    emailAddress: String
+    emailAddress: String,
+    optionalPaymentReference: String = ""
 ) {
 
     val intent = Intent(context, SeerBitActivity::class.java)
@@ -119,6 +122,7 @@ fun startSeerBitSDK(
     intent.putExtra("publicKey", publicKey)
     intent.putExtra("fullName", fullName)
     intent.putExtra("emailAddress", emailAddress)
+    intent.putExtra("paymentRef", optionalPaymentReference)
 
     context.startActivity(intent)
 
@@ -135,7 +139,8 @@ fun SeerBitApp(
     publicKey: String,
     phoneNumber: String,
     fullName: String,
-    emailAddress: String
+    emailAddress: String,
+    paymentRef: String
 ) {
     SeerBitTheme {
         // A surface container using the 'background' color from the theme
@@ -169,7 +174,13 @@ fun SeerBitApp(
             viewModel.merchantState.value.data?.payload?.publicKey = publicKey
             viewModel.merchantState.value.data?.payload?.amount = amount
             viewModel.merchantState.value.data?.payload?.emailAddress = emailAddress
-            viewModel.merchantState.value.data?.payload?.paymentReference = transactionViewModel.paymentRef.value
+
+            if (paymentRef.isEmpty()) {
+                viewModel.merchantState.value.data?.payload?.paymentReference =
+                    transactionViewModel.paymentRef.value
+            } else {
+                viewModel.merchantState.value.data?.payload?.paymentReference = paymentRef
+            }
 
             viewModel.setPublicKey(publicKey)
             PUBLIC_KEY = publicKey
@@ -303,7 +314,7 @@ fun CardHomeScreen(
 
             ) {
 
-            var paymentReference = merchantDetailsData.payload?.paymentReference?:""
+            var paymentReference = merchantDetailsData.payload?.paymentReference ?: ""
 
             val cardDTO = CardDTO(
                 deviceType = "Android",
@@ -335,12 +346,12 @@ fun CardHomeScreen(
 
             //SeerBit Header
             SeerbitPaymentDetailHeader(
-                charges = merchantDetailsData.payload?.vatFee?.toDouble()!!,
+                charges = merchantDetailsData.payload?.vatFee?.toDouble()?:0.0,
                 amount = formatAmount(cardDTO.amount),
-                currencyText = merchantDetailsData.payload.defaultCurrency!!,
+                currencyText = merchantDetailsData.payload?.defaultCurrency?:"",
                 "Debit/Credit Card Details",
-                merchantDetailsData.payload.businessName!!,
-                merchantDetailsData.payload.supportEmail!!
+                merchantDetailsData.payload?.businessName?:"",
+                merchantDetailsData.payload?.supportEmail?:""
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -637,7 +648,8 @@ fun HeaderScreenPreview() {
         phoneNumber = "",
         fullName = "",
         amount = "",
-        emailAddress = ""
+        emailAddress = "",
+        paymentRef = ""
     )
 }
 
