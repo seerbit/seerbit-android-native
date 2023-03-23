@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">seerbitsdk</string>
+    <string name="app_name">seerbitsdk_test</string>
     <string name="no_data_available">No data is available</string>
     <string name="problem_occurred">An error occured</string>
     <string name="publicKey">dk</string>

@@ -119,7 +119,7 @@ fun BankAccountNameScreenPreview() {
 @Composable
 fun BankAccountNameField(
     modifier: Modifier = Modifier, placeholder: String,
-    onEnterBVN: (String) -> Unit
+    onNameEntered: (String) -> Unit
 ) {
     Column {
 
@@ -134,7 +134,7 @@ fun BankAccountNameField(
                 value = value,
                 onValueChange = { newText ->
                         value = newText
-                    onEnterBVN(newText)
+                    onNameEntered(newText)
                 },
 
                 colors = TextFieldDefaults.textFieldColors(

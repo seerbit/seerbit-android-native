@@ -3,13 +3,7 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
 
-    <application
-        android:allowBackup="true"
-        android:icon="@drawable/seerbit_logo"
-        android:label="@string/app_name"
-        android:roundIcon="@drawable/seerbit_logo"
-        android:supportsRtl="true"
-        android:theme="@style/Theme.SeerBit">
+    <application>
         <activity
             android:name="com.example.seerbitsdk.SeerBitActivity"
             android:exported="true"
