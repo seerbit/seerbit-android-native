@@ -1,6 +1,7 @@
 package com.example.seerbitsdk.ussd
 
 import android.util.Log
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -190,7 +191,9 @@ fun UssdSelectBankButton(modifier: Modifier = Modifier, onBankCodeSelected: (Str
     var textFieldSize by remember { mutableStateOf(Size.Zero) }
 
     Column {
-        Card(modifier = modifier, elevation = 1.dp) {
+        Card(modifier = modifier, elevation = 1.dp,
+            border = BorderStroke(0.5.dp, Color.LightGray)
+        ) {
 
             Image(
                 painter = painterResource(id = R.drawable.filled_bg_white),
