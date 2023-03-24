@@ -1,5 +1,6 @@
 package com.example.seerbitsdk.bank
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -124,7 +125,9 @@ fun BankAccountNameField(
     Column {
 
 
-        Card(modifier = modifier, elevation = 4.dp) {
+        Card(modifier = modifier, elevation = 4.dp,
+            border = BorderStroke(0.5.dp, Color.LightGray)
+        ) {
             var value by remember { mutableStateOf("") }
             Image(
                 painter = painterResource(id = R.drawable.filled_bg_white),

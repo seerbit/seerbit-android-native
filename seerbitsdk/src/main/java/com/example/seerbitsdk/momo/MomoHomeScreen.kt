@@ -3,6 +3,7 @@ package com.example.seerbitsdk.momo
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -412,7 +413,9 @@ fun MomoInputAccountNumberField(
     Column {
 
 
-        Card(modifier = modifier, elevation = 1.dp) {
+        Card(modifier = modifier, elevation = 1.dp,
+            border = BorderStroke(0.5.dp, Color.LightGray)
+        ) {
             var value by remember { mutableStateOf("") }
             Image(
                 painter = painterResource(id = R.drawable.filled_bg_white),

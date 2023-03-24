@@ -346,12 +346,12 @@ fun CardHomeScreen(
 
             //SeerBit Header
             SeerbitPaymentDetailHeader(
-                charges = merchantDetailsData.payload?.vatFee?.toDouble()?:0.0,
+                charges = merchantDetailsData.payload?.vatFee?.toDouble() ?: 0.0,
                 amount = formatAmount(cardDTO.amount),
-                currencyText = merchantDetailsData.payload?.defaultCurrency?:"",
+                currencyText = merchantDetailsData.payload?.defaultCurrency ?: "",
                 "Debit/Credit Card Details",
-                merchantDetailsData.payload?.businessName?:"",
-                merchantDetailsData.payload?.supportEmail?:""
+                merchantDetailsData.payload?.businessName ?: "",
+                merchantDetailsData.payload?.supportEmail ?: ""
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -671,7 +671,7 @@ fun CardDetailsScreen(
     ) {
 
 
-        Card(modifier = modifier, elevation = 1.dp) {
+        Card(modifier = modifier, elevation = 1.dp, border = BorderStroke(0.5.dp, Color.LightGray)) {
             var value by rememberSaveable { mutableStateOf(cardNumber) }
 
             OutlinedTextField(
@@ -730,7 +730,11 @@ fun CardDetailsScreen(
         //MMM_CVVScreen(modifier = , cardDetails = )
         Row(modifier = Modifier) {
 
-            Card(modifier = modifier.weight(1f), elevation = 1.dp) {
+            Card(
+                modifier = modifier.weight(1f),
+                elevation = 1.dp,
+                border = BorderStroke(0.5.dp, Color.LightGray)
+            ) {
                 var value by rememberSaveable { mutableStateOf("") }
                 OutlinedTextField(
                     value = value,
@@ -773,7 +777,11 @@ fun CardDetailsScreen(
                 )
             }
             Spacer(modifier = Modifier.width(4.dp))
-            Card(modifier = modifier.weight(1f), elevation = 1.dp) {
+            Card(
+                modifier = modifier.weight(1f),
+                elevation = 1.dp,
+                border = BorderStroke(0.5.dp, Color.LightGray)
+            ) {
                 var value by rememberSaveable { mutableStateOf("") }
 
                 OutlinedTextField(
