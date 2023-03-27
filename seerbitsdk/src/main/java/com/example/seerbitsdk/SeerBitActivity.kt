@@ -315,11 +315,12 @@ fun CardHomeScreen(
             ) {
 
             var paymentReference = merchantDetailsData.payload?.paymentReference ?: ""
+            val amount = merchantDetailsData.payload?.amount
 
             val cardDTO = CardDTO(
                 deviceType = "Android",
                 country = merchantDetailsData.payload?.country?.countryCode ?: "",
-                amount = merchantDetailsData.payload?.amount?.toDouble(),
+                amount = amount?.toDouble(),
                 cvv = cvv,
                 redirectUrl = "http://localhost:3002/#/",
                 productId = "",
@@ -347,7 +348,7 @@ fun CardHomeScreen(
             //SeerBit Header
             SeerbitPaymentDetailHeader(
                 charges = merchantDetailsData.payload?.vatFee?.toDouble() ?: 0.0,
-                amount = formatAmount(cardDTO.amount),
+                amount = amount?:"",
                 currencyText = merchantDetailsData.payload?.defaultCurrency ?: "",
                 "Debit/Credit Card Details",
                 merchantDetailsData.payload?.businessName ?: "",
@@ -671,7 +672,11 @@ fun CardDetailsScreen(
     ) {
 
 
-        Card(modifier = modifier, elevation = 1.dp, border = BorderStroke(0.5.dp, Color.LightGray)) {
+        Card(
+            modifier = modifier,
+            elevation = 1.dp,
+            border = BorderStroke(0.5.dp, Color.LightGray)
+        ) {
             var value by rememberSaveable { mutableStateOf(cardNumber) }
 
             OutlinedTextField(

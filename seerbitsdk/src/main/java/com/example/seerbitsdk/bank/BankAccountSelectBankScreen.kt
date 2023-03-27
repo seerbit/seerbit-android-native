@@ -90,6 +90,7 @@ fun BankAccountSelectBankScreen(
                 Spacer(modifier = Modifier.height(25.dp))
 
                 var amount: String = merchantDetailsData.payload?.amount ?: ""
+                val currency = merchantDetailsData.payload?.defaultCurrency?:""
 
                 SeerbitPaymentDetailHeader(
                     charges = merchantDetailsData.payload?.vatFee?.toDouble()?:0.0,
@@ -144,7 +145,7 @@ fun BankAccountSelectBankScreen(
                 Spacer(modifier = modifier.height(40.dp))
 
                 AuthorizeButton(
-                    buttonText = "Pay NGN$amount",
+                    buttonText = "Pay $currency$amount",
                     onClick = {
                         if (bankCode.isNotEmpty()) {
 

@@ -81,6 +81,7 @@ fun BankAccountDOBScreen(
                 Spacer(modifier = Modifier.height(25.dp))
 
                 var amount: String = merchantDetailsData.payload?.amount ?: ""
+                val currency = merchantDetailsData.payload?.defaultCurrency?:""
                 SeerbitPaymentDetailHeader(
                     charges = merchantDetailsData.payload?.vatFee?.toDouble() ?: 0.0,
                     amount = amount,
@@ -170,7 +171,7 @@ fun BankAccountDOBScreen(
                 Spacer(modifier = modifier.height(30.dp))
 
                 AuthorizeButton(
-                    buttonText = "Pay NGN$amount",
+                    buttonText = "Pay $currency$amount",
                     onClick = {
 
                         if (dob.isNotEmpty()) {
