@@ -61,10 +61,18 @@ class TransactionViewModel : ViewModel() {
     val retry: State<Boolean>
         get() = _retry
 
+    private var _cardDeepLink = mutableStateOf("https://payauth-cs.seerbitapi.com/")
+    val cardDeepLink: State<String>
+        get() = _cardDeepLink
+
 
 
     fun setRetry(setRetry: Boolean) {
         _retry.value = setRetry
+    }
+
+    fun setCardDeepLink(cardDeepLink : String){
+        _cardDeepLink.value = cardDeepLink
     }
 
 

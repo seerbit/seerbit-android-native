@@ -1,5 +1,6 @@
 package com.example.seerbitsdk.transfer
 
+import android.app.Activity
 import android.content.Context
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
@@ -57,6 +58,8 @@ fun TransferHomeScreen(
     val openDialog = remember { mutableStateOf(false) }
     var alertDialogMessage by remember { mutableStateOf("") }
     var alertDialogHeaderMessage by remember { mutableStateOf("") }
+    val exitOnSuccess = remember { mutableStateOf(false) }
+    val activity = (LocalContext.current as? Activity)
 
 
     // if there is an error loading the report
@@ -120,24 +123,29 @@ fun TransferHomeScreen(
 
 
             if (queryTransactionStateState.data?.data != null) {
-                if (queryTransactionStateState.data.data.code == PENDING_CODE) {
-                    showCircularProgressBar = true
-                    transactionViewModel.queryTransaction(paymentRef ?: "")
-                }
-                if (queryTransactionStateState.data.data.code == SUCCESS) {
-                    alertDialogHeaderMessage = "Successful"
-                    openDialog.value = true
-                    alertDialogMessage = queryTransactionStateState.data.data.payments?.reason!!
-                    showCircularProgressBar = false
-                    transactionViewModel.resetTransactionState()
-                }
+                when (queryTransactionStateState.data.data.code) {
 
-                if (queryTransactionStateState.data.data.code == "SM_X23" || queryTransactionStateState.data.data.code == "S12") {
-                    alertDialogHeaderMessage = "Failed"
-                    openDialog.value = true
-                    alertDialogMessage = queryTransactionStateState.data.data.payments?.reason!!
-                    showCircularProgressBar = false
-                    transactionViewModel.resetTransactionState()
+
+                    PENDING_CODE -> {
+                        showCircularProgressBar = true
+                        transactionViewModel.queryTransaction(paymentRef ?: "")
+                    }
+                    SUCCESS -> {
+                        alertDialogHeaderMessage = "Successful"
+                        openDialog.value = true
+                        alertDialogMessage = queryTransactionStateState.data.data.payments?.reason!!
+                        showCircularProgressBar = false
+                        exitOnSuccess.value = true
+                        transactionViewModel.resetTransactionState()
+                    }
+
+                    else -> {
+                        alertDialogHeaderMessage = "Failed"
+                        openDialog.value = true
+                        alertDialogMessage = queryTransactionStateState.data.data.payments?.reason!!
+                        showCircularProgressBar = false
+                        transactionViewModel.resetTransactionState()
+                    }
                 }
             }
 
@@ -240,7 +248,10 @@ fun TransferHomeScreen(
 
                             onClick = {
                                 openDialog.value = false
-                                navController.navigateSingleTopNoSavedState(Debit_CreditCard.route)
+                                if (exitOnSuccess.value) {
+                                    activity?.finish()
+                                }
+
                             },
                             colors = ButtonDefaults.buttonColors(
                                 backgroundColor = SignalRed

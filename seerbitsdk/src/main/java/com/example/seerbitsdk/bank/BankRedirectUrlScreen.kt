@@ -1,6 +1,7 @@
 package com.example.seerbitsdk.bank
 
 
+import android.app.Activity
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
@@ -9,6 +10,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -45,6 +47,8 @@ fun BankRedirectUrlScreen(
     var alertDialogMessage by remember { mutableStateOf("") }
     var alertDialogHeaderMessage by remember { mutableStateOf("") }
     var redirectUrl = ""
+    val exitOnSuccess = remember { mutableStateOf(false) }
+    val activity = (LocalContext.current as? Activity)
 
 
     // if there is an error loading the report
@@ -181,6 +185,7 @@ fun BankRedirectUrlScreen(
                                 SUCCESS -> {
                                     showCircularProgressBar = false
                                     openDialog.value = true
+                                    exitOnSuccess.value = true
                                     alertDialogMessage =
                                         queryTransactionStateState.data.data.payments?.reason!!
                                     alertDialogHeaderMessage = "Success"
@@ -262,6 +267,9 @@ fun BankRedirectUrlScreen(
 
                                 onClick = {
                                     openDialog.value = false
+                                    if(exitOnSuccess.value){
+                                        activity?.finish()
+                                    }
                                 },
                                 colors = ButtonDefaults.buttonColors(
                                     backgroundColor = SignalRed

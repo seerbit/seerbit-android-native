@@ -36,15 +36,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavDestination
+import androidx.navigation.*
 import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import com.example.seerbitsdk.bank.*
 import com.example.seerbitsdk.card.CardEnterPinScreen
 import com.example.seerbitsdk.component.*
@@ -54,6 +51,7 @@ import com.example.seerbitsdk.models.card.CardDTO
 import com.example.seerbitsdk.component.OtherPaymentScreen
 import com.example.seerbitsdk.helper.TransactionType
 import com.example.seerbitsdk.helper.displayPaymentMethod
+import com.example.seerbitsdk.models.OnCloseSeerBitSdkListener
 import com.example.seerbitsdk.momo.MOMOOTPScreen
 import com.example.seerbitsdk.momo.MomoHomeScreen
 import com.example.seerbitsdk.screenstate.*
@@ -81,7 +79,7 @@ class SeerBitActivity : ComponentActivity() {
             val transactionViewModel: TransactionViewModel by viewModels()
             val selectBankViewModel: SelectBankViewModel by viewModels()
 
-            val amount = intent.extras!!.getString("amount")
+            val amount = intent.extras?.getString("amount")
             val publicKey = intent.extras?.getString("publicKey")
             val phoneNumber = intent.extras?.getString("mobile_number")
             val fullName = intent.extras?.getString("fullName")
@@ -112,7 +110,7 @@ fun startSeerBitSDK(
     publicKey: String,
     fullName: String,
     emailAddress: String,
-    optionalPaymentReference: String = ""
+    optionalPaymentReference: String = "",
 ) {
 
     val intent = Intent(context, SeerBitActivity::class.java)
@@ -265,7 +263,7 @@ fun CardHomeScreen(
     navController: NavHostController,
     merchantDetailsState: MerchantDetailsState,
     onOtherPaymentButtonClicked: () -> Unit,
-    transactionViewModel: TransactionViewModel
+    transactionViewModel: TransactionViewModel,
 ) {
 
     var cardDetailsData: CardDetails by remember { mutableStateOf(CardDetails("", "", "", "")) }
@@ -286,6 +284,8 @@ fun CardHomeScreen(
     var alertDialogMessage by remember { mutableStateOf("") }
     var alertDialogHeaderMessage by remember { mutableStateOf("") }
     val openDialog = remember { mutableStateOf(false) }
+    val exitOnSuccess = remember { mutableStateOf(false) }
+    val activity = (LocalContext.current as? Activity)
 
 
     if (merchantDetailsState.hasError) {
@@ -348,7 +348,7 @@ fun CardHomeScreen(
             //SeerBit Header
             SeerbitPaymentDetailHeader(
                 charges = merchantDetailsData.payload?.vatFee?.toDouble() ?: 0.0,
-                amount = amount?:"",
+                amount = amount ?: "",
                 currencyText = merchantDetailsData.payload?.defaultCurrency ?: "",
                 "Debit/Credit Card Details",
                 merchantDetailsData.payload?.businessName ?: "",
@@ -502,6 +502,7 @@ fun CardHomeScreen(
                         openDialog.value = true
                         alertDialogHeaderMessage = "Successful"
                         alertDialogMessage = it.message ?: ""
+                        exitOnSuccess.value = true
                         transactionViewModel.resetTransactionState()
                         return@let
                     }
@@ -606,6 +607,10 @@ fun CardHomeScreen(
 
                             onClick = {
                                 openDialog.value = false
+                                if (exitOnSuccess.value) {
+                                    activity?.finish()
+                                }
+
                             },
                             colors = ButtonDefaults.buttonColors(
                                 backgroundColor = SignalRed
@@ -1020,7 +1025,13 @@ fun MyAppNavHost(
             )
         }
 
-        composable(route = Debit_CreditCard.route) {
+        composable(route = Debit_CreditCard.route,
+            deepLinks = listOf(navDeepLink {
+                this.uriPattern = "http://localhost:3002/#/"
+                this.action = Intent.ACTION_VIEW
+            })
+
+        ) {
             transactionViewModel.resetTransactionState()
             CardHomeScreen(
                 onNavigateToPinScreen = { cardDTO ->

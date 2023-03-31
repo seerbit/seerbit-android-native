@@ -1,5 +1,6 @@
 package com.example.seerbitsdk.ussd
 
+import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -58,6 +59,8 @@ fun USSDHomeScreen(
     val openDialog = remember { mutableStateOf(false) }
     var alertDialogMessage by remember { mutableStateOf("") }
     var alertDialogHeaderMessage by remember { mutableStateOf("") }
+    val exitOnSuccess = remember { mutableStateOf(false) }
+    val activity = (LocalContext.current as? Activity)
 
 
 
@@ -127,6 +130,7 @@ fun USSDHomeScreen(
                             alertDialogMessage = queryTransactionStateState.data.data.message ?: ""
                             alertDialogHeaderMessage = "Success"
                             showLoadingScreen = false
+                            exitOnSuccess.value = true
                             transactionViewModel.resetTransactionState()
                             return@let
 
@@ -226,8 +230,11 @@ fun USSDHomeScreen(
                         confirmButton = {
                             Button(
                                 onClick = {
-                                    navController.navigateSingleTopNoSavedState(Debit_CreditCard.route)
                                     openDialog.value = false
+                                    if(exitOnSuccess.value){
+                                        activity?.finish()
+                                    }
+
 
                                 },
                                 colors = ButtonDefaults.buttonColors(

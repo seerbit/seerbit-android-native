@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -24,9 +25,11 @@ import androidx.compose.ui.unit.sp
 import com.example.seerbit_sdk.ui.theme.SeerBitTheme
 import com.example.seerbitsdk.R
 import com.example.seerbitsdk.bank.BankAccountNumberField
+import com.example.seerbitsdk.models.OnCloseSeerBitSdkListener
 import com.example.seerbitsdk.startSeerBitSDK
 
-class MainActivity : ComponentActivity() {
+class MainActivity : ComponentActivity(), OnCloseSeerBitSdkListener {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -40,6 +43,10 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onCloseSeerBitSDK() {
+        super.onCloseSeerBitSDK()
     }
 }
 
@@ -90,7 +97,7 @@ fun goToPaymentGateway(context: Context = LocalContext.current) {
         Spacer(modifier = Modifier.height(10.dp))
 
 
-        BankAccountNumberField(placeholder = "Enter Phone Number") {
+        PhoneNumberField(placeholder = "Enter Phone Number") {
             phoneNumber = it
         }
         Spacer(modifier = Modifier.height(40.dp))
@@ -115,6 +122,9 @@ fun goToPaymentGateway(context: Context = LocalContext.current) {
     }
 
 }
+
+
+
 
 
 @Composable
@@ -167,5 +177,61 @@ fun MyTextField(
         }
     }
 }
+
+
+
+@Composable
+fun PhoneNumberField(
+    modifier: Modifier = Modifier, placeholder: String,
+    onEnterPhoneNumber: (String) -> Unit
+) {
+    Column {
+
+
+        Card(modifier = modifier, elevation = 1.dp,
+            border = BorderStroke(0.5.dp, Color.LightGray)
+        ) {
+            var value by remember { mutableStateOf("") }
+            Image(
+                painter = painterResource(id = R.drawable.filled_bg_white),
+                contentDescription = null
+            )
+            OutlinedTextField(
+                value = value,
+                onValueChange = { newText ->
+                    if (newText.length <= 11)
+                        value = newText
+                    onEnterPhoneNumber(newText)
+                },
+
+                colors = TextFieldDefaults.textFieldColors(
+                    backgroundColor = MaterialTheme.colors.surface,
+                    disabledIndicatorColor = Color.Transparent,
+                    disabledLabelColor = Color.Transparent,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    cursorColor = Color.Gray
+
+                ),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Phone,
+                    imeAction = ImeAction.Send
+                ),
+                shape = RoundedCornerShape(8.dp),
+                placeholder = {
+                    Text(
+                        text = placeholder,
+                        style = TextStyle(fontSize = 14.sp),
+                        color = Color.LightGray
+                    )
+                },
+                modifier = modifier
+                    .fillMaxWidth()
+                    .height(50.dp)
+            )
+        }
+    }
+}
+
 
 

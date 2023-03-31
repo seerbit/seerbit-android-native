@@ -1,6 +1,7 @@
 package com.example.seerbitsdk.card
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -13,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -122,6 +124,8 @@ fun CardEnterPinScreen(
                     cardEnterPinViewModel.queryTransactionState.value
                 val openDialog = remember { mutableStateOf(false) }
                 var amount: String =  merchantDetailsData.payload?.amount?:""
+                val exitOnSuccess = remember { mutableStateOf(false) }
+                val activity = (LocalContext.current as? Activity)
 
 
                 if(useOtp){
@@ -274,6 +278,7 @@ fun CardEnterPinScreen(
                                     openDialog.value = true
                                     alertDialogMessage = queryTransactionStateState.data.data.payments?.reason!!
                                     alertDialogHeaderMessage = "Success"
+                                    exitOnSuccess.value = true
                                     cardEnterPinViewModel.resetTransactionState()
                                     return@let
                                 }
@@ -396,6 +401,9 @@ fun CardEnterPinScreen(
 
                                 onClick = {
                                     openDialog.value = false
+                                    if(exitOnSuccess.value){
+                                        activity?.finish()
+                                    }
                                 },
                                 colors = ButtonDefaults.buttonColors(
                                     backgroundColor = SignalRed

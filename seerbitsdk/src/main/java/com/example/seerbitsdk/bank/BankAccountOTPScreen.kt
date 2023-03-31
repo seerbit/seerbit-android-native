@@ -1,11 +1,13 @@
 package com.example.seerbitsdk.bank
 
+import android.app.Activity
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -59,6 +61,8 @@ fun BankAccountOTPScreen(
     myBVN = if (bvn == Dummy) "" else bvn
     dateOfBirth = if (dob == Dummy) "" else dob
     val keyboardController = LocalSoftwareKeyboardController.current
+    val exitOnSuccess = remember { mutableStateOf(false) }
+    val activity = (LocalContext.current as? Activity)
 
 
 // if there is an error loading the report
@@ -149,6 +153,7 @@ fun BankAccountOTPScreen(
                                 SUCCESS -> {
                                     showCircularProgressBar = false
                                     openDialog.value = true
+                                    exitOnSuccess.value = true
                                     alertDialogMessage =
                                         queryTransactionStateState.data.data.payments?.reason!!
                                     alertDialogHeaderMessage = "Success"
@@ -267,6 +272,9 @@ fun BankAccountOTPScreen(
 
                                 onClick = {
                                     openDialog.value = false
+                                    if(exitOnSuccess.value){
+                                        activity?.finish()
+                                    }
                                 },
                                 colors = ButtonDefaults.buttonColors(
                                     backgroundColor = SignalRed
