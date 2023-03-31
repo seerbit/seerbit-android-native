@@ -120,7 +120,7 @@ fun USSDHomeScreen(
                     when(queryTransactionStateState.data.data.code) {
                         PENDING_CODE ->
                         {
-                            transactionViewModel.queryTransaction(paymentReference!!)
+                            transactionViewModel.queryTransaction(paymentReference?:"")
                         }
                         SUCCESS -> {
                             openDialog.value = true
@@ -133,7 +133,7 @@ fun USSDHomeScreen(
                         }
                         else -> {
                             openDialog.value = true
-                            alertDialogMessage = queryTransactionStateState.data.data.message!!
+                            alertDialogMessage = queryTransactionStateState.data.data.message?:""
                             alertDialogHeaderMessage = "Failed"
                             showLoadingScreen = false
                             transactionViewModel.resetTransactionState()
