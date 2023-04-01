@@ -86,18 +86,39 @@ class SeerBitActivity : ComponentActivity() {
             val emailAddress = intent.extras?.getString("emailAddress")
             val paymentRef = intent.extras?.getString("paymentRef")
 
-            SeerBitApp(
-                merchantDetailsViewModel,
-                transactionViewModel,
-                cardEnterPinViewModel,
-                selectBankViewModel,
-                amount ?: "",
-                publicKey ?: "",
-                phoneNumber ?: "",
-                fullName ?: "",
-                emailAddress ?: "",
-                paymentRef ?: ""
-            )
+
+            val merchantDetailsState = merchantDetailsViewModel.merchantState.value
+
+            if (merchantDetailsState.hasError) {
+                ErrorExitDialog(message = merchantDetailsState.errorMessage ?: "Something went wrong")
+            }
+
+            if (merchantDetailsState.isLoading) {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    CircularProgressIndicator(color = Color.Black)
+                }
+
+            }
+
+            merchantDetailsState.data?.let { merchantDetailsData ->
+
+                SeerBitApp(
+                    merchantDetailsViewModel,
+                    transactionViewModel,
+                    cardEnterPinViewModel,
+                    selectBankViewModel,
+                    amount ?: "",
+                    publicKey ?: "",
+                    phoneNumber ?: "",
+                    fullName ?: "",
+                    emailAddress ?: "",
+                    paymentRef ?: ""
+                )
+            }
         }
     }
 }
@@ -1025,7 +1046,8 @@ fun MyAppNavHost(
             )
         }
 
-        composable(route = Debit_CreditCard.route,
+        composable(
+            route = Debit_CreditCard.route,
             deepLinks = listOf(navDeepLink {
                 this.uriPattern = "http://localhost:3002/#/"
                 this.action = Intent.ACTION_VIEW
@@ -1412,7 +1434,8 @@ fun ErrorDialog(message: String) {
 }
 
 @Composable
-fun SuccessDialog(message: String, navigateToHome: () -> Unit) {
+fun ErrorExitDialog(context:Context = LocalContext.current, message: String) {
+    val activity = context as? Activity
     val openDialog = remember { mutableStateOf(true) }
     if (openDialog.value) {
         AlertDialog(
@@ -1424,7 +1447,7 @@ fun SuccessDialog(message: String, navigateToHome: () -> Unit) {
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    Text(text = "Success")
+                    Text(text = "Error")
                 }
 
             },
@@ -1440,8 +1463,10 @@ fun SuccessDialog(message: String, navigateToHome: () -> Unit) {
                 Button(
 
                     onClick = {
-                        navigateToHome()
+
                         openDialog.value = false
+                        activity?.finish()
+
                     },
                     colors = ButtonDefaults.buttonColors(
                         backgroundColor = SignalRed
