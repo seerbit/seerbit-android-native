@@ -59,10 +59,7 @@ import com.example.seerbitsdk.transfer.TransferHomeScreen
 import com.example.seerbitsdk.ui.theme.*
 import com.example.seerbitsdk.ussd.USSDHomeScreen
 import com.example.seerbitsdk.ussd.USSDSelectBanksScreen
-import com.example.seerbitsdk.viewmodels.CardEnterPinViewModel
-import com.example.seerbitsdk.viewmodels.MerchantDetailsViewModel
-import com.example.seerbitsdk.viewmodels.SelectBankViewModel
-import com.example.seerbitsdk.viewmodels.TransactionViewModel
+import com.example.seerbitsdk.viewmodels.*
 import com.google.gson.Gson
 
 class SeerBitActivity : ComponentActivity() {
@@ -74,7 +71,7 @@ class SeerBitActivity : ComponentActivity() {
 
 
         setContent {
-            val merchantDetailsViewModel: MerchantDetailsViewModel by viewModels()
+
             val cardEnterPinViewModel: CardEnterPinViewModel by viewModels()
             val transactionViewModel: TransactionViewModel by viewModels()
             val selectBankViewModel: SelectBankViewModel by viewModels()
@@ -86,6 +83,9 @@ class SeerBitActivity : ComponentActivity() {
             val emailAddress = intent.extras?.getString("emailAddress")
             val paymentRef = intent.extras?.getString("paymentRef")
 
+            val merchantDetailsViewModel by viewModels<MerchantDetailsViewModel>{
+                MerchatDetailVmFactory(publicKey?:"0.0")
+            }
 
             val merchantDetailsState = merchantDetailsViewModel.merchantState.value
 
@@ -119,6 +119,7 @@ class SeerBitActivity : ComponentActivity() {
                     paymentRef ?: ""
                 )
             }
+
         }
     }
 }
@@ -200,9 +201,6 @@ fun SeerBitApp(
             } else {
                 viewModel.merchantState.value.data?.payload?.paymentReference = paymentRef
             }
-
-            viewModel.setPublicKey(publicKey)
-            PUBLIC_KEY = publicKey
 
             MyAppNavHost(
                 navController = navController,
@@ -341,7 +339,7 @@ fun CardHomeScreen(
             val cardDTO = CardDTO(
                 deviceType = "Android",
                 country = merchantDetailsData.payload?.country?.countryCode ?: "",
-                amount = amount?.toDouble(),
+                amount = amount?.toDouble()?: 0.0,
                 cvv = cvv,
                 redirectUrl = "http://localhost:3002/#/",
                 productId = "",

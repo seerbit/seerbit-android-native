@@ -31,7 +31,7 @@ import javax.inject.Singleton
 interface MerchantDetailsService {
 
     @GET("merchant/verify/")
-    suspend fun merchantDetails(@Query("key") key : String = PUBLIC_KEY,
+    suspend fun merchantDetails(@Query("key") key : String,
                                 @Query("sbcp") sbcp : String = "uFWgBWF8OB56oCSJudCxKYqNm8Cttss4",
                                 @Query("partner-id") partner_id : String = "1"
     ): Response<MerchantDetailsResponse>

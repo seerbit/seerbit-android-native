@@ -17,10 +17,10 @@ class GetMerchantDetailUseCase {
     private var seerMerchantDetailsRepository: SeerMerchantDetailsRepository =
         SeerMerchantDetailsRepository()
 
-    operator fun invoke() = flow {
+    operator fun invoke(pulicKey:String) = flow {
         try {
             emit(Resource.Loading())
-            val apiResponse = seerMerchantDetailsRepository.getMerchantDetails()
+            val apiResponse = seerMerchantDetailsRepository.getMerchantDetails(pulicKey)
 
             if (apiResponse.isSuccessful) {
                 val result = apiResponse.body()

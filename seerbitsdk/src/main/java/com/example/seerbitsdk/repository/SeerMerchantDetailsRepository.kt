@@ -12,8 +12,8 @@ import javax.inject.Singleton
 class SeerMerchantDetailsRepository {
 
 
-    suspend fun getMerchantDetails(): Response<MerchantDetailsResponse> {
-        return MerchantServiceApi.retrofitService.merchantDetails()
+    suspend fun getMerchantDetails(pulicKey: String): Response<MerchantDetailsResponse> {
+        return MerchantServiceApi.retrofitService.merchantDetails(pulicKey)
     }
 
 }

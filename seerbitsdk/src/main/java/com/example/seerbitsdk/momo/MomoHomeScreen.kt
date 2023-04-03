@@ -318,7 +318,8 @@ fun SelectProviderButton(
 
 
     Column {
-        Card(modifier = modifier, elevation = 1.dp) {
+        Card(modifier = modifier, elevation = 1.dp,
+            border = BorderStroke(0.5.dp, Color.LightGray)) {
 
             Image(
                 painter = painterResource(id = R.drawable.filled_bg_white),

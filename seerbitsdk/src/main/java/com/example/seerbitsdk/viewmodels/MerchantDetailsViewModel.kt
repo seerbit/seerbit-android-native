@@ -16,7 +16,7 @@ import com.example.seerbitsdk.use_cases.GetMerchantDetailUseCase
 import com.example.seerbitsdk.use_cases.CardBinUseCase
 import com.example.seerbitsdk.use_cases.FeeUseCase
 
-class MerchantDetailsViewModel : ViewModel() {
+class MerchantDetailsViewModel(publicKey: String) : ViewModel() {
 
 
     private var _merchantState = mutableStateOf(MerchantDetailsState())
@@ -28,13 +28,18 @@ class MerchantDetailsViewModel : ViewModel() {
     val cardBinState: State<CardBinState>
         get() = _cardBinState
 
+    private var _puKey = mutableStateOf("")
+    val puKey: State<String>
+        get() = _puKey
+
 
     private val merchantDetailsUseCase: GetMerchantDetailUseCase = GetMerchantDetailUseCase()
 
     private val cardBinUseCase: CardBinUseCase = CardBinUseCase()
 
     init {
-        fetchMerchantDetails()
+        PUBLIC_KEY=publicKey
+        fetchMerchantDetails(publicKey)
     }
 
     fun clearCardBinState() {
@@ -46,11 +51,11 @@ class MerchantDetailsViewModel : ViewModel() {
     }
 
 
-    private fun fetchMerchantDetails() {
+    private fun fetchMerchantDetails(publicKey: String) {
         _merchantState.value = MerchantDetailsState(isLoading = true)
         viewModelScope.launch(Dispatchers.Main) {
 
-            merchantDetailsUseCase().collect { resource ->
+            merchantDetailsUseCase(publicKey).collect { resource ->
                 when (resource) {
                     is Resource.Success -> {
                         _merchantState.value = MerchantDetailsState(data = resource.data)
@@ -134,9 +139,6 @@ class MerchantDetailsViewModel : ViewModel() {
 
     }
 
-    fun setPublicKey(publicKey : String){
-        PUBLIC_KEY = publicKey
-    }
 
 }
 
