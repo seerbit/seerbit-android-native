@@ -233,25 +233,16 @@ class TransactionViewModel : ViewModel() {
     }
 
 
-    fun generateRandomReference(): String {
+    private fun generateRandomReference(): String {
 
         val str = "ABCDEFGHIJKLMNOPQRSTNVabcdef6ghijklmnopqrstuvwxyzABCD123456789"
         var password = ""
         for (i in 1..8) {
             password += str.random()
         }
-        return "SBT-T" + UUID.randomUUID().toString()
+        return "SBT-T" + UUID.randomUUID().toString().substring(0,15)
     }
 
-    fun generateRandomReferenceTwo(): String {
-
-        val str = "ABCDEFGHIJKLMNOPQRSTNVabcdef6ghijklmnopqrstuvwxyzABCD123456789"
-        var password = ""
-        for (i in 1..8) {
-            password += str.random()
-        }
-        return "SBT-T" + UUID.randomUUID().toString().substring(0..15)
-    }
 
 
 }

@@ -57,7 +57,6 @@ fun BankAccountOTPScreen(
     val openDialog = remember { mutableStateOf(false) }
     var alertDialogMessage by remember { mutableStateOf("") }
     var alertDialogHeaderMessage by remember { mutableStateOf("") }
-    var paymentRef = transactionViewModel.generateRandomReference()
     myBVN = if (bvn == Dummy) "" else bvn
     dateOfBirth = if (dob == Dummy) "" else dob
     val keyboardController = LocalSoftwareKeyboardController.current

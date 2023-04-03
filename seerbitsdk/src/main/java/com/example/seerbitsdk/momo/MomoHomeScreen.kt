@@ -117,7 +117,7 @@ fun MomoHomeScreen(
                         publicKey = merchantDetailsData.payload?.publicKey,
                         source = "",
                         paymentType = "MOMO",
-                        sourceIP = "102.88.63.64",
+                        sourceIP = "",
                         currency = merchantDetailsData.payload?.defaultCurrency,
                         productDescription = "",
                         email = merchantDetailsData.payload?.emailAddress,
