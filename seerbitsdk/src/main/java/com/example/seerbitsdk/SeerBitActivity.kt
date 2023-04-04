@@ -50,10 +50,7 @@ import com.example.seerbitsdk.models.CardDetails
 import com.example.seerbitsdk.models.RequiredFields
 import com.example.seerbitsdk.models.card.CardDTO
 import com.example.seerbitsdk.component.OtherPaymentScreen
-import com.example.seerbitsdk.helper.TransactionType
-import com.example.seerbitsdk.helper.calculateTransactionFee
-import com.example.seerbitsdk.helper.displayPaymentMethod
-import com.example.seerbitsdk.helper.generateSourceIp
+import com.example.seerbitsdk.helper.*
 import com.example.seerbitsdk.models.OnCloseSeerBitSdkListener
 import com.example.seerbitsdk.momo.MOMOOTPScreen
 import com.example.seerbitsdk.momo.MomoHomeScreen
@@ -339,8 +336,12 @@ fun CardHomeScreen(
             var paymentReference = merchantDetailsData.payload?.paymentReference ?: ""
             val amount = merchantDetailsData.payload?.amount
             val fee =   calculateTransactionFee(merchantDetailsData, TransactionType.CARD.type, amount = amount?.toDouble()?: 0.0)
-            val totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
+            var totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
             val defaultCurrency =   merchantDetailsData.payload?.defaultCurrency?:""
+
+            if(isMerchantFeeBearer(merchantDetailsData)){
+                totalAmount =amount?.toDouble()
+            }
 
             val cardDTO = CardDTO(
                 deviceType = "Android",
@@ -987,7 +988,7 @@ fun PayButton(
 ) {
     Button(
         onClick = onClick,
-        colors = ButtonDefaults.buttonColors(backgroundColor = Color.Gray),
+        colors = ButtonDefaults.buttonColors(backgroundColor = Color.Black),
         shape = RoundedCornerShape(8.dp),
         enabled = enabled,
         modifier = Modifier
@@ -998,10 +999,11 @@ fun PayButton(
         Text(
             text = "Pay $amount",
             style = TextStyle(
-                fontSize = 12.sp,
+                fontSize = 14.sp,
                 fontFamily = Faktpro,
                 fontWeight = FontWeight.Normal,
-                lineHeight = 10.sp
+                lineHeight = 10.sp,
+                color = Color.White
             )
         )
     }
@@ -1289,7 +1291,7 @@ fun MyAppNavHost(
         ) { navBackStackEntry ->
             val bankCode = navBackStackEntry.arguments?.getString("bankCode")
             val bankName = navBackStackEntry.arguments?.getString("bankName")
-
+            transactionViewModel.resetTransactionState()
             BankRedirectUrlScreen(
                 merchantDetailsState = merchantDetailsState,
                 transactionViewModel = transactionViewModel,

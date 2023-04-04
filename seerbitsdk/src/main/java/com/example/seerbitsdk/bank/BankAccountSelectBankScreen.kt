@@ -33,6 +33,8 @@ import com.example.seerbitsdk.component.Route
 import com.example.seerbitsdk.component.SeerbitPaymentDetailHeader
 import com.example.seerbitsdk.helper.TransactionType
 import com.example.seerbitsdk.helper.calculateTransactionFee
+import com.example.seerbitsdk.helper.formatInputDouble
+import com.example.seerbitsdk.helper.isMerchantFeeBearer
 import com.example.seerbitsdk.models.MerchantBanksItem
 import com.example.seerbitsdk.models.RequiredFields
 import com.example.seerbitsdk.navigateSingleTopNoSavedState
@@ -64,7 +66,7 @@ fun BankAccountSelectBankScreen(
     var alertDialogMessage by remember { mutableStateOf("") }
     var alertDialogHeaderMessage by remember { mutableStateOf("") }
 
-
+    transactionViewModel.resetTransactionState()
     // if there is an error loading the report
     if (merchantDetailsState?.hasError!!) {
         ErrorDialog(message = merchantDetailsState.errorMessage ?: "Something went wrong")
@@ -94,8 +96,12 @@ fun BankAccountSelectBankScreen(
                 var amount = merchantDetailsData.payload?.amount
                 val currency = merchantDetailsData.payload?.defaultCurrency?:""
                 val fee =  calculateTransactionFee(merchantDetailsData, TransactionType.ACCOUNT.type, amount = amount?.toDouble()?:0.0)
-                val totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
+                var totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
                 val defaultCurrency =   merchantDetailsData.payload?.defaultCurrency?:""
+
+                if(isMerchantFeeBearer(merchantDetailsData)){
+                    totalAmount =amount?.toDouble()
+                }
 
                 SeerbitPaymentDetailHeader(
                     charges = fee?.toDouble()?:0.0,
@@ -150,7 +156,7 @@ fun BankAccountSelectBankScreen(
                 Spacer(modifier = modifier.height(40.dp))
 
                 AuthorizeButton(
-                    buttonText = "Pay $currency$totalAmount",
+                    buttonText = "Pay $currency${formatInputDouble(totalAmount.toString())}",
                     onClick = {
                         if (bankCode.isNotEmpty()) {
 

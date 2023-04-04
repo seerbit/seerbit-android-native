@@ -24,6 +24,7 @@ import com.example.seerbitsdk.component.*
 import com.example.seerbitsdk.helper.TransactionType
 import com.example.seerbitsdk.helper.calculateTransactionFee
 import com.example.seerbitsdk.helper.generateSourceIp
+import com.example.seerbitsdk.helper.isMerchantFeeBearer
 import com.example.seerbitsdk.models.bankaccount.BankAccountDTO
 import com.example.seerbitsdk.redirectUrl
 import com.example.seerbitsdk.screenstate.InitiateTransactionState
@@ -52,6 +53,7 @@ fun BankRedirectUrlScreen(
     var redirectUrl = ""
     val exitOnSuccess = remember { mutableStateOf(false) }
     val activity = (LocalContext.current as? Activity)
+    val query = remember { mutableStateOf(true) }
 
 
     // if there is an error loading the report
@@ -81,15 +83,22 @@ fun BankRedirectUrlScreen(
                 Spacer(modifier = Modifier.height(25.dp))
                 val paymentRef = merchantDetailsData.payload?.paymentReference ?: ""
                 var amount = merchantDetailsData.payload?.amount
-                val currency = merchantDetailsData.payload?.defaultCurrency?:""
-                val fee =  calculateTransactionFee(merchantDetailsData, TransactionType.ACCOUNT.type, amount = amount?.toDouble()?:0.0)
-                val totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
+                val currency = merchantDetailsData.payload?.defaultCurrency ?: ""
+                val fee = calculateTransactionFee(
+                    merchantDetailsData,
+                    TransactionType.ACCOUNT.type,
+                    amount = amount?.toDouble() ?: 0.0
+                )
+                var totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
 
 
+                if(isMerchantFeeBearer(merchantDetailsData)){
+                    totalAmount =amount?.toDouble()
+                }
 
                 SeerbitPaymentDetailHeaderTwo(
                     charges = fee?.toDouble() ?: 0.0,
-                    amount =amount?:"",
+                    amount = amount ?: "",
                     currencyText = merchantDetailsData.payload?.defaultCurrency ?: "",
                     merchantDetailsData.payload?.businessName ?: "",
                     merchantDetailsData.payload?.supportEmail ?: ""
@@ -113,7 +122,6 @@ fun BankRedirectUrlScreen(
                 )
 
 
-
                 val bankAccountDTO = BankAccountDTO(
                     deviceType = "Android",
                     country = merchantDetailsData.payload?.country?.countryCode ?: "",
@@ -124,17 +132,17 @@ fun BankRedirectUrlScreen(
                     mobileNumber = merchantDetailsData.payload?.userPhoneNumber,
                     paymentReference = paymentRef,
                     fee = fee,
-                    fullName =  merchantDetailsData.payload?.userFullName,
+                    fullName = merchantDetailsData.payload?.userFullName,
                     channelType = bankName,
                     dateOfBirth = "",
-                    publicKey =  merchantDetailsData.payload?.publicKey,
+                    publicKey = merchantDetailsData.payload?.publicKey,
                     source = "",
-                    accountName =  merchantDetailsData.payload?.userFullName,
+                    accountName = merchantDetailsData.payload?.userFullName,
                     paymentType = "ACCOUNT",
                     sourceIP = generateSourceIp(true),
                     currency = merchantDetailsData.payload?.defaultCurrency,
                     bvn = "",
-                    email =  merchantDetailsData.payload?.emailAddress,
+                    email = merchantDetailsData.payload?.emailAddress,
                     productDescription = "",
                     scheduleId = "",
                     accountNumber = "",
@@ -178,6 +186,38 @@ fun BankRedirectUrlScreen(
                     transactionViewModel.resetTransactionState()
                 }
 
+                queryTransactionStateState.data?.let {
+
+                    when (queryTransactionStateState.data.data?.code) {
+                        SUCCESS -> {
+                            showCircularProgressBar = false
+                            openDialog.value = true
+                            exitOnSuccess.value = true
+                            alertDialogMessage =
+                                queryTransactionStateState.data.data.payments?.reason!!
+                            alertDialogHeaderMessage = "Success"
+                            transactionViewModel.resetTransactionState()
+                            return@let
+                        }
+                        PENDING_CODE -> {
+                            transactionViewModel.queryTransaction(
+                                merchantDetailsData.payload?.paymentReference ?: ""
+                            )
+                        }
+                        else -> {
+                            showCircularProgressBar = false
+                            openDialog.value = true
+                            alertDialogMessage =
+                                queryTransactionStateState.errorMessage
+                                    ?: "Something went wrong"
+                            alertDialogHeaderMessage = "Failed"
+                            transactionViewModel.resetTransactionState()
+                            return@let
+                        }
+                    }
+
+                }
+
                 initiateBankAccountPayment.data?.let {
                     showCircularProgressBar = true
                     if (initiateBankAccountPayment.data.data?.code == PENDING_CODE) {
@@ -186,37 +226,14 @@ fun BankRedirectUrlScreen(
                         redirectUrl = it.data?.payments?.redirectUrl ?: ""
                         redirectUrl(redirectUrl = redirectUrl)
                         transactionViewModel.setRetry(true)
-                        if (queryTransactionStateState.data != null) {
 
-                            when (queryTransactionStateState.data.data?.code) {
-                                SUCCESS -> {
-                                    showCircularProgressBar = false
-                                    openDialog.value = true
-                                    exitOnSuccess.value = true
-                                    alertDialogMessage =
-                                        queryTransactionStateState.data.data.payments?.reason!!
-                                    alertDialogHeaderMessage = "Success"
-                                    transactionViewModel.resetTransactionState()
-                                    return@let
-                                }
-                                PENDING_CODE -> {
-                                    transactionViewModel.queryTransaction(
-                                        paymentReferenceAfterInitiate
-                                    )
-                                }
-                                else -> {
-                                    showCircularProgressBar = false
-                                    openDialog.value = true
-                                    alertDialogMessage =
-                                        queryTransactionStateState.errorMessage
-                                            ?: "Something went wrong"
-                                    alertDialogHeaderMessage = "Failed"
-                                    transactionViewModel.resetTransactionState()
-                                    return@let
-                                }
-                            }
+                        if (query.value) {
+                            transactionViewModel.queryTransaction(
+                                paymentReferenceAfterInitiate
+                            )
+                            query.value=false
+                        }
 
-                        } else transactionViewModel.queryTransaction(paymentReferenceAfterInitiate)
                     } else {
                         openDialog.value = true
                         showCircularProgressBar = false
@@ -274,7 +291,7 @@ fun BankRedirectUrlScreen(
 
                                 onClick = {
                                     openDialog.value = false
-                                    if(exitOnSuccess.value){
+                                    if (exitOnSuccess.value) {
                                         activity?.finish()
                                     }
                                 },
@@ -294,3 +311,4 @@ fun BankRedirectUrlScreen(
         }
     }
 }
+

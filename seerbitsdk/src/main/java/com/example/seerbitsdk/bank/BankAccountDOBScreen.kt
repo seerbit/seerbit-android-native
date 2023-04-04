@@ -28,9 +28,7 @@ import com.example.seerbitsdk.R
 import com.example.seerbitsdk.card.AuthorizeButton
 import com.example.seerbitsdk.card.showCircularProgress
 import com.example.seerbitsdk.component.*
-import com.example.seerbitsdk.helper.TransactionType
-import com.example.seerbitsdk.helper.calculateTransactionFee
-import com.example.seerbitsdk.helper.generateSourceIp
+import com.example.seerbitsdk.helper.*
 import com.example.seerbitsdk.models.RequiredFields
 import com.example.seerbitsdk.models.bankaccount.BankAccountDTO
 import com.example.seerbitsdk.navigateSingleTopNoSavedState
@@ -86,7 +84,11 @@ fun BankAccountDOBScreen(
                 var amount = merchantDetailsData.payload?.amount
                 val currency = merchantDetailsData.payload?.defaultCurrency?:""
                 val fee =  calculateTransactionFee(merchantDetailsData, TransactionType.ACCOUNT.type, amount = amount?.toDouble()?:0.0)
-                val totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
+                var totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
+
+                if(isMerchantFeeBearer(merchantDetailsData)){
+                    totalAmount =amount?.toDouble()
+                }
 
                 SeerbitPaymentDetailHeader(
                     charges = fee?.toDouble() ?: 0.0,
@@ -148,9 +150,9 @@ fun BankAccountDOBScreen(
 
                 initiateBankAccountPayment.data?.let {
                     showCircularProgressBar = true
+                    transactionViewModel.setRetry(true)
                     if (initiateBankAccountPayment.data.data?.code == SUCCESS) {
                         val linkingReference = it.data?.payments?.linkingReference
-                        transactionViewModel.setRetry(true)
                         navController.navigateSingleTopNoSavedState(
                             "${Route.BANK_ACCOUNT_OTP_SCREEN}/$bankName/$json/$bankCode/$bankAccountNumber/$bvn/$dob/$linkingReference"
                         )
@@ -177,7 +179,7 @@ fun BankAccountDOBScreen(
                 Spacer(modifier = modifier.height(30.dp))
 
                 AuthorizeButton(
-                    buttonText = "Pay $currency$totalAmount",
+                    buttonText = "Pay $currency${formatInputDouble(totalAmount.toString())}",
                     onClick = {
 
                         if (dob.isNotEmpty()) {

@@ -30,6 +30,7 @@ import com.example.seerbitsdk.component.*
 import com.example.seerbitsdk.helper.TransactionType
 import com.example.seerbitsdk.helper.calculateTransactionFee
 import com.example.seerbitsdk.helper.generateSourceIp
+import com.example.seerbitsdk.helper.isMerchantFeeBearer
 import com.example.seerbitsdk.models.RequiredFields
 import com.example.seerbitsdk.models.bankaccount.BankAccountDTO
 import com.example.seerbitsdk.navigateSingleTopNoSavedState
@@ -90,15 +91,19 @@ fun BankAccountNumberScreen(
             ) {
                 Spacer(modifier = Modifier.height(25.dp))
 
-                var amount: String = merchantDetailsData.payload?.amount ?: ""
-                val fee =  calculateTransactionFee(merchantDetailsData, TransactionType.ACCOUNT.type, amount = amount.toDouble())
-                val totalAmount = fee?.toDouble()?.let { amount.toDouble().plus(it) }
+                var amount = merchantDetailsData.payload?.amount
+                val fee =  calculateTransactionFee(merchantDetailsData, TransactionType.ACCOUNT.type, amount = amount?.toDouble()?:0.0)
+                var totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
                 val defaultCurrency =   merchantDetailsData.payload?.defaultCurrency?:""
+
+                if(isMerchantFeeBearer(merchantDetailsData)){
+                    totalAmount =amount?.toDouble()
+                }
 
                 SeerbitPaymentDetailHeader(
 
                     charges = fee?.toDouble() ?: 0.0,
-                    amount = amount,
+                    amount = amount?: "",
                     currencyText = merchantDetailsData.payload?.defaultCurrency ?: "",
                     "Please Enter your Account Number",
                     merchantDetailsData.payload?.businessName ?: "",

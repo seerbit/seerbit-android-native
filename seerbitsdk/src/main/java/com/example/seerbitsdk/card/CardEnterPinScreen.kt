@@ -33,6 +33,7 @@ import com.example.seerbitsdk.component.*
 import com.example.seerbitsdk.helper.TransactionType
 import com.example.seerbitsdk.helper.calculateTransactionFee
 import com.example.seerbitsdk.helper.generateSourceIp
+import com.example.seerbitsdk.helper.isMerchantFeeBearer
 import com.example.seerbitsdk.models.CardOTPDTO
 import com.example.seerbitsdk.models.Transaction
 import com.example.seerbitsdk.models.card.CardDTO
@@ -131,9 +132,12 @@ fun CardEnterPinScreen(
                 val activity = (LocalContext.current as? Activity)
 
                 val fee =   calculateTransactionFee(merchantDetailsData, TransactionType.CARD.type, amount = amount?.toDouble()?: 0.0)
-                val totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
+                var totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
                 val defaultCurrency =   merchantDetailsData.payload?.defaultCurrency?:""
 
+                if(isMerchantFeeBearer(merchantDetailsData)){
+                    totalAmount =amount?.toDouble()
+                }
 
                 if(useOtp){
                     linkingReference = linkingRef
@@ -365,7 +369,7 @@ fun CardEnterPinScreen(
                 //payment button
                 if (isEnterPin && !isEnterOTP && !useOtp) {
                     PayButton(
-                        amount = "$defaultCurrency ${cardDTO.amount}",
+                        amount = "$defaultCurrency ${formatAmount(cardDTO.amount)}",
                         onClick = {
                             if(pin.length == 4){
                                 onPayButtonClicked(cardDTO)

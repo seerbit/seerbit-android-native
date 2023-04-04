@@ -31,6 +31,7 @@ import com.example.seerbitsdk.component.formatAmount
 import com.example.seerbitsdk.helper.TransactionType
 import com.example.seerbitsdk.helper.calculateTransactionFee
 import com.example.seerbitsdk.helper.generateSourceIp
+import com.example.seerbitsdk.helper.isMerchantFeeBearer
 import com.example.seerbitsdk.models.ussd.UssdBankData
 import com.example.seerbitsdk.models.ussd.UssdDTO
 import com.example.seerbitsdk.navigateSingleTopNoSavedState
@@ -84,7 +85,12 @@ fun USSDSelectBanksScreen(
 
                 var amount= merchantDetailsData.payload?.amount
                 val fee =   calculateTransactionFee(merchantDetailsData, TransactionType.USSD.type, amount = amount?.toDouble()?: 0.0)
-                val totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
+                var totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
+
+                if(isMerchantFeeBearer(merchantDetailsData)){
+                    totalAmount =amount?.toDouble()
+                }
+
 
                 SeerbitPaymentDetailHeader(
                     charges = fee?.toDouble() ?: 0.00,

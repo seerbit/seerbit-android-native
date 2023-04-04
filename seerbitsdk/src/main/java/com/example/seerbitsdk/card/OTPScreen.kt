@@ -179,7 +179,7 @@ fun AuthorizeButton(
     ) {
         Text(text = buttonText, color = Color.White,
             style = TextStyle(
-            fontSize = 12.sp,
+            fontSize = 14.sp,
             fontFamily = Faktpro,
             fontWeight = FontWeight.Normal,
             lineHeight = 10.sp

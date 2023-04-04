@@ -23,12 +23,11 @@ import com.example.seerbitsdk.ErrorDialog
 import com.example.seerbitsdk.R
 import com.example.seerbitsdk.card.AuthorizeButton
 import com.example.seerbitsdk.card.showCircularProgress
-import com.example.seerbitsdk.component.Dummy
-import com.example.seerbitsdk.component.Route
-import com.example.seerbitsdk.component.SeerbitPaymentDetailHeader
-import com.example.seerbitsdk.component.YES
+import com.example.seerbitsdk.component.*
 import com.example.seerbitsdk.helper.TransactionType
 import com.example.seerbitsdk.helper.calculateTransactionFee
+import com.example.seerbitsdk.helper.formatInputDouble
+import com.example.seerbitsdk.helper.isMerchantFeeBearer
 import com.example.seerbitsdk.models.RequiredFields
 import com.example.seerbitsdk.navigateSingleTopNoSavedState
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
@@ -78,8 +77,11 @@ fun BankAccountBVNScreen(
                 var amount = merchantDetailsData.payload?.amount
                 val currency = merchantDetailsData.payload?.defaultCurrency?:""
                 val fee =  calculateTransactionFee(merchantDetailsData, TransactionType.ACCOUNT.type, amount = amount?.toDouble()?:0.0)
-                val totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
+                var totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
 
+                if(isMerchantFeeBearer(merchantDetailsData)){
+                    totalAmount =amount?.toDouble()
+                }
 
                 SeerbitPaymentDetailHeader(
 
@@ -101,7 +103,7 @@ fun BankAccountBVNScreen(
 
                 Spacer(modifier = modifier.height(10.dp))
                 AuthorizeButton(
-                    buttonText = "Pay $currency$totalAmount",
+                    buttonText = "Pay $currency${formatInputDouble(totalAmount.toString()) }",
                     onClick = {
                         if (bvn.isNotEmpty()) {
 

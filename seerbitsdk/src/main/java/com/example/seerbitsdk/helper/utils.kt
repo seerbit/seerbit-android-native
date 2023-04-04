@@ -503,3 +503,7 @@ fun calculateTransactionFee(
 
     return formatInputDouble("")
 }
+
+fun isMerchantFeeBearer(merchantDetailsResponse: MerchantDetailsResponse?):Boolean{
+    return merchantDetailsResponse?.payload?.setting?.chargeOption=="MERCHANT"
+}

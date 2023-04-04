@@ -21,10 +21,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.seerbitsdk.*
-import com.example.seerbitsdk.helper.TransactionType
-import com.example.seerbitsdk.helper.calculateTransactionFee
-import com.example.seerbitsdk.helper.displayPaymentMethod
-import com.example.seerbitsdk.helper.generateSourceIp
+import com.example.seerbitsdk.helper.*
 import com.example.seerbitsdk.models.home.MerchantDetailsResponse
 import com.example.seerbitsdk.models.transfer.TransferDTO
 import com.example.seerbitsdk.screenstate.InitiateTransactionState
@@ -70,7 +67,6 @@ fun OtherPaymentScreen(
                 Spacer(modifier = Modifier.height(25.dp))
                 var amount= merchantDetailsData.payload?.amount
                     val fee =   calculateTransactionFee(merchantDetailsData, TransactionType.TRANSFER.type, amount = amount?.toDouble()?: 0.0)
-                val totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
 
                 SeerbitPaymentDetailHeader(
                     charges = 0.0,
@@ -112,10 +108,10 @@ fun OtherPaymentScreen(
                     paymentRef = it.data?.payments?.paymentReference?:""
                     transactionViewModel.setRetry(true)
                     showCircularProgressBar = false
-                    wallet = it.data?.payments?.wallet!!
-                        walletName = it.data.payments.walletName?:""
-                        bankName = it.data.payments.bankName?:""
-                        accountNumber = it.data.payments.accountNumber?:""
+                    wallet = it.data?.payments?.wallet?:""
+                        walletName = it.data?.payments?.walletName?:""
+                        bankName = it.data?.payments?.bankName?:""
+                        accountNumber = it.data?.payments?.accountNumber?:""
 
                     navController.navigateSingleTopNoSavedState("${Transfer.route}/$paymentRef/$wallet/$walletName/$bankName/$accountNumber")
 
@@ -182,7 +178,11 @@ fun generateTransferDTO(merchantDetailsData: MerchantDetailsResponse, transactio
 
     var amount= merchantDetailsData.payload?.amount
     val fee =   calculateTransactionFee(merchantDetailsData, TransactionType.TRANSFER.type, amount = amount?.toDouble()?: 0.0)
-    val totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
+    var totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
+
+    if(isMerchantFeeBearer(merchantDetailsData)){
+        totalAmount =amount?.toDouble()
+    }
 
     return TransferDTO(
         country = merchantDetailsData.payload?.country?.countryCode ?: "",

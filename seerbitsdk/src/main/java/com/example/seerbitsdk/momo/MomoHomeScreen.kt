@@ -38,6 +38,7 @@ import com.example.seerbitsdk.component.*
 import com.example.seerbitsdk.helper.TransactionType
 import com.example.seerbitsdk.helper.calculateTransactionFee
 import com.example.seerbitsdk.helper.generateSourceIp
+import com.example.seerbitsdk.helper.isMerchantFeeBearer
 import com.example.seerbitsdk.models.momo.MomoDTO
 import com.example.seerbitsdk.models.momo.MomoNetworkResponseItem
 import com.example.seerbitsdk.navigateSingleTopNoSavedState
@@ -93,7 +94,11 @@ fun MomoHomeScreen(
 
                 var amount= merchantDetailsData.payload?.amount
                 val fee =   calculateTransactionFee(merchantDetailsData, TransactionType.MOMO.type, amount = amount?.toDouble()?: 0.0)
-                val totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
+                var totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
+
+                if(isMerchantFeeBearer(merchantDetailsData)){
+                    totalAmount =amount?.toDouble()
+                }
 
                 SeerbitPaymentDetailHeader(
                     charges = fee?.toDouble() ?: 0.0,

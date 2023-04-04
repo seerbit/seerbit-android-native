@@ -34,6 +34,8 @@ import com.example.seerbitsdk.card.showCircularProgress
 import com.example.seerbitsdk.component.*
 import com.example.seerbitsdk.helper.TransactionType
 import com.example.seerbitsdk.helper.calculateTransactionFee
+import com.example.seerbitsdk.helper.formatInputDouble
+import com.example.seerbitsdk.helper.isMerchantFeeBearer
 import com.example.seerbitsdk.navigateSingleTopNoSavedState
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.screenstate.QueryTransactionState
@@ -98,9 +100,13 @@ fun TransferHomeScreen(
 
             var amount= merchantDetailsData.payload?.amount
             val fee =   calculateTransactionFee(merchantDetailsData, TransactionType.TRANSFER.type, amount = amount?.toDouble()?: 0.0)
-            val totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
+            var totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
 
-            transferAmount = formatAmount(amount = amount?.toDouble())
+            if(isMerchantFeeBearer(merchantDetailsData)){
+                totalAmount =amount?.toDouble()
+            }
+
+            transferAmount = formatInputDouble(amount)
 
             Spacer(modifier = Modifier.height(21.dp))
 
@@ -127,7 +133,7 @@ fun TransferHomeScreen(
                 showCircularProgressBar = true
 
             }
-
+            val paymentReference =merchantDetailsData.payload?.paymentReference
 
             if (queryTransactionStateState.data?.data != null) {
                 when (queryTransactionStateState.data.data.code) {
@@ -135,12 +141,12 @@ fun TransferHomeScreen(
 
                     PENDING_CODE -> {
                         showCircularProgressBar = true
-                        transactionViewModel.queryTransaction(paymentRef ?: "")
+                        transactionViewModel.queryTransaction(paymentReference ?: "")
                     }
                     SUCCESS -> {
                         alertDialogHeaderMessage = "Successful"
                         openDialog.value = true
-                        alertDialogMessage = queryTransactionStateState.data.data.payments?.reason!!
+                        alertDialogMessage = queryTransactionStateState.data.data.payments?.reason?: ""
                         showCircularProgressBar = false
                         exitOnSuccess.value = true
                         transactionViewModel.resetTransactionState()
@@ -149,7 +155,7 @@ fun TransferHomeScreen(
                     else -> {
                         alertDialogHeaderMessage = "Failed"
                         openDialog.value = true
-                        alertDialogMessage = queryTransactionStateState.data.data.payments?.reason!!
+                        alertDialogMessage = queryTransactionStateState.data.data.payments?.reason?: ""
                         showCircularProgressBar = false
                         transactionViewModel.resetTransactionState()
                     }
@@ -219,7 +225,7 @@ fun TransferHomeScreen(
             AuthorizeButton(
                 buttonText = "I have completed this bank transfer",
                 onClick = {
-                    transactionViewModel.queryTransaction(paymentRef ?: "")
+                    transactionViewModel.queryTransaction(paymentReference ?: "")
 
                 }, !showCircularProgressBar
             )
