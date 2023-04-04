@@ -124,7 +124,7 @@ fun TransferHomeScreen(
                 openDialog.value = true
                 alertDialogMessage =
                     queryTransactionStateState.data?.data?.message
-                        ?: "Could not retrieve bank details"
+                        ?: "Error occurred while querying this transaction"
                 alertDialogHeaderMessage = "Failed"
                 transactionViewModel.resetTransactionState()
 

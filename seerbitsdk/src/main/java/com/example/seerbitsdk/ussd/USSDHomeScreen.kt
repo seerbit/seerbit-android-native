@@ -52,8 +52,8 @@ fun USSDHomeScreen(
     transactionViewModel: TransactionViewModel,
     paymentReference: String?,
     ussdCode: String?,
-
-
+    onCancelButtonClicked:()->Unit,
+    onOtherPaymentButtonClicked:()->Unit
     ) {
     var showLoadingScreen by remember { mutableStateOf(false) }
     val context = LocalContext.current
@@ -202,6 +202,20 @@ fun USSDHomeScreen(
                         },
                         !showCircularProgressBar
                     )
+
+                    Spacer(modifier = Modifier.height(100.dp))
+
+                    OtherPaymentButtonComponent(
+                        onOtherPaymentButtonClicked = onOtherPaymentButtonClicked,
+                        onCancelButtonClicked = {
+
+                        },
+                        enable = !showCircularProgressBar
+                    )
+
+                    Spacer(modifier = Modifier.height(100.dp))
+                    BottomSeerBitWaterMark(modifier = Modifier.align(alignment = Alignment.CenterHorizontally))
+
                     Spacer(modifier = Modifier.height(16.dp))
                 } else {
                     showLoaderLayout()
@@ -308,9 +322,9 @@ fun HeaderScreenPreview() {
             transactionViewModel = viewModel,
             paymentReference = "",
             ussdCode = "",
-            navController = rememberNavController()
-
-        )
+            navController = rememberNavController(),
+            onCancelButtonClicked = {}
+        ){}
     }
 }
 

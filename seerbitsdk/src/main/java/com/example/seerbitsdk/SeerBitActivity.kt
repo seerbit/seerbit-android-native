@@ -590,7 +590,9 @@ fun CardHomeScreen(
 
             OtherPaymentButtonComponent(
                 onOtherPaymentButtonClicked = onOtherPaymentButtonClicked,
-                onCancelButtonClicked = { navController.navigateSingleTopTo(Debit_CreditCard.route) },
+                onCancelButtonClicked = {
+                    activity?.finish()
+                },
                 enable = !showCircularProgressBar
             )
 
@@ -740,11 +742,7 @@ fun CardDetailsScreen(
                             painter = painterResource(id = trailingIcon),
                             contentDescription = ""
                         )
-                    } else CircularProgressIndicator(
-                        Modifier.size(15.dp),
-                        strokeWidth = 1.dp,
-                        color = Color.Black
-                    )
+                    }
                 },
 
                 shape = RoundedCornerShape(4.dp),
@@ -1354,8 +1352,11 @@ fun MyAppNavHost(
                 transactionViewModel = transactionViewModel,
                 ussdCode = "$ussdCode#",
                 paymentReference = paymentReference,
-                navController = navController
-            )
+                navController = navController,
+                onCancelButtonClicked = {navController.navigateSingleTopTo(Debit_CreditCard.route)}
+            ){
+                navController.navigateSingleTopTo(Route.OTHER_PAYMENT_SCREEN)
+            }
         }
 
 
