@@ -90,6 +90,7 @@ fun formatInputDouble(input: String?): String {
     val value = input.toDouble()
     val formatter = NumberFormat.getInstance()
     formatter.minimumFractionDigits = 2
+    formatter.maximumFractionDigits = 2
     formatter.roundingMode = RoundingMode.CEILING
     return try {
         formatter.format(value)

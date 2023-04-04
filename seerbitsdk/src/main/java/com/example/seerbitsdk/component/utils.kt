@@ -41,7 +41,7 @@ fun validateCardDetails(
 
 fun String.maskedPhoneNumber(): String {
     return if (this.length >= 7) {
-        "*******${this.substring(8)}"
+        "*******${this.substring(7)}"
     } else
         "*****${this.last()}"
 }

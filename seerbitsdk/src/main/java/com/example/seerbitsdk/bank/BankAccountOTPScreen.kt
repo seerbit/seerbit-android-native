@@ -13,6 +13,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.substring
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -96,7 +97,10 @@ fun BankAccountOTPScreen(
 
                 val email   =   merchantDetailsData.payload?.emailAddress
                 val maskedPhoneNumber = merchantDetailsData.payload?.userPhoneNumber?.maskedPhoneNumber()
-                val maskedEmailAddress = "${email?.get(0)}*************${email?.last()}"
+                val filteredEmailIndex=email?.indexOf("@")
+                val maskedEmailAddress = "${email?.get(0)}*************${email?.substring(
+                    filteredEmailIndex?.minus(2) ?: 0
+                )}"
                 var amount = merchantDetailsData.payload?.amount
                 val currency = merchantDetailsData.payload?.defaultCurrency?:""
                 val fee =  calculateTransactionFee(merchantDetailsData, TransactionType.ACCOUNT.type, amount = amount?.toDouble()?:0.0)
