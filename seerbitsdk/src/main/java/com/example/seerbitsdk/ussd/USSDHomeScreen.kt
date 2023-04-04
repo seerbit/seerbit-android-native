@@ -207,9 +207,7 @@ fun USSDHomeScreen(
 
                     OtherPaymentButtonComponent(
                         onOtherPaymentButtonClicked = onOtherPaymentButtonClicked,
-                        onCancelButtonClicked = {
-
-                        },
+                        onCancelButtonClicked = onCancelButtonClicked,
                         enable = !showCircularProgressBar
                     )
 

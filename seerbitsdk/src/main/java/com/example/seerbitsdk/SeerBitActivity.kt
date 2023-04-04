@@ -83,14 +83,16 @@ class SeerBitActivity : ComponentActivity() {
             val emailAddress = intent.extras?.getString("emailAddress")
             val paymentRef = intent.extras?.getString("paymentRef")
 
-            val merchantDetailsViewModel by viewModels<MerchantDetailsViewModel>{
-                MerchatDetailVmFactory(publicKey?:"0.0")
+            val merchantDetailsViewModel by viewModels<MerchantDetailsViewModel> {
+                MerchatDetailVmFactory(publicKey ?: "0.0")
             }
 
             val merchantDetailsState = merchantDetailsViewModel.merchantState.value
 
             if (merchantDetailsState.hasError) {
-                ErrorExitDialog(message = merchantDetailsState.errorMessage ?: "Something went wrong")
+                ErrorExitDialog(
+                    message = merchantDetailsState.errorMessage ?: "Something went wrong"
+                )
             }
 
             if (merchantDetailsState.isLoading) {
@@ -335,12 +337,16 @@ fun CardHomeScreen(
 
             var paymentReference = merchantDetailsData.payload?.paymentReference ?: ""
             val amount = merchantDetailsData.payload?.amount
-            val fee =   calculateTransactionFee(merchantDetailsData, TransactionType.CARD.type, amount = amount?.toDouble()?: 0.0)
+            val fee = calculateTransactionFee(
+                merchantDetailsData,
+                TransactionType.CARD.type,
+                amount = amount?.toDouble() ?: 0.0
+            )
             var totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
-            val defaultCurrency =   merchantDetailsData.payload?.defaultCurrency?:""
+            val defaultCurrency = merchantDetailsData.payload?.defaultCurrency ?: ""
 
-            if(isMerchantFeeBearer(merchantDetailsData)){
-                totalAmount =amount?.toDouble()
+            if (isMerchantFeeBearer(merchantDetailsData)) {
+                totalAmount = amount?.toDouble()
             }
 
             val cardDTO = CardDTO(
@@ -1353,10 +1359,9 @@ fun MyAppNavHost(
                 ussdCode = "$ussdCode#",
                 paymentReference = paymentReference,
                 navController = navController,
-                onCancelButtonClicked = {navController.navigateSingleTopTo(Debit_CreditCard.route)}
-            ){
-                navController.navigateSingleTopTo(Route.OTHER_PAYMENT_SCREEN)
-            }
+                onCancelButtonClicked = { navController.navigateSingleTopTo(Debit_CreditCard.route) },
+                onOtherPaymentButtonClicked = { navController.navigateSingleTopTo(Route.OTHER_PAYMENT_SCREEN) }
+            )
         }
 
 
@@ -1441,7 +1446,7 @@ fun ErrorDialog(message: String) {
 }
 
 @Composable
-fun ErrorExitDialog(context:Context = LocalContext.current, message: String) {
+fun ErrorExitDialog(context: Context = LocalContext.current, message: String) {
     val activity = context as? Activity
     val openDialog = remember { mutableStateOf(true) }
     if (openDialog.value) {
@@ -1472,7 +1477,11 @@ fun ErrorExitDialog(context:Context = LocalContext.current, message: String) {
                     onClick = {
                         openDialog.value = false
                         activity?.finish()
-                        Toast.makeText(context,"Your Transaction has been processed",Toast.LENGTH_LONG).show()
+                        Toast.makeText(
+                            context,
+                            "Your Transaction has been processed",
+                            Toast.LENGTH_LONG
+                        ).show()
 
                     },
                     colors = ButtonDefaults.buttonColors(
