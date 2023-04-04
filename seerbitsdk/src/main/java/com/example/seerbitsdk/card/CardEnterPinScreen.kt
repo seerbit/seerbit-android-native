@@ -176,7 +176,7 @@ fun CardEnterPinScreen(
                     productId = "",
                     mobileNumber = merchantDetailsData.payload?.userPhoneNumber,
                     paymentReference = paymentRef,
-                    fee = merchantDetailsData.payload?.vatFee,
+                    fee = fee,
                     expiryMonth = cardExpiryMonth,
                     fullName = merchantDetailsData.payload?.userFullName,
                     "MASTERCARD",

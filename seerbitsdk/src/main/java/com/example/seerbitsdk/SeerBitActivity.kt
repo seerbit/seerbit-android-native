@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.net.Uri
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -350,7 +351,7 @@ fun CardHomeScreen(
                 productId = "",
                 mobileNumber = merchantDetailsData.payload?.userPhoneNumber,
                 paymentReference = paymentReference,
-                fee = merchantDetailsData.payload?.vatFee,
+                fee = fee,
                 expiryMonth = cardExpiryMonth,
                 fullName = merchantDetailsData.payload?.userFullName,
                 "MASTERCARD",
@@ -459,7 +460,7 @@ fun CardHomeScreen(
                 horizontalArrangement = Arrangement.Center
             ) {
                 PayButton(
-                    amount = "$defaultCurrency ${cardDTO.amount}",
+                    amount = "$defaultCurrency ${formatAmount(cardDTO.amount)}",
                     onClick = {
 
                         if (validateCardDetails(
@@ -1466,9 +1467,9 @@ fun ErrorExitDialog(context:Context = LocalContext.current, message: String) {
                 Button(
 
                     onClick = {
-
                         openDialog.value = false
                         activity?.finish()
+                        Toast.makeText(context,"Your Transaction has been processed",Toast.LENGTH_LONG).show()
 
                     },
                     colors = ButtonDefaults.buttonColors(

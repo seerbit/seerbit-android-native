@@ -115,7 +115,7 @@ fun BankAccountNumberScreen(
                     productId = "",
                     mobileNumber = merchantDetailsData.payload?.userPhoneNumber,
                     paymentReference = paymentRef,
-                    fee = merchantDetailsData.payload?.vatFee,
+                    fee = fee,
                     fullName = merchantDetailsData.payload?.userFullName,
                     channelType = "$bankName",
                     dateOfBirth = "",

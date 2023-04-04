@@ -69,12 +69,12 @@ fun OtherPaymentScreen(
             ) {
                 Spacer(modifier = Modifier.height(25.dp))
                 var amount= merchantDetailsData.payload?.amount
-                    val fee =   calculateTransactionFee(merchantDetailsData, TransactionType.MOMO.type, amount = amount?.toDouble()?: 0.0)
+                    val fee =   calculateTransactionFee(merchantDetailsData, TransactionType.TRANSFER.type, amount = amount?.toDouble()?: 0.0)
                 val totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
 
                 SeerbitPaymentDetailHeader(
-                    charges = fee?.toDouble() ?:0.0,
-                    amount = formatAmount(amount?.toDouble()),
+                    charges = 0.0,
+                    amount = amount.toString(),
                     currencyText = merchantDetailsData.payload?.defaultCurrency?:"",
                     "Other Payment Channels",
                     merchantDetailsData.payload?.businessName?:"",
@@ -191,7 +191,7 @@ fun generateTransferDTO(merchantDetailsData: MerchantDetailsResponse, transactio
         productId = "",
         mobileNumber = merchantDetailsData.payload?.userPhoneNumber,
         paymentReference = merchantDetailsData.payload?.paymentReference,
-        fee = merchantDetailsData.payload?.vatFee,
+        fee = fee,
         fullName = merchantDetailsData.payload?.userFullName,
         channelType = "Transfer",
         publicKey = merchantDetailsData.payload?.publicKey,

@@ -114,7 +114,7 @@ fun MomoHomeScreen(
                         redirectUrl = "http://localhost:3002/#/",
                         mobileNumber = accountNumber,
                         paymentReference = paymentRef,
-                        fee = merchantDetailsData.payload?.vatFee,
+                        fee = fee,
                         fullName = merchantDetailsData.payload?.userFullName,
                         channelType = "wallet",
                         publicKey = merchantDetailsData.payload?.publicKey,

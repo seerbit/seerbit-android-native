@@ -106,7 +106,7 @@ fun TransferHomeScreen(
 
             SeerbitPaymentDetailHeaderTwo(
                 charges = fee?.toDouble()?:0.0,
-                amount = transferAmount,
+                amount = amount.toString(),
                 currencyText = defaultCurrency,
                 businessName = merchantDetailsData.payload?.businessName?:"",
                 email = merchantDetailsData.payload?.supportEmail?:""

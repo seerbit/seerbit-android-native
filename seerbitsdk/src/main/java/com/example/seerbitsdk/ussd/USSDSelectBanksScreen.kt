@@ -27,6 +27,7 @@ import com.example.seerbitsdk.card.AuthorizeButton
 import com.example.seerbitsdk.card.showCircularProgress
 import com.example.seerbitsdk.component.Route
 import com.example.seerbitsdk.component.SeerbitPaymentDetailHeader
+import com.example.seerbitsdk.component.formatAmount
 import com.example.seerbitsdk.helper.TransactionType
 import com.example.seerbitsdk.helper.calculateTransactionFee
 import com.example.seerbitsdk.helper.generateSourceIp
@@ -164,7 +165,7 @@ fun USSDSelectBanksScreen(
                 Spacer(modifier = modifier.height(40.dp))
 
                 AuthorizeButton(
-                    buttonText = "Pay $defaultCurrency $totalAmount",
+                    buttonText = "Pay $defaultCurrency ${formatAmount(totalAmount)}",
                     onClick = {
                         if (bankCode.isNotEmpty()) {
                             transactionViewModel.initiateUssdTransaction(ussdDTO)
