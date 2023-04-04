@@ -24,6 +24,8 @@ import com.example.seerbitsdk.card.AuthorizeButton
 import com.example.seerbitsdk.card.OTPInputField
 import com.example.seerbitsdk.card.showCircularProgress
 import com.example.seerbitsdk.component.*
+import com.example.seerbitsdk.helper.TransactionType
+import com.example.seerbitsdk.helper.calculateTransactionFee
 import com.example.seerbitsdk.models.otp.MomoOtpDto
 import com.example.seerbitsdk.models.otp.Transaction
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
@@ -85,13 +87,16 @@ fun MOMOOTPScreen(
                 Spacer(modifier = Modifier.height(25.dp))
 
 
-                var amount: String = merchantDetailsData.payload?.amount ?: ""
+                val amount = merchantDetailsData.payload?.amount
+                val fee =   calculateTransactionFee(merchantDetailsData, TransactionType.MOMO.type, amount = amount?.toDouble()?: 0.0)
+                val totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
+
                 SeerbitPaymentDetailHeaderTwo(
-                    charges = merchantDetailsData.payload?.vatFee?.toDouble()!!,
-                    amount = amount,
-                    currencyText = merchantDetailsData.payload.defaultCurrency ?: "",
-                    merchantDetailsData.payload.businessName ?: "",
-                    merchantDetailsData.payload.supportEmail ?: ""
+                    charges = fee?.toDouble()?:0.0,
+                    amount = amount?:"",
+                    currencyText = merchantDetailsData.payload?.defaultCurrency ?: "",
+                    merchantDetailsData.payload?.businessName ?: "",
+                    merchantDetailsData.payload?.supportEmail ?: ""
                 )
 
                 val momoOtpDto = MomoOtpDto(transaction = Transaction(linkingReference, otp))

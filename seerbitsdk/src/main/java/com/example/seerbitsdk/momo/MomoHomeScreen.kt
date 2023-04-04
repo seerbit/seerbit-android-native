@@ -35,6 +35,9 @@ import com.example.seerbitsdk.R
 import com.example.seerbitsdk.card.AuthorizeButton
 import com.example.seerbitsdk.card.showCircularProgress
 import com.example.seerbitsdk.component.*
+import com.example.seerbitsdk.helper.TransactionType
+import com.example.seerbitsdk.helper.calculateTransactionFee
+import com.example.seerbitsdk.helper.generateSourceIp
 import com.example.seerbitsdk.models.momo.MomoDTO
 import com.example.seerbitsdk.models.momo.MomoNetworkResponseItem
 import com.example.seerbitsdk.navigateSingleTopNoSavedState
@@ -77,10 +80,6 @@ fun MomoHomeScreen(
 
         Column(modifier = modifier) {
 
-            var amount: String = merchantDetailsData.payload?.amount ?: ""
-
-
-
             Column(
                 modifier = modifier
                     .padding(
@@ -92,9 +91,13 @@ fun MomoHomeScreen(
             ) {
                 Spacer(modifier = Modifier.height(25.dp))
 
+                var amount= merchantDetailsData.payload?.amount
+                val fee =   calculateTransactionFee(merchantDetailsData, TransactionType.MOMO.type, amount = amount?.toDouble()?: 0.0)
+                val totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
+
                 SeerbitPaymentDetailHeader(
-                    charges = merchantDetailsData.payload?.vatFee?.toDouble() ?: 0.0,
-                    amount = amount,
+                    charges = fee?.toDouble() ?: 0.0,
+                    amount = amount?: "",
                     currencyText = merchantDetailsData.payload?.defaultCurrency ?: "",
                     "Choose your bank to start this payment",
                     merchantDetailsData.payload?.businessName ?: "",
@@ -106,7 +109,7 @@ fun MomoHomeScreen(
                     MomoDTO(
                         deviceType = "Android",
                         country = merchantDetailsData.payload?.country?.countryCode ?: "",
-                        amount = amount,
+                        amount = totalAmount.toString(),
                         productId = "",
                         redirectUrl = "http://localhost:3002/#/",
                         mobileNumber = accountNumber,
@@ -117,7 +120,7 @@ fun MomoHomeScreen(
                         publicKey = merchantDetailsData.payload?.publicKey,
                         source = "",
                         paymentType = "MOMO",
-                        sourceIP = "",
+                        sourceIP = generateSourceIp(true),
                         currency = merchantDetailsData.payload?.defaultCurrency,
                         productDescription = "",
                         email = merchantDetailsData.payload?.emailAddress,
@@ -247,7 +250,7 @@ fun MomoHomeScreen(
                             openDialog.value = true
                             alertDialogMessage =
                                 " Invalid Details, Something went wrong"
-                            alertDialogHeaderMessage = "Error Occured"
+                            alertDialogHeaderMessage = "Error Occurred"
                         }
 
                     }, !showCircularProgressBar

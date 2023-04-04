@@ -23,6 +23,8 @@ import com.example.seerbitsdk.card.AuthorizeButton
 import com.example.seerbitsdk.card.OTPInputField
 import com.example.seerbitsdk.card.showCircularProgress
 import com.example.seerbitsdk.component.*
+import com.example.seerbitsdk.helper.TransactionType
+import com.example.seerbitsdk.helper.calculateTransactionFee
 import com.example.seerbitsdk.models.otp.BankAccountOtpDto
 import com.example.seerbitsdk.models.RequiredFields
 import com.example.seerbitsdk.models.bankaccount.BankAccountDTO
@@ -92,18 +94,20 @@ fun BankAccountOTPScreen(
             ) {
                 Spacer(modifier = Modifier.height(25.dp))
 
-
-                val maskedPhoneNumber = merchantDetailsData.payload?.number?.maskedPhoneNumber()
-                "******${merchantDetailsData.payload?.number?.substring(6)}"
-                val maskedEmailAddress = "A**************@gmail.com"
-                var amount: String = merchantDetailsData.payload?.amount ?: ""
+                val email   =   merchantDetailsData.payload?.emailAddress
+                val maskedPhoneNumber = merchantDetailsData.payload?.userPhoneNumber?.maskedPhoneNumber()
+                val maskedEmailAddress = "${email?.get(0)}*************${email?.last()}"
+                var amount = merchantDetailsData.payload?.amount
+                val currency = merchantDetailsData.payload?.defaultCurrency?:""
+                val fee =  calculateTransactionFee(merchantDetailsData, TransactionType.ACCOUNT.type, amount = amount?.toDouble()?:0.0)
+                val totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
 
                 SeerbitPaymentDetailHeaderTwo(
-                    charges =  merchantDetailsData.payload?.vatFee?.toDouble()!!,
-                    amount = amount,
-                    currencyText = merchantDetailsData.payload.defaultCurrency?:"",
-                    merchantDetailsData.payload.businessName?:"",
-                    merchantDetailsData.payload.supportEmail?:""
+                    charges =  fee?.toDouble()?:0.0,
+                    amount = amount?:"",
+                    currencyText = merchantDetailsData.payload?.defaultCurrency?:"",
+                    merchantDetailsData.payload?.businessName?:"",
+                    merchantDetailsData.payload?.supportEmail?:""
                 )
 
                 val bankAccountOtpDtO = BankAccountOtpDto(linkingReference, otp)

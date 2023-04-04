@@ -31,6 +31,8 @@ import com.example.seerbitsdk.card.AuthorizeButton
 import com.example.seerbitsdk.card.showCircularProgress
 import com.example.seerbitsdk.component.Route
 import com.example.seerbitsdk.component.SeerbitPaymentDetailHeader
+import com.example.seerbitsdk.helper.TransactionType
+import com.example.seerbitsdk.helper.calculateTransactionFee
 import com.example.seerbitsdk.models.MerchantBanksItem
 import com.example.seerbitsdk.models.RequiredFields
 import com.example.seerbitsdk.navigateSingleTopNoSavedState
@@ -89,12 +91,15 @@ fun BankAccountSelectBankScreen(
             ) {
                 Spacer(modifier = Modifier.height(25.dp))
 
-                var amount: String = merchantDetailsData.payload?.amount ?: ""
+                var amount = merchantDetailsData.payload?.amount
                 val currency = merchantDetailsData.payload?.defaultCurrency?:""
+                val fee =  calculateTransactionFee(merchantDetailsData, TransactionType.ACCOUNT.type, amount = amount?.toDouble()?:0.0)
+                val totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
+                val defaultCurrency =   merchantDetailsData.payload?.defaultCurrency?:""
 
                 SeerbitPaymentDetailHeader(
-                    charges = merchantDetailsData.payload?.vatFee?.toDouble()?:0.0,
-                    amount = amount,
+                    charges = fee?.toDouble()?:0.0,
+                    amount = amount?:"",
                     currencyText = merchantDetailsData.payload?.defaultCurrency?:"",
                     "Choose your bank to start this payment",
                     merchantDetailsData.payload?.businessName?:"",
@@ -145,7 +150,7 @@ fun BankAccountSelectBankScreen(
                 Spacer(modifier = modifier.height(40.dp))
 
                 AuthorizeButton(
-                    buttonText = "Pay $currency$amount",
+                    buttonText = "Pay $currency$totalAmount",
                     onClick = {
                         if (bankCode.isNotEmpty()) {
 

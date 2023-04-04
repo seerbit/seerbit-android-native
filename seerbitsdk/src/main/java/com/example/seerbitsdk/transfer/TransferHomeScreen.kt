@@ -32,6 +32,8 @@ import com.example.seerbitsdk.R
 import com.example.seerbitsdk.card.AuthorizeButton
 import com.example.seerbitsdk.card.showCircularProgress
 import com.example.seerbitsdk.component.*
+import com.example.seerbitsdk.helper.TransactionType
+import com.example.seerbitsdk.helper.calculateTransactionFee
 import com.example.seerbitsdk.navigateSingleTopNoSavedState
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.screenstate.QueryTransactionState
@@ -93,16 +95,21 @@ fun TransferHomeScreen(
             //enter payment states
 
             val defaultCurrency: String = merchantDetailsData.payload?.defaultCurrency ?: ""
-            var amount: String = merchantDetailsData.payload?.amount ?: ""
-            transferAmount = formatAmount(amount = amount.toDouble())
+
+            var amount= merchantDetailsData.payload?.amount
+            val fee =   calculateTransactionFee(merchantDetailsData, TransactionType.TRANSFER.type, amount = amount?.toDouble()?: 0.0)
+            val totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
+
+            transferAmount = formatAmount(amount = amount?.toDouble())
+
             Spacer(modifier = Modifier.height(21.dp))
 
             SeerbitPaymentDetailHeaderTwo(
-                charges = merchantDetailsData.payload?.vatFee?.toDouble()!!,
-                amount = amount,
+                charges = fee?.toDouble()?:0.0,
+                amount = transferAmount,
                 currencyText = defaultCurrency,
-                businessName = merchantDetailsData.payload.businessName!!,
-                email = merchantDetailsData.payload.supportEmail!!
+                businessName = merchantDetailsData.payload?.businessName?:"",
+                email = merchantDetailsData.payload?.supportEmail?:""
             )
 
             //querying transaction happens after otp has been inputted
@@ -168,7 +175,7 @@ fun TransferHomeScreen(
 
 
             Spacer(modifier = Modifier.height(20.dp))
-            USSDCodeSurfaceView(null, ussdCodeText = "$defaultCurrency$transferAmount")
+            USSDCodeSurfaceView(null, ussdCodeText = "$defaultCurrency${formatAmount(totalAmount)}")
             Spacer(modifier = modifier.height(20.dp))
 
             Text(

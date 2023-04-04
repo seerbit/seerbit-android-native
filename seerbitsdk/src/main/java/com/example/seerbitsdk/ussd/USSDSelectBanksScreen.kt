@@ -27,6 +27,9 @@ import com.example.seerbitsdk.card.AuthorizeButton
 import com.example.seerbitsdk.card.showCircularProgress
 import com.example.seerbitsdk.component.Route
 import com.example.seerbitsdk.component.SeerbitPaymentDetailHeader
+import com.example.seerbitsdk.helper.TransactionType
+import com.example.seerbitsdk.helper.calculateTransactionFee
+import com.example.seerbitsdk.helper.generateSourceIp
 import com.example.seerbitsdk.models.ussd.UssdBankData
 import com.example.seerbitsdk.models.ussd.UssdDTO
 import com.example.seerbitsdk.navigateSingleTopNoSavedState
@@ -40,14 +43,14 @@ fun USSDSelectBanksScreen(
     modifier: Modifier = Modifier,
     navController: NavHostController,
     merchantDetailsState: MerchantDetailsState?,
-   transactionViewModel : TransactionViewModel
+    transactionViewModel: TransactionViewModel
 ) {
     var bankCode by remember { mutableStateOf("") }
     var showErrorDialog by remember { mutableStateOf(false) }
     var showCircularProgressBar by remember { mutableStateOf(false) }
-    var paymentRef by  remember { mutableStateOf("") }
-    var ussdCode by  remember { mutableStateOf("") }
-   var defaultCurrency : String = ""
+    var paymentRef by remember { mutableStateOf("") }
+    var ussdCode by remember { mutableStateOf("") }
+    var defaultCurrency: String = ""
 
     // if there is an error loading the report
     if (merchantDetailsState?.hasError!!) {
@@ -75,17 +78,20 @@ fun USSDSelectBanksScreen(
                     .weight(1f)
             ) {
                 Spacer(modifier = Modifier.height(25.dp))
-                var paymentReference = merchantDetailsData.payload?.paymentReference?:""
-                defaultCurrency = merchantDetailsData.payload?.defaultCurrency?:""
-                var amount: String = merchantDetailsData.payload?.amount ?: ""
+                var paymentReference = merchantDetailsData.payload?.paymentReference ?: ""
+                defaultCurrency = merchantDetailsData.payload?.defaultCurrency ?: ""
+
+                var amount= merchantDetailsData.payload?.amount
+                val fee =   calculateTransactionFee(merchantDetailsData, TransactionType.USSD.type, amount = amount?.toDouble()?: 0.0)
+                val totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
 
                 SeerbitPaymentDetailHeader(
-                    charges =  merchantDetailsData.payload?.vatFee?.toDouble()?: 0.00,
-                    amount = amount,
+                    charges = fee?.toDouble() ?: 0.00,
+                    amount = amount?:"",
                     currencyText = defaultCurrency,
                     "Choose your bank to start this payment",
-                    merchantDetailsData.payload?.businessName?:"",
-                    merchantDetailsData.payload?.supportEmail?:""
+                    merchantDetailsData.payload?.businessName ?: "",
+                    merchantDetailsData.payload?.supportEmail ?: ""
                 )
                 Spacer(modifier = Modifier.height(41.dp))
 
@@ -94,7 +100,7 @@ fun USSDSelectBanksScreen(
                     ErrorDialog(message = "Kindly Select a bank")
                 }
 
-                if(showCircularProgressBar){
+                if (showCircularProgressBar) {
                     showCircularProgress(showProgress = true)
                 }
 
@@ -106,7 +112,7 @@ fun USSDSelectBanksScreen(
                 val ussdDTO = UssdDTO(
                     country = merchantDetailsData.payload?.country?.nameCode ?: "",
                     bankCode = bankCode,
-                    amount = amount,
+                    amount = totalAmount.toString(),
                     redirectUrl = "http://localhost:3002/#/",
                     productId = "",
                     mobileNumber = merchantDetailsData.payload?.number,
@@ -114,13 +120,13 @@ fun USSDSelectBanksScreen(
                     fee = merchantDetailsData.payload?.vatFee,
                     fullName = merchantDetailsData.payload?.userFullName,
                     channelType = "ussd",
-                    publicKey =  merchantDetailsData.payload?.publicKey,
+                    publicKey = merchantDetailsData.payload?.publicKey,
                     source = "",
                     paymentType = "USSD",
-                    sourceIP = "102.88.63.64",
+                    sourceIP = generateSourceIp(true),
                     currency = merchantDetailsData.payload?.defaultCurrency,
                     productDescription = "",
-                    email =  merchantDetailsData.payload?.emailAddress,
+                    email = merchantDetailsData.payload?.emailAddress,
                     retry = transactionViewModel.retry.value,
                     ddeviceType = "Android"
                 )
@@ -143,11 +149,12 @@ fun USSDSelectBanksScreen(
                 initiateUssdPayment.data?.let {
                     transactionViewModel.setRetry(true)
                     paymentRef = it.data?.payments?.paymentReference ?: ""
-                    ussdCode = it.data?.payments?.ussdDailCode?: ""
+                    ussdCode = it.data?.payments?.ussdDailCode ?: ""
                     Log.d("ussdCodesss", ussdCode)
                     showCircularProgressBar = false
                     navController.navigateSingleTopNoSavedState(
-                        "${Route.USSD_HOME_SCREEN}/$paymentRef/${ussdCode}")
+                        "${Route.USSD_HOME_SCREEN}/$paymentRef/${ussdCode}"
+                    )
 
                 }
 
@@ -157,12 +164,11 @@ fun USSDSelectBanksScreen(
                 Spacer(modifier = modifier.height(40.dp))
 
                 AuthorizeButton(
-                    buttonText = "Pay $defaultCurrency $amount",
+                    buttonText = "Pay $defaultCurrency $totalAmount",
                     onClick = {
-                        if(bankCode.isNotEmpty()) {
+                        if (bankCode.isNotEmpty()) {
                             transactionViewModel.initiateUssdTransaction(ussdDTO)
-                        }
-                        else {
+                        } else {
                             showErrorDialog = true
                         }
                     }, !showCircularProgressBar
@@ -191,7 +197,8 @@ fun UssdSelectBankButton(modifier: Modifier = Modifier, onBankCodeSelected: (Str
     var textFieldSize by remember { mutableStateOf(Size.Zero) }
 
     Column {
-        Card(modifier = modifier, elevation = 1.dp,
+        Card(
+            modifier = modifier, elevation = 1.dp,
             border = BorderStroke(0.5.dp, Color.LightGray)
         ) {
 
@@ -259,7 +266,7 @@ fun UssdSelectBankButton(modifier: Modifier = Modifier, onBankCodeSelected: (Str
 
 }
 
-fun setAmountWithCurrency(){
+fun setAmountWithCurrency() {
 
 }
 

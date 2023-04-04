@@ -28,6 +28,9 @@ import com.example.seerbitsdk.R
 import com.example.seerbitsdk.card.AuthorizeButton
 import com.example.seerbitsdk.card.showCircularProgress
 import com.example.seerbitsdk.component.*
+import com.example.seerbitsdk.helper.TransactionType
+import com.example.seerbitsdk.helper.calculateTransactionFee
+import com.example.seerbitsdk.helper.generateSourceIp
 import com.example.seerbitsdk.models.RequiredFields
 import com.example.seerbitsdk.models.bankaccount.BankAccountDTO
 import com.example.seerbitsdk.navigateSingleTopNoSavedState
@@ -80,11 +83,14 @@ fun BankAccountDOBScreen(
             ) {
                 Spacer(modifier = Modifier.height(25.dp))
 
-                var amount: String = merchantDetailsData.payload?.amount ?: ""
+                var amount = merchantDetailsData.payload?.amount
                 val currency = merchantDetailsData.payload?.defaultCurrency?:""
+                val fee =  calculateTransactionFee(merchantDetailsData, TransactionType.ACCOUNT.type, amount = amount?.toDouble()?:0.0)
+                val totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
+
                 SeerbitPaymentDetailHeader(
-                    charges = merchantDetailsData.payload?.vatFee?.toDouble() ?: 0.0,
-                    amount = amount,
+                    charges = fee?.toDouble() ?: 0.0,
+                    amount = amount?:"",
                     currencyText = merchantDetailsData.payload?.defaultCurrency ?: "",
                     "Please Enter your birthday",
                     merchantDetailsData.payload?.businessName ?: "",
@@ -96,7 +102,7 @@ fun BankAccountDOBScreen(
                     deviceType = "Android",
                     country = merchantDetailsData.payload?.country?.countryCode ?: "",
                     bankCode = bankCode,
-                    amount = amount,
+                    amount = totalAmount.toString(),
                     redirectUrl = "http://localhost:3002/#/",
                     productId = "",
                     mobileNumber = merchantDetailsData.payload?.userPhoneNumber,
@@ -109,7 +115,7 @@ fun BankAccountDOBScreen(
                     source = "",
                     accountName = merchantDetailsData.payload?.userFullName,
                     paymentType = "ACCOUNT",
-                    sourceIP = "128.0.0.1",
+                    sourceIP = generateSourceIp(true),
                     currency = merchantDetailsData.payload?.defaultCurrency,
                     bvn = bvn,
                     email = merchantDetailsData.payload?.emailAddress,
@@ -171,7 +177,7 @@ fun BankAccountDOBScreen(
                 Spacer(modifier = modifier.height(30.dp))
 
                 AuthorizeButton(
-                    buttonText = "Pay $currency$amount",
+                    buttonText = "Pay $currency$totalAmount",
                     onClick = {
 
                         if (dob.isNotEmpty()) {

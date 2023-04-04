@@ -27,6 +27,9 @@ import com.example.seerbitsdk.R
 import com.example.seerbitsdk.card.AuthorizeButton
 import com.example.seerbitsdk.card.showCircularProgress
 import com.example.seerbitsdk.component.*
+import com.example.seerbitsdk.helper.TransactionType
+import com.example.seerbitsdk.helper.calculateTransactionFee
+import com.example.seerbitsdk.helper.generateSourceIp
 import com.example.seerbitsdk.models.RequiredFields
 import com.example.seerbitsdk.models.bankaccount.BankAccountDTO
 import com.example.seerbitsdk.navigateSingleTopNoSavedState
@@ -88,9 +91,13 @@ fun BankAccountNumberScreen(
                 Spacer(modifier = Modifier.height(25.dp))
 
                 var amount: String = merchantDetailsData.payload?.amount ?: ""
+                val fee =  calculateTransactionFee(merchantDetailsData, TransactionType.ACCOUNT.type, amount = amount.toDouble())
+                val totalAmount = fee?.toDouble()?.let { amount.toDouble().plus(it) }
+                val defaultCurrency =   merchantDetailsData.payload?.defaultCurrency?:""
+
                 SeerbitPaymentDetailHeader(
 
-                    charges = merchantDetailsData.payload?.vatFee?.toDouble() ?: 0.0,
+                    charges = fee?.toDouble() ?: 0.0,
                     amount = amount,
                     currencyText = merchantDetailsData.payload?.defaultCurrency ?: "",
                     "Please Enter your Account Number",
@@ -103,7 +110,7 @@ fun BankAccountNumberScreen(
                     deviceType = "Android",
                     country = merchantDetailsData.payload?.country?.countryCode ?: "",
                     bankCode = bankCode,
-                    amount = amount,
+                    amount = totalAmount.toString(),
                     redirectUrl = "http://localhost:3002/#/",
                     productId = "",
                     mobileNumber = merchantDetailsData.payload?.userPhoneNumber,
@@ -116,7 +123,7 @@ fun BankAccountNumberScreen(
                     source = "",
                     accountName = merchantDetailsData.payload?.userFullName,
                     paymentType = "ACCOUNT",
-                    sourceIP = "128.0.0.1",
+                    sourceIP = generateSourceIp(useIPv4 = true),
                     currency = merchantDetailsData.payload?.defaultCurrency,
                     bvn = "",
                     email = merchantDetailsData.payload?.emailAddress,

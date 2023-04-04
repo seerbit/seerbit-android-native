@@ -50,7 +50,9 @@ import com.example.seerbitsdk.models.RequiredFields
 import com.example.seerbitsdk.models.card.CardDTO
 import com.example.seerbitsdk.component.OtherPaymentScreen
 import com.example.seerbitsdk.helper.TransactionType
+import com.example.seerbitsdk.helper.calculateTransactionFee
 import com.example.seerbitsdk.helper.displayPaymentMethod
+import com.example.seerbitsdk.helper.generateSourceIp
 import com.example.seerbitsdk.models.OnCloseSeerBitSdkListener
 import com.example.seerbitsdk.momo.MOMOOTPScreen
 import com.example.seerbitsdk.momo.MomoHomeScreen
@@ -335,11 +337,14 @@ fun CardHomeScreen(
 
             var paymentReference = merchantDetailsData.payload?.paymentReference ?: ""
             val amount = merchantDetailsData.payload?.amount
+            val fee =   calculateTransactionFee(merchantDetailsData, TransactionType.CARD.type, amount = amount?.toDouble()?: 0.0)
+            val totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
+            val defaultCurrency =   merchantDetailsData.payload?.defaultCurrency?:""
 
             val cardDTO = CardDTO(
                 deviceType = "Android",
                 country = merchantDetailsData.payload?.country?.countryCode ?: "",
-                amount = amount?.toDouble()?: 0.0,
+                amount = totalAmount,
                 cvv = cvv,
                 redirectUrl = "http://localhost:3002/#/",
                 productId = "",
@@ -353,7 +358,7 @@ fun CardHomeScreen(
                 expiryYear = cardExpiryYear,
                 source = "",
                 paymentType = "CARD",
-                sourceIP = "0.0.0.1",
+                sourceIP = generateSourceIp(useIPv4 = true),
                 pin = "",
                 currency = merchantDetailsData.payload?.defaultCurrency,
                 "LOCAL",
@@ -366,7 +371,7 @@ fun CardHomeScreen(
 
             //SeerBit Header
             SeerbitPaymentDetailHeader(
-                charges = merchantDetailsData.payload?.vatFee?.toDouble() ?: 0.0,
+                charges = fee?.toDouble() ?: 0.0,
                 amount = amount ?: "",
                 currencyText = merchantDetailsData.payload?.defaultCurrency ?: "",
                 "Debit/Credit Card Details",
@@ -454,7 +459,7 @@ fun CardHomeScreen(
                 horizontalArrangement = Arrangement.Center
             ) {
                 PayButton(
-                    amount = "NGN ${cardDTO.amount}",
+                    amount = "$defaultCurrency ${cardDTO.amount}",
                     onClick = {
 
                         if (validateCardDetails(

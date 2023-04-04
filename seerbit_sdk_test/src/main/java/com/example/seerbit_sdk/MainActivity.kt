@@ -108,7 +108,7 @@ fun goToPaymentGateway(context: Context = LocalContext.current) {
                     context,
                     amount,
                     phoneNumber,
-                    "SBPUBK_WWEQK6UVR1PNZEVVUOBNIQHEIEIM1HJC",
+                    "SBPUBK_1ZAL1HXRQQFKHSHXAQ91KGGWEEUXZK4I",
                     fullName,
                     email
                 )

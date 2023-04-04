@@ -22,7 +22,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.seerbitsdk.*
 import com.example.seerbitsdk.helper.TransactionType
+import com.example.seerbitsdk.helper.calculateTransactionFee
 import com.example.seerbitsdk.helper.displayPaymentMethod
+import com.example.seerbitsdk.helper.generateSourceIp
 import com.example.seerbitsdk.models.home.MerchantDetailsResponse
 import com.example.seerbitsdk.models.transfer.TransferDTO
 import com.example.seerbitsdk.screenstate.InitiateTransactionState
@@ -66,11 +68,13 @@ fun OtherPaymentScreen(
 
             ) {
                 Spacer(modifier = Modifier.height(25.dp))
-                var amount: String = merchantDetailsData.payload?.amount ?: ""
+                var amount= merchantDetailsData.payload?.amount
+                    val fee =   calculateTransactionFee(merchantDetailsData, TransactionType.MOMO.type, amount = amount?.toDouble()?: 0.0)
+                val totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
 
                 SeerbitPaymentDetailHeader(
-                    charges = merchantDetailsData.payload?.vatFee?.toDouble() ?:0.0,
-                    amount = amount,
+                    charges = fee?.toDouble() ?:0.0,
+                    amount = formatAmount(amount?.toDouble()),
                     currencyText = merchantDetailsData.payload?.defaultCurrency?:"",
                     "Other Payment Channels",
                     merchantDetailsData.payload?.businessName?:"",
@@ -175,12 +179,15 @@ fun OtherPaymentScreen(
 }
 
 fun generateTransferDTO(merchantDetailsData: MerchantDetailsResponse, transactionViewModel: TransactionViewModel) : TransferDTO {
-    var amount: String = merchantDetailsData.payload?.amount ?: ""
+
+    var amount= merchantDetailsData.payload?.amount
+    val fee =   calculateTransactionFee(merchantDetailsData, TransactionType.TRANSFER.type, amount = amount?.toDouble()?: 0.0)
+    val totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
 
     return TransferDTO(
         country = merchantDetailsData.payload?.country?.countryCode ?: "",
         bankCode = "044",
-        amount = amount,
+        amount = totalAmount.toString(),
         productId = "",
         mobileNumber = merchantDetailsData.payload?.userPhoneNumber,
         paymentReference = merchantDetailsData.payload?.paymentReference,
@@ -190,7 +197,7 @@ fun generateTransferDTO(merchantDetailsData: MerchantDetailsResponse, transactio
         publicKey = merchantDetailsData.payload?.publicKey,
         source = "",
         paymentType = "TRANSFER",
-        sourceIP = "102.88.63.64",
+        sourceIP = generateSourceIp(true),
         currency = merchantDetailsData.payload?.defaultCurrency,
         productDescription = "",
         email = merchantDetailsData.payload?.emailAddress,

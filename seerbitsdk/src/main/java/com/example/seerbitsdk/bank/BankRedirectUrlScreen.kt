@@ -21,6 +21,9 @@ import com.example.seerbitsdk.ErrorDialog
 import com.example.seerbitsdk.card.AuthorizeButton
 import com.example.seerbitsdk.card.showCircularProgress
 import com.example.seerbitsdk.component.*
+import com.example.seerbitsdk.helper.TransactionType
+import com.example.seerbitsdk.helper.calculateTransactionFee
+import com.example.seerbitsdk.helper.generateSourceIp
 import com.example.seerbitsdk.models.bankaccount.BankAccountDTO
 import com.example.seerbitsdk.redirectUrl
 import com.example.seerbitsdk.screenstate.InitiateTransactionState
@@ -76,13 +79,17 @@ fun BankRedirectUrlScreen(
                     .weight(1f)
             ) {
                 Spacer(modifier = Modifier.height(25.dp))
-                var amount: String = merchantDetailsData.payload?.amount ?: ""
                 val paymentRef = merchantDetailsData.payload?.paymentReference ?: ""
+                var amount = merchantDetailsData.payload?.amount
+                val currency = merchantDetailsData.payload?.defaultCurrency?:""
+                val fee =  calculateTransactionFee(merchantDetailsData, TransactionType.ACCOUNT.type, amount = amount?.toDouble()?:0.0)
+                val totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
+
 
 
                 SeerbitPaymentDetailHeaderTwo(
-                    charges = merchantDetailsData.payload?.vatFee?.toDouble() ?: 0.0,
-                    amount =amount,
+                    charges = fee?.toDouble() ?: 0.0,
+                    amount =amount?:"",
                     currencyText = merchantDetailsData.payload?.defaultCurrency ?: "",
                     merchantDetailsData.payload?.businessName ?: "",
                     merchantDetailsData.payload?.supportEmail ?: ""
@@ -111,7 +118,7 @@ fun BankRedirectUrlScreen(
                     deviceType = "Android",
                     country = merchantDetailsData.payload?.country?.countryCode ?: "",
                     bankCode = bankCode,
-                    amount = amount,
+                    amount = totalAmount.toString(),
                     redirectUrl = "http://localhost:3002/#/",
                     productId = "",
                     mobileNumber = merchantDetailsData.payload?.userPhoneNumber,
@@ -124,7 +131,7 @@ fun BankRedirectUrlScreen(
                     source = "",
                     accountName =  merchantDetailsData.payload?.userFullName,
                     paymentType = "ACCOUNT",
-                    sourceIP = "128.0.0.1",
+                    sourceIP = generateSourceIp(true),
                     currency = merchantDetailsData.payload?.defaultCurrency,
                     bvn = "",
                     email =  merchantDetailsData.payload?.emailAddress,

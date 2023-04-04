@@ -30,6 +30,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.seerbitsdk.*
 import com.example.seerbitsdk.component.*
+import com.example.seerbitsdk.helper.TransactionType
+import com.example.seerbitsdk.helper.calculateTransactionFee
+import com.example.seerbitsdk.helper.generateSourceIp
 import com.example.seerbitsdk.models.CardOTPDTO
 import com.example.seerbitsdk.models.Transaction
 import com.example.seerbitsdk.models.card.CardDTO
@@ -123,9 +126,13 @@ fun CardEnterPinScreen(
                 val queryTransactionStateState: QueryTransactionState =
                     cardEnterPinViewModel.queryTransactionState.value
                 val openDialog = remember { mutableStateOf(false) }
-                var amount: String =  merchantDetailsData.payload?.amount?:""
+                var amount  =merchantDetailsData.payload?.amount
                 val exitOnSuccess = remember { mutableStateOf(false) }
                 val activity = (LocalContext.current as? Activity)
+
+                val fee =   calculateTransactionFee(merchantDetailsData, TransactionType.CARD.type, amount = amount?.toDouble()?: 0.0)
+                val totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
+                val defaultCurrency =   merchantDetailsData.payload?.defaultCurrency?:""
 
 
                 if(useOtp){
@@ -135,12 +142,12 @@ fun CardEnterPinScreen(
                 Spacer(modifier = Modifier.height(21.dp))
                 SeerbitPaymentDetailHeader(
 
-                    charges =  merchantDetailsData.payload?.vatFee?.toDouble()!!,
-                    amount = amount,
-                    currencyText = merchantDetailsData.payload.defaultCurrency!!,
+                    charges =  fee?.toDouble()?:0.0,
+                    amount = amount?:"",
+                    currencyText = merchantDetailsData.payload?.defaultCurrency?:"",
                     "",
-                    merchantDetailsData.payload.businessName!!,
-                    merchantDetailsData.payload.supportEmail!!
+                    merchantDetailsData.payload?.businessName?:"",
+                    merchantDetailsData.payload?.supportEmail?:""
                 )
 
 
@@ -162,34 +169,34 @@ fun CardEnterPinScreen(
 
                 val cardDTO = CardDTO(
                     deviceType = "Android",
-                    country = merchantDetailsData.payload.country?.countryCode ?: "",
-                    amount = merchantDetailsData.payload.amount?.toDouble()?:0.0,
+                    country = merchantDetailsData.payload?.country?.countryCode ?: "",
+                    amount = totalAmount ?:0.0,
                     cvv = cvv,
                     redirectUrl = "http://localhost:3002/#/",
                     productId = "",
-                    mobileNumber = merchantDetailsData.payload.userPhoneNumber,
+                    mobileNumber = merchantDetailsData.payload?.userPhoneNumber,
                     paymentReference = paymentRef,
-                    fee = merchantDetailsData.payload.vatFee,
+                    fee = merchantDetailsData.payload?.vatFee,
                     expiryMonth = cardExpiryMonth,
-                    fullName = merchantDetailsData.payload.userFullName,
+                    fullName = merchantDetailsData.payload?.userFullName,
                     "MASTERCARD",
-                    publicKey = merchantDetailsData.payload.publicKey,
+                    publicKey = merchantDetailsData.payload?.publicKey,
                     expiryYear = cardExpiryYear,
                     source = "MODAL",
                     paymentType = "CARD",
-                    sourceIP = "0.0.0.1",
+                    sourceIP = generateSourceIp(useIPv4 = true),
                     pin = pin,
-                    currency = merchantDetailsData.payload.defaultCurrency,
+                    currency = merchantDetailsData.payload?.defaultCurrency,
                     "LOCAL",
                     false,
-                    email = merchantDetailsData.payload.emailAddress,
+                    email = merchantDetailsData.payload?.emailAddress,
                     cardNumber = cardNumber,
                     retry = true
                 )
 
                 val cardOTPDTO = CardOTPDTO( transaction = Transaction( linkingReference, otp) )
                 var otpHeaderText : String = ""
-                val alternativeOTPText : String = "Kindly enter the OTP sent to ${merchantDetailsData.payload.number?.maskedPhoneNumber()} and\n" +
+                val alternativeOTPText : String = "Kindly enter the OTP sent to ${merchantDetailsData.payload?.number?.maskedPhoneNumber()} and\n" +
                         "o***********@gmail.com or enter the OTP generates on your hardware token device"
 
                 otpHeaderText = otpText.ifEmpty {
@@ -358,7 +365,7 @@ fun CardEnterPinScreen(
                 //payment button
                 if (isEnterPin && !isEnterOTP && !useOtp) {
                     PayButton(
-                        amount = "NGN ${cardDTO.amount}",
+                        amount = "$defaultCurrency ${cardDTO.amount}",
                         onClick = {
                             if(pin.length == 4){
                                 onPayButtonClicked(cardDTO)

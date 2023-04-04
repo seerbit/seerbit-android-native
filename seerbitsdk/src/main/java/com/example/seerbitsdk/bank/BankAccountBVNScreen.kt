@@ -27,6 +27,8 @@ import com.example.seerbitsdk.component.Dummy
 import com.example.seerbitsdk.component.Route
 import com.example.seerbitsdk.component.SeerbitPaymentDetailHeader
 import com.example.seerbitsdk.component.YES
+import com.example.seerbitsdk.helper.TransactionType
+import com.example.seerbitsdk.helper.calculateTransactionFee
 import com.example.seerbitsdk.models.RequiredFields
 import com.example.seerbitsdk.navigateSingleTopNoSavedState
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
@@ -72,17 +74,21 @@ fun BankAccountBVNScreen(
                     .weight(1f)
             ) {
                 Spacer(modifier = Modifier.height(25.dp))
-                var amount: String = merchantDetailsData.payload?.amount ?: ""
+
+                var amount = merchantDetailsData.payload?.amount
                 val currency = merchantDetailsData.payload?.defaultCurrency?:""
+                val fee =  calculateTransactionFee(merchantDetailsData, TransactionType.ACCOUNT.type, amount = amount?.toDouble()?:0.0)
+                val totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
+
 
                 SeerbitPaymentDetailHeader(
 
-                    charges =  merchantDetailsData.payload?.vatFee?.toDouble()!!,
-                    amount = amount,
-                    currencyText = merchantDetailsData.payload.defaultCurrency!!,
+                    charges =  fee?.toDouble()?:0.0,
+                    amount = amount?:"",
+                    currencyText = merchantDetailsData.payload?.defaultCurrency?:"",
                     "Kindly Enter your BVN",
-                    merchantDetailsData.payload.businessName!!,
-                    merchantDetailsData.payload.supportEmail!!
+                    merchantDetailsData.payload?.businessName?:"",
+                    merchantDetailsData.payload?.supportEmail?:""
                 )
 
                 Spacer(modifier = modifier.height(10.dp))
@@ -95,7 +101,7 @@ fun BankAccountBVNScreen(
 
                 Spacer(modifier = modifier.height(10.dp))
                 AuthorizeButton(
-                    buttonText = "Pay $currency$amount",
+                    buttonText = "Pay $currency$totalAmount",
                     onClick = {
                         if (bvn.isNotEmpty()) {
 
