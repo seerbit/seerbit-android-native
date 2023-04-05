@@ -6,7 +6,7 @@ pluginManagement {
 
         maven {
             url "https://jitpack.io"
-            credentials { username authToken }
+            credentials { username "jp_3s9rkn9juopvk32r5bfjvkpkuk" }
         }
     }
 }

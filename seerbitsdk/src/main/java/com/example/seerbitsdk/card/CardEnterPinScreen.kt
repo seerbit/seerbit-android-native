@@ -246,7 +246,7 @@ fun CardEnterPinScreen(
                     }
 
                     if (it.data?.code == "S12") {
-                        alertDialogMessage = it.data?.message.toString()
+                        alertDialogMessage = it.data.message.toString()
                         openDialog.value = true
                         alertDialogHeaderMessage = "Failed"
                     }
