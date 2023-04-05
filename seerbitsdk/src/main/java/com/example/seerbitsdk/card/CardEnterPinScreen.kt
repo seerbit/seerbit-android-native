@@ -355,16 +355,22 @@ fun CardEnterPinScreen(
                             ?: "Something went wrong"
                     )
                 }
-                showCircularProgressBar = initiateCardPaymentEnterPinState.isLoading
+                if(initiateCardPaymentEnterPinState.isLoading){
+                    showCircularProgressBar = true
+                }
+
+
 
                 initiateCardPaymentEnterPinState.data?.let {
-                    showCircularProgressBar = false
-                    paymentReference2 = it.data?.payments?.paymentReference!!
-                    linkingReference = it.data.payments.linkingReference
-                    isEnterOTP = it.data.message == KINDLY_ENTER_OTP
+                    if (it.data?.code == PENDING_CODE) {
+                        showCircularProgressBar = false
+                        paymentReference2 = it.data?.payments?.paymentReference!!
+                        linkingReference = it.data.payments.linkingReference
+                        isEnterOTP = true
+                    }
 
-                    if (it.data.code == "S12") {
-                        alertDialogMessage = it.data.message.toString()
+                    if (it.data?.code == "S12") {
+                        alertDialogMessage = it.data?.message.toString()
                         openDialog.value = true
                         alertDialogHeaderMessage = "Failed"
                     }
