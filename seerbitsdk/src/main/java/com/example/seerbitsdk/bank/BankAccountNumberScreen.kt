@@ -106,8 +106,8 @@ fun BankAccountNumberScreen(
                     amount = amount?: "",
                     currencyText = merchantDetailsData.payload?.defaultCurrency ?: "",
                     "Please Enter your Account Number",
-                    merchantDetailsData.payload?.businessName ?: "",
-                    merchantDetailsData.payload?.supportEmail ?: ""
+                    merchantDetailsData.payload?.userFullName ?: "",
+                    merchantDetailsData.payload?.emailAddress ?: ""
                 )
                 val paymentRef = merchantDetailsData.payload?.paymentReference ?: ""
 

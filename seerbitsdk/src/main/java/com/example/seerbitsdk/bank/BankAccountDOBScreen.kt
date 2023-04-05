@@ -94,8 +94,8 @@ fun BankAccountDOBScreen(
                     amount = amount?:"",
                     currencyText = merchantDetailsData.payload?.defaultCurrency ?: "",
                     "Please Enter your birthday",
-                    merchantDetailsData.payload?.businessName ?: "",
-                    merchantDetailsData.payload?.supportEmail ?: ""
+                    merchantDetailsData.payload?.userFullName ?: "",
+                    merchantDetailsData.payload?.emailAddress ?: ""
                 )
 
                 val paymentRef = merchantDetailsData.payload?.paymentReference ?: ""

@@ -97,8 +97,8 @@ fun USSDSelectBanksScreen(
                     amount = amount?:"",
                     currencyText = defaultCurrency,
                     "Choose your bank to start this payment",
-                    merchantDetailsData.payload?.businessName ?: "",
-                    merchantDetailsData.payload?.supportEmail ?: ""
+                    merchantDetailsData.payload?.userFullName ?: "",
+                    merchantDetailsData.payload?.emailAddress ?: ""
                 )
                 Spacer(modifier = Modifier.height(41.dp))
 

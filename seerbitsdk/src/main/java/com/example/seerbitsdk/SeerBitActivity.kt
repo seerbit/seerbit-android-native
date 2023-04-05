@@ -395,8 +395,8 @@ fun CardHomeScreen(
                 amount = amount ?: "",
                 currencyText = merchantDetailsData.payload?.defaultCurrency ?: "",
                 "Debit/Credit Card Details",
-                merchantDetailsData.payload?.businessName ?: "",
-                merchantDetailsData.payload?.supportEmail ?: ""
+                merchantDetailsData.payload?.userFullName ?: "",
+                merchantDetailsData.payload?.emailAddress ?: ""
             )
 
             Spacer(modifier = Modifier.height(8.dp))

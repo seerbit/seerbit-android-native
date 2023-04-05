@@ -114,8 +114,8 @@ fun TransferHomeScreen(
                 charges = fee?.toDouble()?:0.0,
                 amount = amount.toString(),
                 currencyText = defaultCurrency,
-                businessName = merchantDetailsData.payload?.businessName?:"",
-                email = merchantDetailsData.payload?.supportEmail?:""
+                merchantDetailsData.payload?.userFullName ?: "",
+                merchantDetailsData.payload?.emailAddress ?: ""
             )
 
             //querying transaction happens after otp has been inputted

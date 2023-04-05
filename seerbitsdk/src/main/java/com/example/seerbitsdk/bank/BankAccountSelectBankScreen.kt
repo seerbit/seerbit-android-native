@@ -110,8 +110,8 @@ fun BankAccountSelectBankScreen(
                     amount = amount?:"",
                     currencyText = merchantDetailsData.payload?.defaultCurrency?:"",
                     "Choose your bank to start this payment",
-                    merchantDetailsData.payload?.businessName?:"",
-                    merchantDetailsData.payload?.supportEmail?:""
+                    merchantDetailsData.payload?.userFullName ?: "",
+                    merchantDetailsData.payload?.emailAddress ?: ""
                 )
 
 

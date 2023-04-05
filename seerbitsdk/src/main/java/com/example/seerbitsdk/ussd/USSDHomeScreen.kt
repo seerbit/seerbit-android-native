@@ -99,8 +99,8 @@ fun USSDHomeScreen(
                     amount = amount?:"",
                     currencyText = merchantDetailsData.payload?.defaultCurrency ?: "",
                     "",
-                    merchantDetailsData.payload?.businessName ?: "",
-                    merchantDetailsData.payload?.supportEmail ?: ""
+                    merchantDetailsData.payload?.userFullName ?: "",
+                    merchantDetailsData.payload?.emailAddress ?: ""
                 )
 
 

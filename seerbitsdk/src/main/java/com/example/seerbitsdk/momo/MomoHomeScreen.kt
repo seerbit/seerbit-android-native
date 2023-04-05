@@ -105,8 +105,8 @@ fun MomoHomeScreen(
                     amount = amount?: "",
                     currencyText = merchantDetailsData.payload?.defaultCurrency ?: "",
                     "Choose your bank to start this payment",
-                    merchantDetailsData.payload?.businessName ?: "",
-                    merchantDetailsData.payload?.supportEmail ?: ""
+                    merchantDetailsData.payload?.userFullName ?: "",
+                    merchantDetailsData.payload?.emailAddress ?: ""
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 val paymentRef = merchantDetailsData.payload?.paymentReference ?: ""

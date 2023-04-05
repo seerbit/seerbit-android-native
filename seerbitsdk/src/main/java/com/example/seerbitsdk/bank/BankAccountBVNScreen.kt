@@ -88,8 +88,8 @@ fun BankAccountBVNScreen(
                     amount = amount?:"",
                     currencyText = merchantDetailsData.payload?.defaultCurrency?:"",
                     "Kindly Enter your BVN",
-                    merchantDetailsData.payload?.businessName?:"",
-                    merchantDetailsData.payload?.supportEmail?:""
+                    merchantDetailsData.payload?.userFullName ?: "",
+                    merchantDetailsData.payload?.emailAddress ?: ""
                 )
 
                 Spacer(modifier = modifier.height(10.dp))

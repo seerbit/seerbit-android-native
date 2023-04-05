@@ -73,8 +73,8 @@ fun OtherPaymentScreen(
                     amount = amount.toString(),
                     currencyText = merchantDetailsData.payload?.defaultCurrency?:"",
                     "Other Payment Channels",
-                    merchantDetailsData.payload?.businessName?:"",
-                    merchantDetailsData.payload?.supportEmail?:""
+                    merchantDetailsData.payload?.userFullName ?: "",
+                    merchantDetailsData.payload?.emailAddress ?: ""
                 )
                 Spacer(modifier = Modifier.height(8.dp))
 

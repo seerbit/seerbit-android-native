@@ -114,8 +114,8 @@ fun BankAccountOTPScreen(
                     charges =  fee?.toDouble()?:0.0,
                     amount = amount?:"",
                     currencyText = merchantDetailsData.payload?.defaultCurrency?:"",
-                    merchantDetailsData.payload?.businessName?:"",
-                    merchantDetailsData.payload?.supportEmail?:""
+                    merchantDetailsData.payload?.userFullName ?: "",
+                    merchantDetailsData.payload?.emailAddress ?: ""
                 )
 
                 val bankAccountOtpDtO = BankAccountOtpDto(linkingReference, otp)
