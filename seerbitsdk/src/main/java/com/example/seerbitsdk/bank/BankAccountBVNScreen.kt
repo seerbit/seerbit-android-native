@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -19,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.example.seerbitsdk.ErrorDialog
+import com.example.seerbitsdk.*
 import com.example.seerbitsdk.R
 import com.example.seerbitsdk.card.AuthorizeButton
 import com.example.seerbitsdk.card.showCircularProgress
@@ -29,7 +30,6 @@ import com.example.seerbitsdk.helper.calculateTransactionFee
 import com.example.seerbitsdk.helper.formatInputDouble
 import com.example.seerbitsdk.helper.isMerchantFeeBearer
 import com.example.seerbitsdk.models.RequiredFields
-import com.example.seerbitsdk.navigateSingleTopNoSavedState
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.ui.theme.SeerBitTheme
 import com.example.seerbitsdk.viewmodels.TransactionViewModel
@@ -45,7 +45,6 @@ fun BankAccountBVNScreen(
     bankCode: String?,
     requiredFields : RequiredFields?,
     bankName: String?
-
     ) {
 
     var bvn by remember { mutableStateOf("") }
@@ -123,6 +122,19 @@ fun BankAccountBVNScreen(
                         }
                     }, true
                 )
+                Spacer(modifier = Modifier.height(100.dp))
+
+                OtherPaymentButtonComponent(
+                    onOtherPaymentButtonClicked = { navController.navigatePopUpToOtherPaymentScreen(Route.OTHER_PAYMENT_SCREEN) },
+                    onCancelButtonClicked = {navController.navigateSingleTopTo(Debit_CreditCard.route)},
+                    enable = true
+                )
+
+                Spacer(modifier = Modifier.height(100.dp))
+                BottomSeerBitWaterMark(modifier = Modifier.align(alignment = Alignment.CenterHorizontally))
+
+                Spacer(modifier = Modifier.height(16.dp))
+
             }
 
         }

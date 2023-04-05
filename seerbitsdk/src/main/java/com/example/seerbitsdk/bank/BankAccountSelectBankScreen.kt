@@ -13,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -25,10 +26,12 @@ import androidx.compose.ui.unit.*
 import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.seerbitsdk.ErrorDialog
+import com.example.seerbitsdk.*
 import com.example.seerbitsdk.R
 import com.example.seerbitsdk.card.AuthorizeButton
 import com.example.seerbitsdk.card.showCircularProgress
+import com.example.seerbitsdk.component.BottomSeerBitWaterMark
+import com.example.seerbitsdk.component.OtherPaymentButtonComponent
 import com.example.seerbitsdk.component.Route
 import com.example.seerbitsdk.component.SeerbitPaymentDetailHeader
 import com.example.seerbitsdk.helper.TransactionType
@@ -37,7 +40,6 @@ import com.example.seerbitsdk.helper.formatInputDouble
 import com.example.seerbitsdk.helper.isMerchantFeeBearer
 import com.example.seerbitsdk.models.MerchantBanksItem
 import com.example.seerbitsdk.models.RequiredFields
-import com.example.seerbitsdk.navigateSingleTopNoSavedState
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.ui.theme.SeerBitTheme
 import com.example.seerbitsdk.viewmodels.SelectBankViewModel

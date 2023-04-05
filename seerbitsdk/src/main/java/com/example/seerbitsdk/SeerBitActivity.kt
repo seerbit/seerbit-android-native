@@ -1308,7 +1308,8 @@ fun MyAppNavHost(
                 merchantDetailsState = merchantDetailsState,
                 transactionViewModel = transactionViewModel,
                 bankCode = bankCode!!,
-                bankName = bankName!!
+                bankName = bankName!!,
+                navController = navController
             )
         }
 

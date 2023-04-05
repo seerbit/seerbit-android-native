@@ -17,7 +17,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.seerbitsdk.ErrorDialog
+import androidx.navigation.NavHostController
+import com.example.seerbitsdk.*
 import com.example.seerbitsdk.card.AuthorizeButton
 import com.example.seerbitsdk.card.showCircularProgress
 import com.example.seerbitsdk.component.*
@@ -26,7 +27,6 @@ import com.example.seerbitsdk.helper.calculateTransactionFee
 import com.example.seerbitsdk.helper.generateSourceIp
 import com.example.seerbitsdk.helper.isMerchantFeeBearer
 import com.example.seerbitsdk.models.bankaccount.BankAccountDTO
-import com.example.seerbitsdk.redirectUrl
 import com.example.seerbitsdk.screenstate.InitiateTransactionState
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.screenstate.QueryTransactionState
@@ -39,7 +39,8 @@ fun BankRedirectUrlScreen(
     transactionViewModel: TransactionViewModel,
     merchantDetailsState: MerchantDetailsState?,
     bankCode: String,
-    bankName: String
+    bankName: String,
+    navController:NavHostController
 ) {
 
 
@@ -261,6 +262,19 @@ fun BankRedirectUrlScreen(
                         }
                     }, !showCircularProgressBar
                 )
+
+                Spacer(modifier = Modifier.height(100.dp))
+
+                OtherPaymentButtonComponent(
+                    onOtherPaymentButtonClicked = { navController.navigatePopUpToOtherPaymentScreen(Route.OTHER_PAYMENT_SCREEN) },
+                    onCancelButtonClicked = {navController.navigateSingleTopTo(Debit_CreditCard.route)},
+                    enable = !showCircularProgressBar
+                )
+
+                Spacer(modifier = Modifier.height(100.dp))
+                BottomSeerBitWaterMark(modifier = Modifier.align(alignment = Alignment.CenterHorizontally))
+
+                Spacer(modifier = Modifier.height(16.dp))
 
 
                 //The alert dialog occurs here

@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.seerbitsdk.Debit_CreditCard
 import com.example.seerbitsdk.ErrorDialog
 import com.example.seerbitsdk.card.AuthorizeButton
 import com.example.seerbitsdk.card.OTPInputField
@@ -29,6 +30,8 @@ import com.example.seerbitsdk.helper.calculateTransactionFee
 import com.example.seerbitsdk.models.otp.BankAccountOtpDto
 import com.example.seerbitsdk.models.RequiredFields
 import com.example.seerbitsdk.models.bankaccount.BankAccountDTO
+import com.example.seerbitsdk.navigatePopUpToOtherPaymentScreen
+import com.example.seerbitsdk.navigateSingleTopTo
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.screenstate.OTPState
 import com.example.seerbitsdk.screenstate.QueryTransactionState
@@ -51,6 +54,7 @@ fun BankAccountOTPScreen(
     requiredFields: RequiredFields?,
     bankName: String?,
     linkingReference: String?,
+
     ) {
 
     var otp by remember { mutableStateOf("") }
@@ -249,6 +253,20 @@ fun BankAccountOTPScreen(
                         }
                     }, !showCircularProgressBar
                 )
+
+
+                Spacer(modifier = Modifier.height(100.dp))
+
+                OtherPaymentButtonComponent(
+                    onOtherPaymentButtonClicked = { navController.navigatePopUpToOtherPaymentScreen(Route.OTHER_PAYMENT_SCREEN) },
+                    onCancelButtonClicked = {navController.navigateSingleTopTo(Debit_CreditCard.route)},
+                    enable = !showCircularProgressBar
+                )
+
+                Spacer(modifier = Modifier.height(100.dp))
+                BottomSeerBitWaterMark(modifier = Modifier.align(alignment = Alignment.CenterHorizontally))
+
+                Spacer(modifier = Modifier.height(16.dp))
 
 
                 //The alert dialog occurs here
