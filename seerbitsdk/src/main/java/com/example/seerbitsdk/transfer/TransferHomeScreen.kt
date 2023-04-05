@@ -40,6 +40,8 @@ import com.example.seerbitsdk.navigateSingleTopNoSavedState
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.screenstate.QueryTransactionState
 import com.example.seerbitsdk.ui.theme.*
+import com.example.seerbitsdk.ussd.ErrorDialogg
+import com.example.seerbitsdk.ussd.ErrorDialoggWithRetry
 import com.example.seerbitsdk.ussd.USSDCodeSurfaceView
 import com.example.seerbitsdk.ussd.copyToClipboard
 import com.example.seerbitsdk.viewmodels.TransactionViewModel
@@ -98,12 +100,17 @@ fun TransferHomeScreen(
 
             val defaultCurrency: String = merchantDetailsData.payload?.defaultCurrency ?: ""
 
-            var amount= merchantDetailsData.payload?.amount
-            val fee =   calculateTransactionFee(merchantDetailsData, TransactionType.TRANSFER.type, amount = amount?.toDouble()?: 0.0)
+            var amount = merchantDetailsData.payload?.amount
+            val fee = calculateTransactionFee(
+                merchantDetailsData,
+                TransactionType.TRANSFER.type,
+                amount = amount?.toDouble() ?: 0.0
+            )
             var totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
+            val paymentReference = merchantDetailsData.payload?.paymentReference
 
-            if(isMerchantFeeBearer(merchantDetailsData)){
-                totalAmount =amount?.toDouble()
+            if (isMerchantFeeBearer(merchantDetailsData)) {
+                totalAmount = amount?.toDouble()
             }
 
             transferAmount = formatInputDouble(amount)
@@ -111,12 +118,24 @@ fun TransferHomeScreen(
             Spacer(modifier = Modifier.height(21.dp))
 
             SeerbitPaymentDetailHeaderTwo(
-                charges = fee?.toDouble()?:0.0,
+                charges = fee?.toDouble() ?: 0.0,
                 amount = amount.toString(),
                 currencyText = defaultCurrency,
                 merchantDetailsData.payload?.userFullName ?: "",
                 merchantDetailsData.payload?.emailAddress ?: ""
             )
+
+            ErrorDialoggWithRetry(
+                showDialog = openDialog,
+                alertDialogHeaderMessage = alertDialogHeaderMessage,
+                alertDialogMessage = alertDialogMessage,
+                exitOnSuccess = exitOnSuccess.value,
+                onDismiss = { openDialog.value = false }
+            ) {
+                openDialog.value = false
+                transactionViewModel.queryTransaction(paymentReference ?: "")
+            }
+
 
             //querying transaction happens after otp has been inputted
             if (queryTransactionStateState.hasError) {
@@ -133,7 +152,7 @@ fun TransferHomeScreen(
                 showCircularProgressBar = true
 
             }
-            val paymentReference =merchantDetailsData.payload?.paymentReference
+
 
             if (queryTransactionStateState.data?.data != null) {
                 when (queryTransactionStateState.data.data.code) {
@@ -144,9 +163,10 @@ fun TransferHomeScreen(
                         transactionViewModel.queryTransaction(paymentReference ?: "")
                     }
                     SUCCESS -> {
-                        alertDialogHeaderMessage = "Successful"
+                        alertDialogHeaderMessage = "Success!!"
                         openDialog.value = true
-                        alertDialogMessage = queryTransactionStateState.data.data.payments?.reason?: ""
+                        alertDialogMessage =
+                            queryTransactionStateState.data.data.payments?.reason ?: ""
                         showCircularProgressBar = false
                         exitOnSuccess.value = true
                         transactionViewModel.resetTransactionState()
@@ -155,7 +175,8 @@ fun TransferHomeScreen(
                     else -> {
                         alertDialogHeaderMessage = "Failed"
                         openDialog.value = true
-                        alertDialogMessage = queryTransactionStateState.data.data.payments?.reason?: ""
+                        alertDialogMessage =
+                            queryTransactionStateState.data.data.payments?.reason ?: ""
                         showCircularProgressBar = false
                         transactionViewModel.resetTransactionState()
                     }
@@ -230,52 +251,6 @@ fun TransferHomeScreen(
                 }, !showCircularProgressBar
             )
             Spacer(modifier = Modifier.height(50.dp))
-
-
-            //put your alert dialog here
-            //The alert dialog occurs here
-            if (openDialog.value) {
-                AlertDialog(
-                    onDismissRequest = {
-
-                    },
-                    title = {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            Text(text = alertDialogHeaderMessage)
-                        }
-
-                    },
-                    text = {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            Text(alertDialogMessage)
-                        }
-                    },
-                    confirmButton = {
-                        Button(
-
-                            onClick = {
-                                openDialog.value = false
-                                if (exitOnSuccess.value) {
-                                    activity?.finish()
-                                }
-
-                            },
-                            colors = ButtonDefaults.buttonColors(
-                                backgroundColor = SignalRed
-                            )
-                        ) {
-                            Text(text = "Close")
-
-                        }
-                    },
-                )
-            }
 
 
         }

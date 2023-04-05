@@ -44,6 +44,7 @@ import com.example.seerbitsdk.screenstate.QueryTransactionState
 import com.example.seerbitsdk.ui.theme.Faktpro
 import com.example.seerbitsdk.ui.theme.SeerBitTheme
 import com.example.seerbitsdk.ui.theme.SignalRed
+import com.example.seerbitsdk.ussd.ErrorDialogg
 import com.example.seerbitsdk.viewmodels.CardEnterPinViewModel
 import com.example.seerbitsdk.viewmodels.TransactionViewModel
 import com.example.seerbitsdk.viewmodels.MerchantDetailsViewModel
@@ -159,6 +160,15 @@ fun CardEnterPinScreen(
                     merchantDetailsData.payload?.userFullName ?: "",
                     merchantDetailsData.payload?.emailAddress ?: ""
                 )
+
+                ErrorDialogg(
+                    showDialog = openDialog,
+                    alertDialogHeaderMessage = alertDialogHeaderMessage,
+                    alertDialogMessage = alertDialogMessage,
+                    exitOnSuccess = exitOnSuccess.value
+                ) {
+                    openDialog.value = false
+                }
 
 
 
@@ -280,7 +290,7 @@ fun CardEnterPinScreen(
                 if (otpState.hasError) {
                     alertDialogMessage = otpState.errorMessage ?: "Something went wrong"
                     openDialog.value = true
-                    alertDialogHeaderMessage = "Error occurred"
+                    alertDialogHeaderMessage = "Error"
                     showCircularProgressBar = false
                     cardEnterPinViewModel.resetTransactionState()
                 }
@@ -356,7 +366,7 @@ fun CardEnterPinScreen(
                     if (it.data.code == "S12") {
                         alertDialogMessage = it.data.message.toString()
                         openDialog.value = true
-                        alertDialogHeaderMessage = "Error occurred"
+                        alertDialogHeaderMessage = "Failed"
                     }
 
                 }
@@ -386,55 +396,13 @@ fun CardEnterPinScreen(
                             } else {
                                 openDialog.value = true
                                 alertDialogMessage = "Invalid pin"
-                                alertDialogHeaderMessage = "Error Occurred"
+                                alertDialogHeaderMessage = "Error"
                             }
 
                         }, !showCircularProgressBar
                     )
                 }
 
-                //The alert dialog occurs here
-                if (openDialog.value) {
-                    AlertDialog(
-                        onDismissRequest = {
-                            openDialog.value = false
-                        },
-                        title = {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                Text(text = alertDialogHeaderMessage)
-                            }
-
-                        },
-                        text = {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                Text(alertDialogMessage)
-                            }
-                        },
-                        confirmButton = {
-                            Button(
-
-                                onClick = {
-                                    openDialog.value = false
-                                    if (exitOnSuccess.value) {
-                                        activity?.finish()
-                                    }
-                                },
-                                colors = ButtonDefaults.buttonColors(
-                                    backgroundColor = SignalRed
-                                )
-                            ) {
-                                Text(text = "Close")
-
-                            }
-                        },
-                    )
-                }
             }
 
 

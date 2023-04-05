@@ -37,6 +37,7 @@ import com.example.seerbitsdk.screenstate.OTPState
 import com.example.seerbitsdk.screenstate.QueryTransactionState
 import com.example.seerbitsdk.ui.theme.SeerBitTheme
 import com.example.seerbitsdk.ui.theme.SignalRed
+import com.example.seerbitsdk.ussd.ErrorDialogg
 import com.example.seerbitsdk.viewmodels.TransactionViewModel
 
 
@@ -118,6 +119,15 @@ fun BankAccountOTPScreen(
                     merchantDetailsData.payload?.emailAddress ?: ""
                 )
 
+                ErrorDialogg(
+                    showDialog = openDialog,
+                    alertDialogHeaderMessage = alertDialogHeaderMessage,
+                    alertDialogMessage = alertDialogMessage,
+                    exitOnSuccess = exitOnSuccess.value
+                ) {
+                    openDialog.value = false
+                }
+
                 val bankAccountOtpDtO = BankAccountOtpDto(linkingReference, otp)
 
                  //HANDLES initiate query response
@@ -167,7 +177,7 @@ fun BankAccountOTPScreen(
                                     exitOnSuccess.value = true
                                     alertDialogMessage =
                                         queryTransactionStateState.data.data.payments?.reason!!
-                                    alertDialogHeaderMessage = "Success"
+                                    alertDialogHeaderMessage = "Success!!"
                                     transactionViewModel.resetTransactionState()
                                     return@let
                                 }
@@ -268,49 +278,6 @@ fun BankAccountOTPScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-
-                //The alert dialog occurs here
-                if (openDialog.value) {
-                    AlertDialog(
-                        onDismissRequest = {
-                            openDialog.value = false
-                        },
-                        title = {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                Text(text = alertDialogHeaderMessage, textAlign = TextAlign.Center)
-                            }
-
-                        },
-                        text = {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                Text(alertDialogMessage, textAlign = TextAlign.Center)
-                            }
-                        },
-                        confirmButton = {
-                            Button(
-
-                                onClick = {
-                                    openDialog.value = false
-                                    if(exitOnSuccess.value){
-                                        activity?.finish()
-                                    }
-                                },
-                                colors = ButtonDefaults.buttonColors(
-                                    backgroundColor = SignalRed
-                                )
-                            ) {
-                                Text(text = "Close")
-
-                            }
-                        },
-                    )
-                }
             }
 
 

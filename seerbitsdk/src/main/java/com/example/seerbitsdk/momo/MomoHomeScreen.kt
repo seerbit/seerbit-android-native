@@ -47,6 +47,7 @@ import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.screenstate.QueryTransactionState
 import com.example.seerbitsdk.ui.theme.SeerBitTheme
 import com.example.seerbitsdk.ui.theme.SignalRed
+import com.example.seerbitsdk.ussd.ErrorDialogg
 import com.example.seerbitsdk.viewmodels.SelectBankViewModel
 import com.example.seerbitsdk.viewmodels.TransactionViewModel
 
@@ -108,6 +109,16 @@ fun MomoHomeScreen(
                     merchantDetailsData.payload?.userFullName ?: "",
                     merchantDetailsData.payload?.emailAddress ?: ""
                 )
+
+                ErrorDialogg(
+                    showDialog = openDialog,
+                    alertDialogHeaderMessage = alertDialogHeaderMessage,
+                    alertDialogMessage = alertDialogMessage,
+                    exitOnSuccess = false
+                ) {
+                    openDialog.value = false
+                }
+
                 Spacer(modifier = Modifier.height(10.dp))
                 val paymentRef = merchantDetailsData.payload?.paymentReference ?: ""
                 val momoDTO: MomoDTO =
@@ -191,7 +202,7 @@ fun MomoHomeScreen(
                                     openDialog.value = true
                                     alertDialogMessage =
                                         queryTransactionStateState.data.data.payments?.reason ?: ""
-                                    alertDialogHeaderMessage = "Success"
+                                    alertDialogHeaderMessage = "Success!!"
                                     transactionViewModel.resetTransactionState()
                                     return@let
                                 }
@@ -261,45 +272,7 @@ fun MomoHomeScreen(
                     }, !showCircularProgressBar
                 )
 
-                //The alert dialog occurs here
-                if (openDialog.value) {
-                    AlertDialog(
-                        onDismissRequest = {
-                            openDialog.value = false
-                        },
-                        title = {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                Text(text = alertDialogHeaderMessage, textAlign = TextAlign.Center)
-                            }
 
-                        },
-                        text = {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                Text(alertDialogMessage, textAlign = TextAlign.Center)
-                            }
-                        },
-                        confirmButton = {
-                            Button(
-
-                                onClick = {
-                                    openDialog.value = false
-                                },
-                                colors = ButtonDefaults.buttonColors(
-                                    backgroundColor = SignalRed
-                                )
-                            ) {
-                                Text(text = "Close")
-
-                            }
-                        },
-                    )
-                }
 
 
             }

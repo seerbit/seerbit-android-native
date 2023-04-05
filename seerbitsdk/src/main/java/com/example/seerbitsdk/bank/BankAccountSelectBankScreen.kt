@@ -42,6 +42,7 @@ import com.example.seerbitsdk.models.MerchantBanksItem
 import com.example.seerbitsdk.models.RequiredFields
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.ui.theme.SeerBitTheme
+import com.example.seerbitsdk.ussd.ErrorDialogg
 import com.example.seerbitsdk.viewmodels.SelectBankViewModel
 import com.example.seerbitsdk.viewmodels.TransactionViewModel
 
@@ -117,6 +118,14 @@ fun BankAccountSelectBankScreen(
 
                 Spacer(modifier = Modifier.height(10.dp))
 
+                ErrorDialogg(
+                    showDialog = openDialog,
+                    alertDialogHeaderMessage = alertDialogHeaderMessage,
+                    alertDialogMessage = alertDialogMessage,
+                    exitOnSuccess = false
+                ) {
+                    openDialog.value = false
+                }
 
                 if (showCircularProgressBar) {
                     showCircularProgress(showProgress = true)
@@ -130,7 +139,9 @@ fun BankAccountSelectBankScreen(
 
                 if (availableBanksState.hasError) {
                     showCircularProgressBar = false
-                    showErrorDialog = true
+                    openDialog.value = true
+                    alertDialogHeaderMessage = "Failed"
+                    alertDialogMessage ="Error while fetching banks"
                 }
 
                 showCircularProgressBar = availableBanksState.isLoading
@@ -174,7 +185,9 @@ fun BankAccountSelectBankScreen(
                                 )
                             }
                         } else {
-                            showErrorDialog = true
+                            openDialog.value = true
+                            alertDialogHeaderMessage = "Failed"
+                            alertDialogMessage ="This action could not be completed"
                         }
                     }, !showCircularProgressBar
                 )

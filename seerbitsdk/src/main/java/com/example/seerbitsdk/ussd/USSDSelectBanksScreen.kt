@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -53,6 +54,7 @@ fun USSDSelectBanksScreen(
     var paymentRef by remember { mutableStateOf("") }
     var ussdCode by remember { mutableStateOf("") }
     var defaultCurrency: String = ""
+    val openDialog = rememberSaveable { mutableStateOf(false) }
 
     // if there is an error loading the report
     if (merchantDetailsState?.hasError!!) {
@@ -103,9 +105,15 @@ fun USSDSelectBanksScreen(
                 Spacer(modifier = Modifier.height(41.dp))
 
 
-                if (showErrorDialog) {
-                    ErrorDialog(message = "Kindly Select a bank")
-                }
+                    ErrorDialogg(
+                        showDialog = openDialog,
+                        alertDialogHeaderMessage = "Failed",
+                        alertDialogMessage = "Kindly select a bank",
+                        exitOnSuccess = false
+                    ) {
+                        openDialog.value = false
+                    }
+
 
                 if (showCircularProgressBar) {
                     showCircularProgress(showProgress = true)
@@ -176,7 +184,7 @@ fun USSDSelectBanksScreen(
                         if (bankCode.isNotEmpty()) {
                             transactionViewModel.initiateUssdTransaction(ussdDTO)
                         } else {
-                            showErrorDialog = true
+                            openDialog.value = true
                         }
                     }, !showCircularProgressBar
                 )

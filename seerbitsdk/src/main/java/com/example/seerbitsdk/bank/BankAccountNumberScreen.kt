@@ -37,6 +37,7 @@ import com.example.seerbitsdk.models.bankaccount.BankAccountDTO
 import com.example.seerbitsdk.screenstate.InitiateTransactionState
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.ui.theme.SeerBitTheme
+import com.example.seerbitsdk.ussd.ErrorDialogg
 import com.example.seerbitsdk.viewmodels.TransactionViewModel
 import com.google.gson.Gson
 
@@ -109,6 +110,16 @@ fun BankAccountNumberScreen(
                     merchantDetailsData.payload?.userFullName ?: "",
                     merchantDetailsData.payload?.emailAddress ?: ""
                 )
+
+                ErrorDialogg(
+                    showDialog = openDialog,
+                    alertDialogHeaderMessage = alertDialogHeaderMessage,
+                    alertDialogMessage = alertDialogMessage,
+                    exitOnSuccess =false
+                ) {
+                    openDialog.value = false
+                }
+
                 val paymentRef = merchantDetailsData.payload?.paymentReference ?: ""
 
                 val bankAccountDTO = BankAccountDTO(
@@ -221,6 +232,12 @@ fun BankAccountNumberScreen(
 
                             }
 
+                        }
+                        else {
+                            openDialog.value = true
+                            showCircularProgressBar = false
+                            alertDialogMessage = "Invalid Account Number"
+                            alertDialogHeaderMessage = "Failed"
                         }
 
 

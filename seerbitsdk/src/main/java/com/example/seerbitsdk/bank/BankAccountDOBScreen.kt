@@ -36,6 +36,7 @@ import com.example.seerbitsdk.screenstate.InitiateTransactionState
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.ui.theme.SeerBitTheme
 import com.example.seerbitsdk.ui.theme.SignalRed
+import com.example.seerbitsdk.ussd.ErrorDialogg
 import com.example.seerbitsdk.viewmodels.TransactionViewModel
 import com.google.gson.Gson
 
@@ -130,6 +131,15 @@ fun BankAccountDOBScreen(
                     showCircularProgress(showProgress = true)
                 }
 
+                ErrorDialogg(
+                    showDialog = openDialog,
+                    alertDialogHeaderMessage = alertDialogHeaderMessage,
+                    alertDialogMessage = alertDialogMessage,
+                    exitOnSuccess = false
+                ) {
+                    openDialog.value = false
+                }
+
                 val initiateBankAccountPayment: InitiateTransactionState =
                     transactionViewModel.initiateTransactionState.value
                 //enter payment states
@@ -184,6 +194,12 @@ fun BankAccountDOBScreen(
                         if (dob.isNotEmpty()) {
                             transactionViewModel.initiateTransaction(bankAccountDTO)
                         }
+                        else {
+                            openDialog.value = true
+                            showCircularProgressBar = false
+                            alertDialogMessage = "Invalid Date of Birth"
+                            alertDialogHeaderMessage = "Failed"
+                        }
                     }, !showCircularProgressBar
                 )
 
@@ -200,48 +216,6 @@ fun BankAccountDOBScreen(
                 BottomSeerBitWaterMark(modifier = Modifier.align(alignment = Alignment.CenterHorizontally))
 
                 Spacer(modifier = Modifier.height(16.dp))
-
-
-                //The alert dialog occurs here
-                if (openDialog.value) {
-                    AlertDialog(
-                        onDismissRequest = {
-                            openDialog.value = false
-                        },
-                        title = {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                Text(text = alertDialogHeaderMessage, textAlign = TextAlign.Center)
-                            }
-
-                        },
-                        text = {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                Text(alertDialogMessage, textAlign = TextAlign.Center)
-                            }
-                        },
-                        confirmButton = {
-                            Button(
-
-                                onClick = {
-                                    openDialog.value = false
-                                },
-                                colors = ButtonDefaults.buttonColors(
-                                    backgroundColor = SignalRed
-                                )
-                            ) {
-                                Text(text = "Close")
-
-                            }
-                        },
-                    )
-                }
-
 
             }
 

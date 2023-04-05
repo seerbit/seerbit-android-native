@@ -31,6 +31,7 @@ import com.example.seerbitsdk.screenstate.InitiateTransactionState
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.screenstate.QueryTransactionState
 import com.example.seerbitsdk.ui.theme.SignalRed
+import com.example.seerbitsdk.ussd.ErrorDialogg
 import com.example.seerbitsdk.viewmodels.TransactionViewModel
 
 @Composable
@@ -104,6 +105,15 @@ fun BankRedirectUrlScreen(
                     merchantDetailsData.payload?.userFullName ?: "",
                     merchantDetailsData.payload?.emailAddress ?: ""
                 )
+
+                ErrorDialogg(
+                    showDialog = openDialog,
+                    alertDialogHeaderMessage = alertDialogHeaderMessage,
+                    alertDialogMessage = alertDialogMessage,
+                    exitOnSuccess = exitOnSuccess.value
+                ) {
+                    openDialog.value = false
+                }
 
                 Spacer(modifier = Modifier.height(20.dp))
 
@@ -275,51 +285,6 @@ fun BankRedirectUrlScreen(
                 BottomSeerBitWaterMark(modifier = Modifier.align(alignment = Alignment.CenterHorizontally))
 
                 Spacer(modifier = Modifier.height(16.dp))
-
-
-                //The alert dialog occurs here
-                if (openDialog.value) {
-                    AlertDialog(
-                        onDismissRequest = {
-                            openDialog.value = false
-                        },
-                        title = {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                Text(text = alertDialogHeaderMessage, textAlign = TextAlign.Center)
-                            }
-
-                        },
-                        text = {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                Text(alertDialogMessage, textAlign = TextAlign.Center)
-                            }
-                        },
-                        confirmButton = {
-                            Button(
-
-                                onClick = {
-                                    openDialog.value = false
-                                    if (exitOnSuccess.value) {
-                                        activity?.finish()
-                                    }
-                                },
-                                colors = ButtonDefaults.buttonColors(
-                                    backgroundColor = SignalRed
-                                )
-                            ) {
-                                Text(text = "Close")
-
-                            }
-                        },
-                    )
-                }
-
 
             }
         }

@@ -57,6 +57,7 @@ import com.example.seerbitsdk.momo.MomoHomeScreen
 import com.example.seerbitsdk.screenstate.*
 import com.example.seerbitsdk.transfer.TransferHomeScreen
 import com.example.seerbitsdk.ui.theme.*
+import com.example.seerbitsdk.ussd.ErrorDialogg
 import com.example.seerbitsdk.ussd.USSDHomeScreen
 import com.example.seerbitsdk.ussd.USSDSelectBanksScreen
 import com.example.seerbitsdk.viewmodels.*
@@ -82,18 +83,29 @@ class SeerBitActivity : ComponentActivity() {
             val fullName = intent.extras?.getString("fullName")
             val emailAddress = intent.extras?.getString("emailAddress")
             val paymentRef = intent.extras?.getString("paymentRef")
-
+            val openDialog = remember {
+                mutableStateOf(false)
+            }
             val merchantDetailsViewModel by viewModels<MerchantDetailsViewModel> {
                 MerchatDetailVmFactory(publicKey ?: "0.0")
             }
 
             val merchantDetailsState = merchantDetailsViewModel.merchantState.value
 
-            if (merchantDetailsState.hasError) {
-                ErrorExitDialog(
-                    message = merchantDetailsState.errorMessage ?: "Something went wrong"
-                )
+            ErrorDialogg(
+                showDialog = openDialog,
+                alertDialogHeaderMessage = "Error",
+                alertDialogMessage = "Error while loading sdk, Kindly check your internet",
+                exitOnSuccess = true
+            ) {
+                openDialog.value = false
             }
+
+
+            if (merchantDetailsState.hasError) {
+               openDialog.value = true
+            }
+
 
             if (merchantDetailsState.isLoading) {
                 Column(
@@ -401,6 +413,14 @@ fun CardHomeScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
+            ErrorDialogg(
+                showDialog = openDialog,
+                alertDialogHeaderMessage = alertDialogHeaderMessage,
+                alertDialogMessage = alertDialogMessage,
+                exitOnSuccess = exitOnSuccess.value
+            ) {
+                openDialog.value = false
+            }
 
             val cardBinState: CardBinState =
                 transactionViewModel.cardBinState.value
@@ -524,7 +544,7 @@ fun CardHomeScreen(
 
             if (queryTransactionStateState.hasError) {
                 openDialog.value = true
-                alertDialogMessage = "Error"
+                alertDialogMessage = "Failed"
                 alertDialogHeaderMessage =
                     queryTransactionStateState.errorMessage ?: "Something went wrong"
                 transactionViewModel.resetTransactionState()
@@ -544,7 +564,7 @@ fun CardHomeScreen(
                     SUCCESS -> {
                         showCircularProgressBar = false
                         openDialog.value = true
-                        alertDialogHeaderMessage = "Transaction was Successful"
+                        alertDialogHeaderMessage = "Success!!!"
                         alertDialogMessage = it.message ?: ""
                         exitOnSuccess.value = true
                         transactionViewModel.resetTransactionState()
@@ -570,7 +590,7 @@ fun CardHomeScreen(
                     showCircularProgressBar = false
                     transactionViewModel.setRetry(true)
                     paymentRef = transactionState.data.data?.payments?.paymentReference ?: ""
-                    val linkingRef = transactionState.data.data?.payments?.linkingReference ?: ""
+                    val linkingRef = transactionState.data.data?.payments?.linkingReference ?: "-1"
                     val toEnterPinScreen = transactionState.data.data?.message == KINDLY_ENTER_PIN
                     val useOtp =
                         transactionState.data.data?.message?.contains(KINDLY_ENTER_THE_OTP, true)
@@ -617,60 +637,7 @@ fun CardHomeScreen(
             Spacer(modifier = Modifier.height(100.dp))
             BottomSeerBitWaterMark(modifier = Modifier.align(alignment = Alignment.CenterHorizontally))
 
-
-            //The alert dialog occurs here
-            if (openDialog.value) {
-                AlertDialog(
-                    onDismissRequest = {
-                        openDialog.value = false
-                    },
-                    title = {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            Text(
-                                text = alertDialogHeaderMessage,
-                                style = TextStyle(),
-                                textAlign = TextAlign.Center
-                            )
-                        }
-
-                    },
-                    text = {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            Text(
-                                text = alertDialogMessage,
-                                textAlign = TextAlign.Center
-                            )
-                        }
-                    },
-                    confirmButton = {
-                        Button(
-
-                            onClick = {
-                                openDialog.value = false
-                                if (exitOnSuccess.value) {
-                                    activity?.finish()
-                                }
-
-                            },
-                            colors = ButtonDefaults.buttonColors(
-                                backgroundColor = SignalRed
-                            )
-                        ) {
-                            Text(text = "Close")
-
-                        }
-                    },
-                )
-            }
         }
-
-
     }
 
 }
@@ -1486,11 +1453,6 @@ fun ErrorExitDialog(context: Context = LocalContext.current, message: String) {
                     onClick = {
                         openDialog.value = false
                         activity?.finish()
-                        Toast.makeText(
-                            context,
-                            "Your Transaction has been processed",
-                            Toast.LENGTH_LONG
-                        ).show()
 
                     },
                     colors = ButtonDefaults.buttonColors(

@@ -4,8 +4,10 @@ import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.widget.Space
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -16,7 +18,9 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -28,6 +32,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.seerbitsdk.*
+import com.example.seerbitsdk.R
 import com.example.seerbitsdk.card.AuthorizeButton
 import com.example.seerbitsdk.card.showCircularProgress
 import com.example.seerbitsdk.component.*
@@ -35,10 +40,7 @@ import com.example.seerbitsdk.helper.TransactionType
 import com.example.seerbitsdk.helper.calculateTransactionFee
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.screenstate.QueryTransactionState
-import com.example.seerbitsdk.ui.theme.Faktpro
-import com.example.seerbitsdk.ui.theme.LighterGray
-import com.example.seerbitsdk.ui.theme.SeerBitTheme
-import com.example.seerbitsdk.ui.theme.SignalRed
+import com.example.seerbitsdk.ui.theme.*
 import com.example.seerbitsdk.viewmodels.TransactionViewModel
 
 
@@ -50,13 +52,13 @@ fun USSDHomeScreen(
     transactionViewModel: TransactionViewModel,
     paymentReference: String?,
     ussdCode: String?,
-    onCancelButtonClicked:()->Unit,
-    onOtherPaymentButtonClicked:()->Unit
-    ) {
+    onCancelButtonClicked: () -> Unit,
+    onOtherPaymentButtonClicked: () -> Unit
+) {
     var showLoadingScreen by remember { mutableStateOf(false) }
     val context = LocalContext.current
-    var showCircularProgressBar by rememberSaveable { mutableStateOf(false) }
-    val openDialog = remember { mutableStateOf(false) }
+    var showCircularProgressBar by remember { mutableStateOf(false) }
+    val openDialog = rememberSaveable { mutableStateOf(false) }
     var alertDialogMessage by remember { mutableStateOf("") }
     var alertDialogHeaderMessage by remember { mutableStateOf("") }
     val exitOnSuccess = remember { mutableStateOf(false) }
@@ -88,21 +90,34 @@ fun USSDHomeScreen(
 
             ) {
 
-                var amount= merchantDetailsData.payload?.amount
-                val fee =   calculateTransactionFee(merchantDetailsData, TransactionType.USSD.type, amount = amount?.toDouble()?: 0.0)
+                var amount = merchantDetailsData.payload?.amount
+                val fee = calculateTransactionFee(
+                    merchantDetailsData,
+                    TransactionType.USSD.type,
+                    amount = amount?.toDouble() ?: 0.0
+                )
                 val totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
 
                 Spacer(modifier = Modifier.height(21.dp))
                 SeerbitPaymentDetailHeader(
 
                     charges = fee?.toDouble() ?: 0.0,
-                    amount = amount?:"",
+                    amount = amount ?: "",
                     currencyText = merchantDetailsData.payload?.defaultCurrency ?: "",
                     "",
                     merchantDetailsData.payload?.userFullName ?: "",
                     merchantDetailsData.payload?.emailAddress ?: ""
                 )
 
+
+                ErrorDialogg(
+                    showDialog = openDialog,
+                    alertDialogHeaderMessage = alertDialogHeaderMessage,
+                    alertDialogMessage = alertDialogMessage,
+                    exitOnSuccess = exitOnSuccess.value
+                ) {
+                    openDialog.value = false
+                }
 
                 //HANDLES initiate query response
                 val queryTransactionStateState: QueryTransactionState =
@@ -113,24 +128,23 @@ fun USSDHomeScreen(
                 if (queryTransactionStateState.hasError) {
                     showLoadingScreen = false
                     openDialog.value = true
-                    alertDialogMessage =
-                        queryTransactionStateState.errorMessage ?: "Something went wrong"
+                    alertDialogMessage = "This action could not be completed"
                     alertDialogHeaderMessage = "Failed"
+
                 }
                 if (queryTransactionStateState.isLoading) {
                 }
 
                 queryTransactionStateState.data?.data?.let {
 
-                    when(queryTransactionStateState.data.data.code) {
-                        PENDING_CODE ->
-                        {
-                            transactionViewModel.queryTransaction(paymentReference?:"")
+                    when (queryTransactionStateState.data.data.code) {
+                        PENDING_CODE -> {
+                            transactionViewModel.queryTransaction(paymentReference ?: "")
                         }
                         SUCCESS -> {
                             openDialog.value = true
                             alertDialogMessage = queryTransactionStateState.data.data.message ?: ""
-                            alertDialogHeaderMessage = "Success"
+                            alertDialogHeaderMessage = "Success!"
                             showLoadingScreen = false
                             exitOnSuccess.value = true
                             transactionViewModel.resetTransactionState()
@@ -139,12 +153,11 @@ fun USSDHomeScreen(
                         }
                         else -> {
                             openDialog.value = true
-                            alertDialogMessage = queryTransactionStateState.data.data.message?:""
+                            alertDialogMessage = queryTransactionStateState.data.data.message ?: ""
                             alertDialogHeaderMessage = "Failed"
                             showLoadingScreen = false
                             transactionViewModel.resetTransactionState()
                             return@let
-
                         }
                     }
                 }
@@ -152,6 +165,7 @@ fun USSDHomeScreen(
                 if (showCircularProgressBar) {
                     showCircularProgress(showProgress = true)
                 }
+
                 // if loadingScreen value is false
                 if (!showLoadingScreen) {
                     Text(
@@ -204,7 +218,11 @@ fun USSDHomeScreen(
                     Spacer(modifier = Modifier.height(100.dp))
 
                     OtherPaymentButtonComponent(
-                        onOtherPaymentButtonClicked = { navController.navigatePopUpToOtherPaymentScreen(Route.OTHER_PAYMENT_SCREEN) },
+                        onOtherPaymentButtonClicked = {
+                            navController.navigatePopUpToOtherPaymentScreen(
+                                Route.OTHER_PAYMENT_SCREEN
+                            )
+                        },
                         onCancelButtonClicked = onCancelButtonClicked,
                         enable = !showCircularProgressBar
                     )
@@ -213,53 +231,10 @@ fun USSDHomeScreen(
                     BottomSeerBitWaterMark(modifier = Modifier.align(alignment = Alignment.CenterHorizontally))
 
                     Spacer(modifier = Modifier.height(16.dp))
+
+
                 } else {
                     showLoaderLayout()
-                }
-
-
-                //The alert dialog occurs here
-                if (openDialog.value) {
-                    AlertDialog(
-                        onDismissRequest = {
-
-                        },
-                        title = {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                Text(text = alertDialogHeaderMessage)
-                            }
-
-                        },
-                        text = {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                Text(alertDialogMessage)
-                            }
-                        },
-                        confirmButton = {
-                            Button(
-                                onClick = {
-                                    openDialog.value = false
-                                    if(exitOnSuccess.value){
-                                        activity?.finish()
-                                    }
-
-
-                                },
-                                colors = ButtonDefaults.buttonColors(
-                                    backgroundColor = SignalRed
-                                )
-                            ) {
-                                Text(text = "Close")
-
-                            }
-                        },
-                    )
                 }
 
 
@@ -320,7 +295,7 @@ fun HeaderScreenPreview() {
             ussdCode = "",
             navController = rememberNavController(),
             onCancelButtonClicked = {}
-        ){}
+        ) {}
     }
 }
 
@@ -349,4 +324,187 @@ fun showLoaderLayout() {
     Spacer(modifier = Modifier.height(25.dp))
 
 
+}
+
+
+@Composable
+fun ErrorDialogg(
+    context: Context = LocalContext.current, showDialog: MutableState<Boolean>,
+    alertDialogHeaderMessage: String,
+    alertDialogMessage: String, exitOnSuccess: Boolean,
+    onDismiss: () -> Unit
+) {
+    //The alert dialog occurs here
+    val activity = context as? Activity
+
+    if (showDialog.value) {
+        AlertDialog(
+            shape = RoundedCornerShape(16.dp),
+            onDismissRequest = {
+                onDismiss()
+            },
+            title = {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = alertDialogHeaderMessage, style = TextStyle(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp
+                        )
+                    )
+                }
+
+            },
+            text = {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(alertDialogMessage, style = TextStyle(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp,
+                        lineHeight = 1.sp
+                    ))
+                }
+            },
+            confirmButton = {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+
+                    if (alertDialogHeaderMessage == "Failed" || alertDialogHeaderMessage == "Error" || alertDialogHeaderMessage == "Error Occurred")
+                        Image(
+                            painter = painterResource(id = R.drawable.failed),
+                            contentDescription = "", modifier = Modifier.size(60.dp)
+                        )
+                    else if(alertDialogHeaderMessage.contains("Success", ignoreCase = true)){
+                        Image(
+                            painter = painterResource(id = R.drawable.success),
+                            contentDescription = "", modifier = Modifier.size(60.dp)
+                        )
+                    }
+                    else  Image(
+                        painter = painterResource(id = R.drawable.failed),
+                        contentDescription = "", modifier = Modifier.size(60.dp)
+                    )
+
+                }
+                Button(
+                    onClick = {
+                        onDismiss()
+                        if (exitOnSuccess) {
+                            activity?.finish()
+                        }
+                    },
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(32.dp).height(40.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = Teal500
+                    )
+                ) {
+                    Text(text = "Close")
+
+                }
+
+
+            },
+        )
+    }
+}
+
+
+@Composable
+fun ErrorDialoggWithRetry(
+    context: Context = LocalContext.current, showDialog: MutableState<Boolean>,
+    alertDialogHeaderMessage: String,
+    alertDialogMessage: String, exitOnSuccess: Boolean,
+    onDismiss: () -> Unit,
+    onRetry: () -> Unit
+) {
+    //The alert dialog occurs here
+    val activity = context as? Activity
+
+    if (showDialog.value) {
+        AlertDialog(
+            shape = RoundedCornerShape(16.dp),
+            onDismissRequest = {
+                onDismiss()
+            },
+            title = {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = alertDialogHeaderMessage, style = TextStyle(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp
+                        )
+                    )
+                }
+
+            },
+            text = {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(alertDialogMessage, style = TextStyle(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp,
+                        lineHeight = 1.sp
+                    ))
+                }
+            },
+            confirmButton = {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+
+                    if (alertDialogHeaderMessage == "Failed" || alertDialogHeaderMessage == "Error" || alertDialogHeaderMessage == "Error Occurred")
+                        Image(
+                            painter = painterResource(id = R.drawable.failed),
+                            contentDescription = "", modifier = Modifier.size(60.dp)
+                        )
+                    else if(alertDialogHeaderMessage.contains("Success", ignoreCase = true)){
+                        Image(
+                            painter = painterResource(id = R.drawable.success),
+                            contentDescription = "", modifier = Modifier.size(60.dp)
+                        )
+                    }
+                    else  Image(
+                        painter = painterResource(id = R.drawable.failed),
+                        contentDescription = "", modifier = Modifier.size(60.dp)
+                    )
+
+                }
+
+                Button(
+                        onClick = {
+                            onRetry()
+                            if (exitOnSuccess) {
+                                activity?.finish()
+                            }
+                        },
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier.fillMaxWidth()
+                            .padding(32.dp).height(40.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            backgroundColor = Teal500
+                        )
+                    ) {
+                        Text(text = "Retry")
+                    }
+
+            },
+        )
+    }
 }

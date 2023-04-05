@@ -32,6 +32,7 @@ import com.example.seerbitsdk.helper.isMerchantFeeBearer
 import com.example.seerbitsdk.models.RequiredFields
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.ui.theme.SeerBitTheme
+import com.example.seerbitsdk.ussd.ErrorDialogg
 import com.example.seerbitsdk.viewmodels.TransactionViewModel
 import com.google.gson.Gson
 
@@ -49,6 +50,10 @@ fun BankAccountBVNScreen(
 
     var bvn by remember { mutableStateOf("") }
     var json by remember { mutableStateOf(Uri.encode(Gson().toJson(requiredFields))) }
+    var showCircularProgressBar by remember { mutableStateOf(false) }
+    val openDialog = remember { mutableStateOf(false) }
+    var alertDialogMessage by remember { mutableStateOf("") }
+    var alertDialogHeaderMessage by remember { mutableStateOf("") }
 
     // if there is an error loading the report
     if (merchantDetailsState?.hasError!!) {
@@ -92,6 +97,16 @@ fun BankAccountBVNScreen(
                     merchantDetailsData.payload?.emailAddress ?: ""
                 )
 
+                ErrorDialogg(
+                    showDialog = openDialog,
+                    alertDialogHeaderMessage = alertDialogHeaderMessage,
+                    alertDialogMessage = alertDialogMessage,
+                    exitOnSuccess = false
+                ) {
+
+                }
+
+
                 Spacer(modifier = modifier.height(10.dp))
 
                 BVNInputField(Modifier, "Enter your BVN Number") {
@@ -119,6 +134,11 @@ fun BankAccountBVNScreen(
                                     )
                                 }
                             }
+                        }else {
+                            openDialog.value = true
+                            showCircularProgressBar = false
+                            alertDialogMessage = "Invalid BVN"
+                            alertDialogHeaderMessage = "Failed"
                         }
                     }, true
                 )

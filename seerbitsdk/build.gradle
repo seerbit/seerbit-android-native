@@ -104,9 +104,9 @@ afterEvaluate {
             release(MavenPublication) {
                 from components.release
 
-                groupId = 'com.github.seerbit/seerbit-android-native'
-                artifactId = 'seerbit-android-sdk'
-                version = '1.0'
+                groupId = 'com.github.seerbit'
+                artifactId = 'seerbitsdk'
+                version = '1.0.0'
             }
         }
     }
