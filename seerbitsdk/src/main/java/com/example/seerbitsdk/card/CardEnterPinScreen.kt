@@ -161,6 +161,11 @@ fun CardEnterPinScreen(
                     merchantDetailsData.payload?.emailAddress ?: ""
                 )
 
+                //this handles when to show progress bar
+                if (showCircularProgressBar) {
+                    showCircularProgress(showProgress = true)
+                }
+
                 ErrorDialogg(
                     showDialog = openDialog,
                     alertDialogHeaderMessage = alertDialogHeaderMessage,
@@ -217,12 +222,39 @@ fun CardEnterPinScreen(
                 val cardOTPDTO = CardOTPDTO(transaction = Transaction(linkingReference, otp))
                 var otpHeaderText: String = ""
                 val alternativeOTPText: String =
-                    "Kindly enter the OTP sent to ${merchantDetailsData.payload?.number?.maskedPhoneNumber()} and\n" +
-                            "o***********@gmail.com or enter the OTP generates on your hardware token device"
+                    "Kindly enter the OTP sent to ${merchantDetailsData.payload?.userPhoneNumber?.maskedPhoneNumber()} and\n" +
+                            "${merchantDetailsData.payload?.emailAddress} or enter the OTP generates on your hardware token device"
 
                 otpHeaderText = otpText.ifEmpty {
                     alternativeOTPText
                 }
+
+
+                if(initiateCardPaymentEnterPinState.isLoading){
+                    showCircularProgressBar = true
+                }
+
+
+
+                initiateCardPaymentEnterPinState.data?.let {
+                    if (it.data?.code == PENDING_CODE) {
+                        showCircularProgressBar = false
+                        paymentReference2 = it.data.payments?.paymentReference!!
+                        linkingReference = it.data.payments.linkingReference
+                        isEnterOTP = true
+                        otpHeaderText = it.data.message ?:""
+                    }
+
+                    if (it.data?.code == "S12") {
+                        alertDialogMessage = it.data?.message.toString()
+                        openDialog.value = true
+                        alertDialogHeaderMessage = "Failed"
+                    }
+
+                }
+
+
+
 
                 if (isEnterPin && !isEnterOTP && !useOtp) {
                     PinInputField(onEnterPin = { pin = it })
@@ -280,10 +312,7 @@ fun CardEnterPinScreen(
                     )
                 }
 
-                //this handles when to show progress bar
-                if (showCircularProgressBar) {
-                    showCircularProgress(showProgress = true)
-                }
+
 
 
 
@@ -294,7 +323,9 @@ fun CardEnterPinScreen(
                     showCircularProgressBar = false
                     cardEnterPinViewModel.resetTransactionState()
                 }
-                showCircularProgressBar = otpState.isLoading
+                if( otpState.isLoading){
+                    showCircularProgressBar = true
+                }
 
                 otpState.data?.let { otp ->
 
@@ -355,28 +386,6 @@ fun CardEnterPinScreen(
                             ?: "Something went wrong"
                     )
                 }
-                if(initiateCardPaymentEnterPinState.isLoading){
-                    showCircularProgressBar = true
-                }
-
-
-
-                initiateCardPaymentEnterPinState.data?.let {
-                    if (it.data?.code == PENDING_CODE) {
-                        showCircularProgressBar = false
-                        paymentReference2 = it.data?.payments?.paymentReference!!
-                        linkingReference = it.data.payments.linkingReference
-                        isEnterOTP = true
-                    }
-
-                    if (it.data?.code == "S12") {
-                        alertDialogMessage = it.data?.message.toString()
-                        openDialog.value = true
-                        alertDialogHeaderMessage = "Failed"
-                    }
-
-                }
-
 
                 //querying transaction happens after otp has been inputted
                 if (queryTransactionStateState.hasError) {
