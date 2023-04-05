@@ -223,6 +223,18 @@ fun SeerBitApp(
 
 }
 
+fun NavHostController.navigatePopUpToOtherPaymentScreen(route: String){
+    this.navigate(route){
+        popUpTo(Route.OTHER_PAYMENT_SCREEN) {
+            inclusive = true
+        }
+
+        launchSingleTop = true
+        restoreState = true
+
+    }
+
+}
 
 fun NavHostController.navigateSingleTopTo(route: String) =
     this.navigate(route) {
@@ -532,7 +544,7 @@ fun CardHomeScreen(
                     SUCCESS -> {
                         showCircularProgressBar = false
                         openDialog.value = true
-                        alertDialogHeaderMessage = "Successful"
+                        alertDialogHeaderMessage = "Transaction was Successful"
                         alertDialogMessage = it.message ?: ""
                         exitOnSuccess.value = true
                         transactionViewModel.resetTransactionState()
@@ -1058,10 +1070,6 @@ fun MyAppNavHost(
 
         composable(
             route = Debit_CreditCard.route,
-            deepLinks = listOf(navDeepLink {
-                this.uriPattern = "http://localhost:3002/#/"
-                this.action = Intent.ACTION_VIEW
-            })
 
         ) {
             transactionViewModel.resetTransactionState()
@@ -1360,7 +1368,7 @@ fun MyAppNavHost(
                 paymentReference = paymentReference,
                 navController = navController,
                 onCancelButtonClicked = { navController.navigateSingleTopTo(Debit_CreditCard.route) },
-                onOtherPaymentButtonClicked = { navController.navigateSingleTopTo(Route.OTHER_PAYMENT_SCREEN) }
+                onOtherPaymentButtonClicked = { navController.navigate(Route.OTHER_PAYMENT_SCREEN) }
             )
         }
 
