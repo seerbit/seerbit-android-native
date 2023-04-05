@@ -4,10 +4,7 @@ pluginManagement {
         google()
         mavenCentral()
 
-        maven {
-            url "https://jitpack.io"
-            credentials { username "jp_3s9rkn9juopvk32r5bfjvkpkuk" }
-        }
+        maven { url 'https://jitpack.io' }
     }
 }
 dependencyResolutionManagement {
