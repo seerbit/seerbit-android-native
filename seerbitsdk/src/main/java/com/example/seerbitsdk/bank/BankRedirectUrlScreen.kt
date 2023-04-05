@@ -75,8 +75,8 @@ fun BankRedirectUrlScreen(
             Column(
                 modifier = modifier
                     .padding(
-                        start = 21.dp,
-                        end = 21.dp
+                        start = 8.dp,
+                        end = 8.dp
                     )
                     .fillMaxWidth()
                     .weight(1f)
