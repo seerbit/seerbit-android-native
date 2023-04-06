@@ -489,9 +489,10 @@ fun ErrorDialoggWithRetry(
 
                 Button(
                         onClick = {
-                            onRetry()
                             if (exitOnSuccess) {
                                 activity?.finish()
+                            } else {
+                                onRetry()
                             }
                         },
                         shape = RoundedCornerShape(8.dp),
@@ -501,7 +502,10 @@ fun ErrorDialoggWithRetry(
                             backgroundColor = Teal500
                         )
                     ) {
-                        Text(text = "Retry")
+                        val text: String = if(exitOnSuccess){
+                        "Close"
+                    }else "Retry"
+                        Text(text = text)
                     }
 
             },
