@@ -164,7 +164,7 @@ fun SeerbitPaymentDetailHeaderTwo(
         Spacer(modifier = Modifier.height(4.dp))
 
         Text(
-            text = "Subcharge $currencyText$charges",
+            text = "Fees $currencyText$charges",
             style = TextStyle(
                 fontSize = 14.sp,
                 fontFamily = Faktpro,
