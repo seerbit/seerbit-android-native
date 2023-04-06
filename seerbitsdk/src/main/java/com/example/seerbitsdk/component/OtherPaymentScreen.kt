@@ -29,6 +29,7 @@ import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.ui.theme.DeepRed
 import com.example.seerbitsdk.ui.theme.Faktpro
 import com.example.seerbitsdk.ui.theme.SignalRed
+import com.example.seerbitsdk.ussd.ErrorDialogg
 import com.example.seerbitsdk.viewmodels.TransactionViewModel
 
 
@@ -46,6 +47,7 @@ fun OtherPaymentScreen(
     var bankName by remember { mutableStateOf("") }
     var accountNumber by remember { mutableStateOf("") }
     var showCircularProgressBar by rememberSaveable { mutableStateOf(false) }
+    var openDialog = remember { mutableStateOf(false) }
 
     merchantDetailsState?.data?.let { merchantDetailsData ->
         Column(
@@ -95,8 +97,17 @@ fun OtherPaymentScreen(
                     transactionViewModel.initiateTransactionState.value
 
 
+                ErrorDialogg(
+                    showDialog = openDialog,
+                    alertDialogHeaderMessage = "Failed",
+                    alertDialogMessage = "This action could not be completed",
+                    exitOnSuccess = false
+                ) {
+                    openDialog.value = false
+                }
                 if (initiateTransferPayment.hasError) {
-                    showCircularProgressBar = true
+                    showCircularProgressBar = false
+                    openDialog.value = true
                     transactionViewModel.resetTransactionState()
                 }
 
