@@ -7,12 +7,9 @@ import android.content.Context
 import android.widget.Space
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -25,9 +22,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -329,7 +329,8 @@ fun showLoaderLayout() {
 
 @Composable
 fun ErrorDialogg(
-    context: Context = LocalContext.current, showDialog: MutableState<Boolean>,
+    context: Context = LocalContext.current,
+    showDialog: MutableState<Boolean>,
     alertDialogHeaderMessage: String,
     alertDialogMessage: String, exitOnSuccess: Boolean,
     onDismiss: () -> Unit
@@ -352,22 +353,33 @@ fun ErrorDialogg(
                         text = alertDialogHeaderMessage, style = TextStyle(
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp
-                        )
+                        ),
+
                     )
                 }
 
             },
+            properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false),
             text = {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center
+                    horizontalArrangement = Arrangement.Center,
                 ) {
-                    Text(alertDialogMessage, style = TextStyle(
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 14.sp,
-                        lineHeight = 1.sp
-                    ))
+                    Text(
+                        alertDialogMessage,
+                        style = TextStyle(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp,
+                            lineHeight = 19.sp,
+                        ),
+                        modifier = Modifier.fillMaxWidth(),
+                        softWrap = true,
+                        maxLines = 3,
+                        overflow = TextOverflow.Ellipsis,
+                        textAlign = TextAlign.Center
+                    )
                 }
+
             },
             confirmButton = {
                 Column(
@@ -381,13 +393,12 @@ fun ErrorDialogg(
                             painter = painterResource(id = R.drawable.failed),
                             contentDescription = "", modifier = Modifier.size(60.dp)
                         )
-                    else if(alertDialogHeaderMessage.contains("Success", ignoreCase = true)){
+                    else if (alertDialogHeaderMessage.contains("Success", ignoreCase = true)) {
                         Image(
                             painter = painterResource(id = R.drawable.success),
                             contentDescription = "", modifier = Modifier.size(60.dp)
                         )
-                    }
-                    else  Image(
+                    } else Image(
                         painter = painterResource(id = R.drawable.failed),
                         contentDescription = "", modifier = Modifier.size(60.dp)
                     )
@@ -403,7 +414,8 @@ fun ErrorDialogg(
                     shape = RoundedCornerShape(8.dp),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(32.dp).height(40.dp),
+                        .padding(32.dp)
+                        .height(40.dp),
                     colors = ButtonDefaults.buttonColors(
                         backgroundColor = Teal500
                     )
@@ -455,11 +467,13 @@ fun ErrorDialoggWithRetry(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    Text(alertDialogMessage, style = TextStyle(
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 14.sp,
-                        lineHeight = 1.sp
-                    ))
+                    Text(
+                        alertDialogMessage, style = TextStyle(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp,
+                            lineHeight = 1.sp
+                        )
+                    )
                 }
             },
             confirmButton = {
@@ -474,13 +488,12 @@ fun ErrorDialoggWithRetry(
                             painter = painterResource(id = R.drawable.failed),
                             contentDescription = "", modifier = Modifier.size(60.dp)
                         )
-                    else if(alertDialogHeaderMessage.contains("Success", ignoreCase = true)){
+                    else if (alertDialogHeaderMessage.contains("Success", ignoreCase = true)) {
                         Image(
                             painter = painterResource(id = R.drawable.success),
                             contentDescription = "", modifier = Modifier.size(60.dp)
                         )
-                    }
-                    else  Image(
+                    } else Image(
                         painter = painterResource(id = R.drawable.failed),
                         contentDescription = "", modifier = Modifier.size(60.dp)
                     )
@@ -488,25 +501,27 @@ fun ErrorDialoggWithRetry(
                 }
 
                 Button(
-                        onClick = {
-                            if (exitOnSuccess) {
-                                activity?.finish()
-                            } else {
-                                onRetry()
-                            }
-                        },
-                        shape = RoundedCornerShape(8.dp),
-                        modifier = Modifier.fillMaxWidth()
-                            .padding(32.dp).height(40.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            backgroundColor = Teal500
-                        )
-                    ) {
-                        val text: String = if(exitOnSuccess){
+                    onClick = {
+                        if (exitOnSuccess) {
+                            activity?.finish()
+                        } else {
+                            onRetry()
+                        }
+                    },
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(32.dp)
+                        .height(40.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = Teal500
+                    )
+                ) {
+                    val text: String = if (exitOnSuccess) {
                         "Close"
-                    }else "Retry"
-                        Text(text = text)
-                    }
+                    } else "Retry"
+                    Text(text = text)
+                }
 
             },
         )
