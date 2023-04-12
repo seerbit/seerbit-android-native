@@ -45,6 +45,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.seerbitsdk.bank.*
 import com.example.seerbitsdk.card.CardEnterPinScreen
+import com.example.seerbitsdk.card.OTPScreen
 import com.example.seerbitsdk.component.*
 import com.example.seerbitsdk.models.CardDetails
 import com.example.seerbitsdk.models.RequiredFields
@@ -103,7 +104,7 @@ class SeerBitActivity : ComponentActivity() {
 
 
             if (merchantDetailsState.hasError) {
-               openDialog.value = true
+                openDialog.value = true
             }
 
 
@@ -235,8 +236,8 @@ fun SeerBitApp(
 
 }
 
-fun NavHostController.navigatePopUpToOtherPaymentScreen(route: String){
-    this.navigate(route){
+fun NavHostController.navigatePopUpToOtherPaymentScreen(route: String) {
+    this.navigate(route) {
         popUpTo(Route.OTHER_PAYMENT_SCREEN) {
             inclusive = true
         }
@@ -600,10 +601,15 @@ fun CardHomeScreen(
                         redirectUrl = it
                         canRedirectToUrl = true
                     }
-                    if (toEnterPinScreen || useOtp) {
+                    if (toEnterPinScreen) {
                         redirectUrl = ""
                         navController.navigateSingleTopTo(
                             "${Route.PIN_SCREEN}/$paymentRef/$cvv/$cardNumber/$cardExpiryMonth/$cardExpiryYear/$toEnterPinScreen/$useOtp/$otpText/$linkingRef"
+                        )
+                        return@let
+                    } else if (useOtp) {
+                        navController.navigateSingleTopTo(
+                            "${Route.CARD_OTP_SCREEN}/$paymentRef/$otpText/$linkingRef"
                         )
                         return@let
                     } else if (canRedirectToUrl) {
@@ -1038,7 +1044,7 @@ fun MyAppNavHost(
         composable(
             route = Debit_CreditCard.route,
 
-        ) {
+            ) {
             transactionViewModel.resetTransactionState()
             CardHomeScreen(
                 onNavigateToPinScreen = { cardDTO ->
@@ -1094,11 +1100,32 @@ fun MyAppNavHost(
                 cardNumber = cardNumber!!,
                 cardExpiryMonth = cardExpiryMonth!!,
                 cardExpiryYear = cardExpiryYear!!,
-                isEnterPin = isEnterPin!!,
-                useOtp = useOtp!!,
-                otpText = otpText!!,
-                linkingRef = linkingRef!!
             )
+        }
+
+        composable(
+            "${Route.CARD_OTP_SCREEN}/{paymentRef}/{otpText}/{linkingRef}",
+            arguments = listOf(
+                // declaring argument type
+                navArgument("paymentRef") { type = NavType.StringType },
+                navArgument("otpText") { type = NavType.StringType },
+                navArgument("linkingRef") { type = NavType.StringType },
+
+                )
+        ) { navBackStackEntry ->
+            val useOtp = navBackStackEntry.arguments?.getBoolean("useOtp")
+            val otpText = navBackStackEntry.arguments?.getString("otpText")
+            val linkingRef = navBackStackEntry.arguments?.getString("linkingRef")
+
+            cardEnterPinViewModel.resetTransactionState()
+            OTPScreen(
+                otpText = otpText!!,
+                linkingRef = linkingRef!!,
+                merchantDetailsState = merchantDetailsState,
+                cardEnterPinViewModel = cardEnterPinViewModel,
+                transactionViewModel = transactionViewModel
+            )
+
         }
 
         //BANK ACCOUUT HOME SCREEN

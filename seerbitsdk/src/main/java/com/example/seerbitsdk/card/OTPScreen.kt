@@ -1,7 +1,9 @@
 package com.example.seerbitsdk.card
 
+import android.app.Activity
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -10,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -17,80 +20,257 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import com.example.seerbitsdk.ErrorDialog
 import com.example.seerbitsdk.R
-import com.example.seerbitsdk.component.OtherPaymentButtonComponent
-import com.example.seerbitsdk.component.SeerbitPaymentDetailHeader
+import com.example.seerbitsdk.component.*
+import com.example.seerbitsdk.helper.TransactionType
+import com.example.seerbitsdk.helper.calculateTransactionFee
+import com.example.seerbitsdk.models.CardOTPDTO
+import com.example.seerbitsdk.models.Transaction
+import com.example.seerbitsdk.screenstate.MerchantDetailsState
+import com.example.seerbitsdk.screenstate.OTPState
+import com.example.seerbitsdk.screenstate.QueryTransactionState
 import com.example.seerbitsdk.ui.theme.Faktpro
-import com.example.seerbitsdk.ui.theme.SeerBitTheme
+import com.example.seerbitsdk.ussd.ErrorDialogg
+import com.example.seerbitsdk.viewmodels.CardEnterPinViewModel
+import com.example.seerbitsdk.viewmodels.TransactionViewModel
 
 
 @Composable
 fun OTPScreen(
     modifier: Modifier = Modifier,
-    onPaymentMethodClick: (String) -> Unit
+    otpText: String,
+    linkingRef: String,
+    merchantDetailsState: MerchantDetailsState,
+    cardEnterPinViewModel: CardEnterPinViewModel,
+    transactionViewModel: TransactionViewModel
+
 ) {
-    var showPinScreen by remember { mutableStateOf(false) }
     Column(modifier = modifier) {
 
-        Column(
-            modifier = modifier
-                .padding(
-                    start = 21.dp,
-                    end = 21.dp
+
+        // if there is an error loading the report
+        if (merchantDetailsState.hasError) {
+            ErrorDialog(message = merchantDetailsState.errorMessage ?: "Something went wrong")
+        }
+
+        if (merchantDetailsState.isLoading) {
+            showCircularProgress(showProgress = true)
+        }
+
+
+
+        merchantDetailsState.data?.let { merchantDetailsData ->
+
+            Column(
+                modifier = modifier
+                    .padding(
+                        start = 8.dp,
+                        end = 8.dp
+                    )
+                    .fillMaxWidth()
+                    .weight(1f)
+            ) {
+
+
+
+                var showCircularProgressBar by remember { mutableStateOf(false) }
+                var otp by remember { mutableStateOf("") }
+                var alertDialogMessage by remember { mutableStateOf("") }
+                var alertDialogHeaderMessage by remember { mutableStateOf("") }
+                val paymentRef = merchantDetailsData.payload?.paymentReference ?: ""
+                //HANDLE ENTER OTP STATE
+
+                val otpState: OTPState = cardEnterPinViewModel.otpState.value
+                val queryTransactionStateState: QueryTransactionState =
+                    cardEnterPinViewModel.queryTransactionState.value
+                val openDialog = remember { mutableStateOf(false) }
+                var amount = merchantDetailsData.payload?.amount
+                val exitOnSuccess = remember { mutableStateOf(false) }
+                val activity = (LocalContext.current as? Activity)
+
+                val fee = calculateTransactionFee(
+                    merchantDetailsData,
+                    TransactionType.CARD.type,
+                    amount = amount?.toDouble() ?: 0.0
                 )
-                .fillMaxWidth()
-                .weight(1f)
-        ) {
-            Spacer(modifier = Modifier.height(25.dp))
 
-            SeerbitPaymentDetailHeader(
-                charges = 0.45,
-                amount = "60,000.00",
-                currencyText = "NGN",
-                "",
-                "",
-                ""
-            )
+                Spacer(modifier = Modifier.height(21.dp))
+                SeerbitPaymentDetailHeader(
 
-            Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    text = "Kindly enter the OTP sent to *******9502 and\n" +
-                            "o***********@gmail.com or enter the OTP genrates on your hardware token device",
-                    style = TextStyle(
-                        fontSize = 14.sp,
-                        fontFamily = FontFamily.SansSerif,
-                        fontWeight = FontWeight.Normal,
-                        lineHeight = 14.sp,
-                        textAlign = TextAlign.Center
-
-                    ),
-                    modifier = Modifier
-                        .align(alignment = Alignment.CenterVertically)
-                        .padding(10.dp)
+                    charges = fee?.toDouble() ?: 0.0,
+                    amount = amount ?: "",
+                    currencyText = merchantDetailsData.payload?.defaultCurrency ?: "",
+                    "",
+                    merchantDetailsData.payload?.userFullName ?: "",
+                    merchantDetailsData.payload?.emailAddress ?: ""
                 )
-            }
-            Spacer(modifier = Modifier.height(20.dp))
-            OTPInputField(Modifier, "Enter OTP") {
+
+                //this handles when to show progress bar
+                if (showCircularProgressBar) {
+                    showCircularProgress(true)
+                }
+
+
+                ErrorDialogg(
+                    showDialog = openDialog,
+                    alertDialogHeaderMessage = alertDialogHeaderMessage,
+                    alertDialogMessage = alertDialogMessage,
+                    exitOnSuccess = exitOnSuccess.value
+                ) {
+                    openDialog.value = false
+                    showCircularProgressBar = false
+                }
+
+
+                val cardOTPDTO = CardOTPDTO(transaction = Transaction(linkingRef, otp))
+                var otpHeaderText = ""
+                val alternativeOTPText: String =
+                    "Kindly enter the OTP sent to ${merchantDetailsData.payload?.userPhoneNumber?.maskedPhoneNumber()} and\n" +
+                            "${merchantDetailsData.payload?.emailAddress} or enter the OTP generates on your hardware token device"
+
+
+
+                otpHeaderText = otpText.ifEmpty {
+                    alternativeOTPText
+                }
+
+
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = otpHeaderText, style = TextStyle(
+                            fontSize = 14.sp,
+                            fontFamily = FontFamily.SansSerif,
+                            fontWeight = FontWeight.Normal,
+                            lineHeight = 14.sp,
+                            textAlign = TextAlign.Center
+
+                        ),
+                        modifier = Modifier
+                            .align(alignment = Alignment.CenterVertically)
+                            .padding(10.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.height(20.dp))
+
+                OTPInputField(Modifier, "Enter OTP") {
+                    otp = it
+                }
+                Spacer(modifier = modifier.height(20.dp))
+
+                Row(
+                    horizontalArrangement = Arrangement.End,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = "Resend OTP",
+                        modifier = Modifier.clickable(enabled = !showCircularProgressBar, "") {
+
+                        })
+                }
+                Spacer(modifier = modifier.height(10.dp))
+
+
+                AuthorizeButton(
+                    buttonText = "Authorize Payment",
+                    onClick = {
+                        if (otp.length < 6) {
+                            openDialog.value = true
+                            alertDialogMessage = "Invalid otp"
+                            alertDialogHeaderMessage = "Error Occurred"
+                        } else {
+                            cardEnterPinViewModel.sendOtp(cardOTPDTO)
+
+                        }
+                    }, !showCircularProgressBar
+                )
+
+
+
+                if (otpState.hasError) {
+                    showCircularProgressBar = false
+                    alertDialogMessage = otpState.errorMessage ?: "Something went wrong"
+                    alertDialogHeaderMessage = "Error"
+                    openDialog.value = true
+                    cardEnterPinViewModel.resetTransactionState()
+                }
+
+                if (otpState.isLoading) {
+                    showCircularProgressBar = true
+                }
+
+                otpState.data?.let { otp ->
+
+                    if (otpState.data.status == "SUCCESS") {
+                        showCircularProgressBar = false
+                        if (queryTransactionStateState.data != null) {
+
+                            if (queryTransactionStateState.data.data?.code == SUCCESS) {
+                                showCircularProgressBar = false
+                                openDialog.value = true
+                                alertDialogMessage =
+                                    queryTransactionStateState.data.data.payments?.reason!!
+                                alertDialogHeaderMessage = "Success"
+                                exitOnSuccess.value = true
+                                cardEnterPinViewModel.resetTransactionState()
+                                return@let
+                            }
+                            do {
+                                cardEnterPinViewModel.queryTransaction(transactionViewModel.paymentRef.value)
+                            } while (queryTransactionStateState.data.data?.code == PENDING_CODE)
+
+
+                            if (queryTransactionStateState.data.data?.code == FAILED_CODE || queryTransactionStateState.data.data?.code == FAILED) {
+                                showCircularProgressBar = false
+                                openDialog.value = true
+                                alertDialogMessage =
+                                    queryTransactionStateState.data.data.payments?.reason ?: ""
+                                alertDialogHeaderMessage = "Failed"
+                                cardEnterPinViewModel.resetTransactionState()
+                                return@let
+                            } else {
+                                showCircularProgressBar = false
+                                openDialog.value = true
+                                alertDialogMessage =
+                                    queryTransactionStateState.data.data?.payments?.reason ?: ""
+                                alertDialogHeaderMessage = "Failed"
+                                cardEnterPinViewModel.resetTransactionState()
+                                return@let
+                            }
+
+
+                        } else cardEnterPinViewModel.queryTransaction(transactionViewModel.paymentRef.value)
+                    } else if (otpState.data.status == FAILED) {
+                        showCircularProgressBar = false
+                        openDialog.value = true
+                        alertDialogMessage = otpState.data.data?.message ?: "Error processing otp"
+                        alertDialogHeaderMessage = "Failed"
+                        cardEnterPinViewModel.resetTransactionState()
+                    }
+                }
+
+                //querying transaction happens after otp has been inputted
+                if (queryTransactionStateState.hasError) {
+                    showCircularProgressBar = false
+                    openDialog.value = true
+                    alertDialogMessage = queryTransactionStateState.errorMessage?: "Error processing otp"
+                    alertDialogHeaderMessage = "Failed"
+                    cardEnterPinViewModel.resetTransactionState()
+                }
+
+                if (queryTransactionStateState.isLoading) {
+                    showCircularProgressBar = true
+                }
+
+
 
             }
-            Spacer(modifier = modifier.height(20.dp))
-
-            Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
-                Text(text = "Resend OTP")
-            }
-            Spacer(modifier = modifier.height(10.dp))
-            AuthorizeButton(buttonText = "Authorize Payment",
-                onClick = { showPinScreen = true }, true
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Spacer(modifier = Modifier.height(60.dp))
-
-            OtherPaymentButtonComponent(
-                onOtherPaymentButtonClicked = { /*TODO*/ },
-                onCancelButtonClicked = {}, enable = true)
 
         }
 
@@ -99,13 +279,40 @@ fun OTPScreen(
 }
 
 
-@Preview(showBackground = true, widthDp = 400, heightDp = 700)
+//@Preview(showBackground = true, widthDp = 400, heightDp = 700)
+//@Composable
+//fun OTPScreenPreview() {
+//    SeerBitTheme {
+//        OTPScreen(
+//            onPaymentMethodClick = {},
+//            useOtp = true,
+//            otpText = "",
+//            linkingRef = "",
+//            navController = rememberNavController(),
+//            merchantDetailsState = null,
+//            onOtherPaymentButtonClicked = { /*TODO*/ },
+//            cardEnterPinViewModel = ,
+//            transactionViewModel =
+//        )
+//        OTPScreen(
+//            onPaymentMethodClick = {}
+//        )
+//    }
+//}
+
 @Composable
-fun OTPScreenPreview() {
-    SeerBitTheme {
-        OTPScreen(
-            onPaymentMethodClick = {}
-        )
+fun showCircularProgressTwo(showProgress: Boolean) {
+    if(showProgress) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+
+            CircularProgressIndicator(
+                color = Color.DarkGray,
+            )
+        }
     }
 }
 
@@ -116,7 +323,8 @@ fun OTPInputField(
     onEnterOTP: (String) -> Unit
 ) {
     Column {
-        Card(modifier = modifier, elevation = 1.dp,
+        Card(
+            modifier = modifier, elevation = 1.dp,
             border = BorderStroke(0.5.dp, Color.LightGray)
         ) {
             var value by remember { mutableStateOf("") }
@@ -165,7 +373,7 @@ fun OTPInputField(
 @Composable
 fun AuthorizeButton(
     buttonText: String,
-    onClick: () -> Unit, enableButton : Boolean
+    onClick: () -> Unit, enableButton: Boolean
 ) {
     Button(
         onClick = onClick,
@@ -177,13 +385,15 @@ fun AuthorizeButton(
             .fillMaxWidth()
 
     ) {
-        Text(text = buttonText, color = Color.White,
+        Text(
+            text = buttonText, color = Color.White,
             style = TextStyle(
-            fontSize = 14.sp,
-            fontFamily = Faktpro,
-            fontWeight = FontWeight.Normal,
-            lineHeight = 10.sp
-        ))
+                fontSize = 14.sp,
+                fontFamily = Faktpro,
+                fontWeight = FontWeight.Normal,
+                lineHeight = 10.sp
+            )
+        )
     }
 
 }

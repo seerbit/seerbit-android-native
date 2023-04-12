@@ -2,6 +2,7 @@ package com.example.seerbitsdk.component
 
 object Route{
 
+    const val CARD_OTP_SCREEN: String = "CARD_OTP_SCREE"
     const val MOMO_OTP_SCREEN: String = "momootpscreen"
     const val BANK_ACCOUNT_REDIRECT_URL_SCREEN: String = "BankAccountRedirectUrlScreen"
     const val BANK_HOME_SCREEN = "BankHomeScreen"
