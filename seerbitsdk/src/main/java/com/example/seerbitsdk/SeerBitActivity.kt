@@ -70,8 +70,6 @@ class SeerBitActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-
-
         setContent {
 
             val cardEnterPinViewModel: CardEnterPinViewModel by viewModels()
@@ -96,7 +94,7 @@ class SeerBitActivity : ComponentActivity() {
             ErrorDialogg(
                 showDialog = openDialog,
                 alertDialogHeaderMessage = "Error",
-                alertDialogMessage = "Error while loading sdk, Kindly check your internet",
+                alertDialogMessage = "Error occurred while loading sdk. Please check your Internet or public key.",
                 exitOnSuccess = true
             ) {
                 openDialog.value = false

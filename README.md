@@ -30,7 +30,7 @@ allprojects {
 
 ```
 dependencies {
-	        implementation 'com.github.seerbit:seerbit-android-native:1.0.1'
+	        implementation 'com.github.seerbit:seerbit-android-native:1.0.2'
 	}
   
  ```

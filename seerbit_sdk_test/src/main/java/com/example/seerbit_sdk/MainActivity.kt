@@ -24,7 +24,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.seerbit_sdk.ui.theme.SeerBitTheme
 import com.example.seerbitsdk.R
-import com.example.seerbitsdk.bank.BankAccountNumberField
 import com.example.seerbitsdk.models.OnCloseSeerBitSdkListener
 import com.example.seerbitsdk.startSeerBitSDK
 
@@ -50,19 +49,6 @@ class MainActivity : ComponentActivity(), OnCloseSeerBitSdkListener {
     }
 }
 
-@Composable
-fun Greeting(name: String) {
-    Text(text = "Hello $name!")
-}
-
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    SeerBitTheme {
-        Greeting("Android")
-    }
-}
-
 
 @Preview(showBackground = true, heightDp = 300)
 @Composable
@@ -74,11 +60,11 @@ fun goToPaymentGateway(context: Context = LocalContext.current) {
         modifier = Modifier.fillMaxSize().padding(20.dp)
     ) {
 
-        var fullName by remember { mutableStateOf("") }
-        var email by remember { mutableStateOf("") }
+        var fullName by remember { mutableStateOf("SeerBit SeerBit") }
+        var email by remember { mutableStateOf("seerbit@gmail.com") }
         var publicKey by remember { mutableStateOf("") }
-        var phoneNumber by remember { mutableStateOf("") }
-        var amount by remember { mutableStateOf("") }
+        var phoneNumber by remember { mutableStateOf("09098987676") }
+        var amount by remember { mutableStateOf("43") }
 
         MyTextField(placeholder = "Enter Use Name") {
             fullName = it
@@ -108,7 +94,7 @@ fun goToPaymentGateway(context: Context = LocalContext.current) {
                     context,
                     amount,
                     phoneNumber,
-                    "SBPUBK_SCAD2TXCTYVZOORZEGXR17OTLECBGUAI",
+                    "SBTESTPUBK_t4G16GCA1O51AV0Va3PPretaisXubSw1",
                     fullName,
                     email
                 )
