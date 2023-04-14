@@ -417,10 +417,10 @@ fun ErrorDialogg(
                         .padding(32.dp)
                         .height(40.dp),
                     colors = ButtonDefaults.buttonColors(
-                        backgroundColor = Teal500
+                        backgroundColor = Color.Black
                     )
                 ) {
-                    Text(text = "Close")
+                    Text(text = "Close", style = TextStyle(color = Color.White))
 
                 }
 
@@ -514,13 +514,13 @@ fun ErrorDialoggWithRetry(
                         .padding(32.dp)
                         .height(40.dp),
                     colors = ButtonDefaults.buttonColors(
-                        backgroundColor = Teal500
+                        backgroundColor = Color.Black
                     )
                 ) {
                     val text: String = if (exitOnSuccess) {
                         "Close"
                     } else "Retry"
-                    Text(text = text)
+                    Text(text = text, style = TextStyle(color = Color.White))
                 }
 
             },

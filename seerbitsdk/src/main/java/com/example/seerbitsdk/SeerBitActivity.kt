@@ -377,7 +377,7 @@ fun CardHomeScreen(
                 country = merchantDetailsData.payload?.country?.countryCode ?: "",
                 amount = totalAmount,
                 cvv = cvv,
-                redirectUrl = "http://localhost:3002/#/",
+                redirectUrl = "https://com.example.seerbit_sdk",
                 productId = "",
                 mobileNumber = merchantDetailsData.payload?.userPhoneNumber,
                 paymentReference = paymentReference,
@@ -455,7 +455,7 @@ fun CardHomeScreen(
 
                         if (cardBinState.data != null) {
                             var split: List<String?>
-                            if (cardBinState.data.responseMessage != "BIN not Found") {
+                            if (cardBinState.data.responseMessage != "BIN not found") {
                                 transactionViewModel.clearCardBinState()
                                 split = cardBinState.data.cardName?.split(" ")!!
 
@@ -512,7 +512,7 @@ fun CardHomeScreen(
 
                         } else {
                             openDialog.value = true
-                            alertDialogMessage = "Invalid Card Details"
+                            alertDialogMessage = "Invalid card details"
                             alertDialogHeaderMessage = "Error Occurred"
                         }
                     }, !showCircularProgressBar
@@ -1041,8 +1041,13 @@ fun MyAppNavHost(
 
         composable(
             route = Debit_CreditCard.route,
-
-            ) {
+//            deepLinks = listOf(
+//                navDeepLink {
+//                    uriPattern = DeepLinkPattern.HomePattern
+//                }
+//
+//            )
+        ) {
             transactionViewModel.resetTransactionState()
             CardHomeScreen(
                 onNavigateToPinScreen = { cardDTO ->
