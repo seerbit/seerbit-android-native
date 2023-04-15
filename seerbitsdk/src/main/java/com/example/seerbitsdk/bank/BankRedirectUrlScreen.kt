@@ -3,9 +3,6 @@ package com.example.seerbitsdk.bank
 
 import android.app.Activity
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -30,8 +27,7 @@ import com.example.seerbitsdk.models.bankaccount.BankAccountDTO
 import com.example.seerbitsdk.screenstate.InitiateTransactionState
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.screenstate.QueryTransactionState
-import com.example.seerbitsdk.ui.theme.SignalRed
-import com.example.seerbitsdk.ussd.ErrorDialogg
+import com.example.seerbitsdk.ussd.ModalDialog
 import com.example.seerbitsdk.viewmodels.TransactionViewModel
 
 @Composable
@@ -106,7 +102,7 @@ fun BankRedirectUrlScreen(
                     merchantDetailsData.payload?.emailAddress ?: ""
                 )
 
-                ErrorDialogg(
+                ModalDialog(
                     showDialog = openDialog,
                     alertDialogHeaderMessage = alertDialogHeaderMessage,
                     alertDialogMessage = alertDialogMessage,

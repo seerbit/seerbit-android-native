@@ -13,7 +13,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -30,8 +29,6 @@ import com.example.seerbitsdk.*
 import com.example.seerbitsdk.R
 import com.example.seerbitsdk.card.AuthorizeButton
 import com.example.seerbitsdk.card.showCircularProgress
-import com.example.seerbitsdk.component.BottomSeerBitWaterMark
-import com.example.seerbitsdk.component.OtherPaymentButtonComponent
 import com.example.seerbitsdk.component.Route
 import com.example.seerbitsdk.component.SeerbitPaymentDetailHeader
 import com.example.seerbitsdk.helper.TransactionType
@@ -42,7 +39,7 @@ import com.example.seerbitsdk.models.MerchantBanksItem
 import com.example.seerbitsdk.models.RequiredFields
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.ui.theme.SeerBitTheme
-import com.example.seerbitsdk.ussd.ErrorDialogg
+import com.example.seerbitsdk.ussd.ModalDialog
 import com.example.seerbitsdk.viewmodels.SelectBankViewModel
 import com.example.seerbitsdk.viewmodels.TransactionViewModel
 
@@ -118,7 +115,7 @@ fun BankAccountSelectBankScreen(
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                ErrorDialogg(
+                ModalDialog(
                     showDialog = openDialog,
                     alertDialogHeaderMessage = alertDialogHeaderMessage,
                     alertDialogMessage = alertDialogMessage,

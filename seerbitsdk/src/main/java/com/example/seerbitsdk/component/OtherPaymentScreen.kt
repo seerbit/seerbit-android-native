@@ -29,7 +29,7 @@ import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.ui.theme.DeepRed
 import com.example.seerbitsdk.ui.theme.Faktpro
 import com.example.seerbitsdk.ui.theme.SignalRed
-import com.example.seerbitsdk.ussd.ErrorDialogg
+import com.example.seerbitsdk.ussd.ModalDialog
 import com.example.seerbitsdk.viewmodels.TransactionViewModel
 
 
@@ -97,7 +97,7 @@ fun OtherPaymentScreen(
                     transactionViewModel.initiateTransactionState.value
 
 
-                ErrorDialogg(
+                ModalDialog(
                     showDialog = openDialog,
                     alertDialogHeaderMessage = "Failed",
                     alertDialogMessage = "This action could not be completed",

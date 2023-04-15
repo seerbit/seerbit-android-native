@@ -4,9 +4,7 @@ import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import android.widget.Space
 import android.widget.Toast
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -15,7 +13,6 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 
@@ -110,7 +107,7 @@ fun USSDHomeScreen(
                 )
 
 
-                ErrorDialogg(
+                ModalDialog(
                     showDialog = openDialog,
                     alertDialogHeaderMessage = alertDialogHeaderMessage,
                     alertDialogMessage = alertDialogMessage,
@@ -143,8 +140,8 @@ fun USSDHomeScreen(
                         }
                         SUCCESS -> {
                             openDialog.value = true
-                            alertDialogMessage = queryTransactionStateState.data.data.message ?: ""
-                            alertDialogHeaderMessage = "Success!"
+                            alertDialogMessage =  ""//queryTransactionStateState.data.data.message ?:
+                            alertDialogHeaderMessage = "Transaction Successful!"
                             showLoadingScreen = false
                             exitOnSuccess.value = true
                             transactionViewModel.resetTransactionState()
@@ -328,7 +325,7 @@ fun showLoaderLayout() {
 
 
 @Composable
-fun ErrorDialogg(
+fun ModalDialog(
     context: Context = LocalContext.current,
     showDialog: MutableState<Boolean>,
     alertDialogHeaderMessage: String,
@@ -396,7 +393,7 @@ fun ErrorDialogg(
                     else if (alertDialogHeaderMessage.contains("Success", ignoreCase = true)) {
                         Image(
                             painter = painterResource(id = R.drawable.success),
-                            contentDescription = "", modifier = Modifier.size(60.dp)
+                            contentDescription = "", modifier = Modifier.size(120.dp)
                         )
                     } else Image(
                         painter = painterResource(id = R.drawable.failed),
@@ -432,7 +429,7 @@ fun ErrorDialogg(
 
 
 @Composable
-fun ErrorDialoggWithRetry(
+fun ErrorDialogWithRetry(
     context: Context = LocalContext.current, showDialog: MutableState<Boolean>,
     alertDialogHeaderMessage: String,
     alertDialogMessage: String, exitOnSuccess: Boolean,
@@ -457,7 +454,8 @@ fun ErrorDialoggWithRetry(
                         text = alertDialogHeaderMessage, style = TextStyle(
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp
-                        )
+                        ),
+                        textAlign = TextAlign.Center
                     )
                 }
 
@@ -471,8 +469,9 @@ fun ErrorDialoggWithRetry(
                         alertDialogMessage, style = TextStyle(
                             fontWeight = FontWeight.Bold,
                             fontSize = 14.sp,
-                            lineHeight = 1.sp
-                        )
+                            lineHeight = 19.sp,
+                        ),
+                        textAlign = TextAlign.Center
                     )
                 }
             },

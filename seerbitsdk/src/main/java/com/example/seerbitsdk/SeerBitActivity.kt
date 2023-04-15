@@ -7,7 +7,6 @@ import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.net.Uri
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -32,7 +31,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -51,13 +49,12 @@ import com.example.seerbitsdk.models.RequiredFields
 import com.example.seerbitsdk.models.card.CardDTO
 import com.example.seerbitsdk.component.OtherPaymentScreen
 import com.example.seerbitsdk.helper.*
-import com.example.seerbitsdk.models.OnCloseSeerBitSdkListener
 import com.example.seerbitsdk.momo.MOMOOTPScreen
 import com.example.seerbitsdk.momo.MomoHomeScreen
 import com.example.seerbitsdk.screenstate.*
 import com.example.seerbitsdk.transfer.TransferHomeScreen
 import com.example.seerbitsdk.ui.theme.*
-import com.example.seerbitsdk.ussd.ErrorDialogg
+import com.example.seerbitsdk.ussd.ModalDialog
 import com.example.seerbitsdk.ussd.USSDHomeScreen
 import com.example.seerbitsdk.ussd.USSDSelectBanksScreen
 import com.example.seerbitsdk.viewmodels.*
@@ -90,7 +87,7 @@ class SeerBitActivity : ComponentActivity() {
 
             val merchantDetailsState = merchantDetailsViewModel.merchantState.value
 
-            ErrorDialogg(
+            ModalDialog(
                 showDialog = openDialog,
                 alertDialogHeaderMessage = "Error",
                 alertDialogMessage = "Error occurred while loading sdk. Please check your Internet or public key.",
@@ -411,7 +408,7 @@ fun CardHomeScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            ErrorDialogg(
+            ModalDialog(
                 showDialog = openDialog,
                 alertDialogHeaderMessage = alertDialogHeaderMessage,
                 alertDialogMessage = alertDialogMessage,

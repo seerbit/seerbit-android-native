@@ -3,7 +3,6 @@ package com.example.seerbitsdk.transfer
 import android.app.Activity
 import android.content.Context
 import android.widget.Toast
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -26,7 +25,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.seerbitsdk.Debit_CreditCard
 import com.example.seerbitsdk.ErrorDialog
 import com.example.seerbitsdk.R
 import com.example.seerbitsdk.card.AuthorizeButton
@@ -36,12 +34,10 @@ import com.example.seerbitsdk.helper.TransactionType
 import com.example.seerbitsdk.helper.calculateTransactionFee
 import com.example.seerbitsdk.helper.formatInputDouble
 import com.example.seerbitsdk.helper.isMerchantFeeBearer
-import com.example.seerbitsdk.navigateSingleTopNoSavedState
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.screenstate.QueryTransactionState
 import com.example.seerbitsdk.ui.theme.*
-import com.example.seerbitsdk.ussd.ErrorDialogg
-import com.example.seerbitsdk.ussd.ErrorDialoggWithRetry
+import com.example.seerbitsdk.ussd.ErrorDialogWithRetry
 import com.example.seerbitsdk.ussd.USSDCodeSurfaceView
 import com.example.seerbitsdk.ussd.copyToClipboard
 import com.example.seerbitsdk.viewmodels.TransactionViewModel
@@ -125,7 +121,7 @@ fun TransferHomeScreen(
                 merchantDetailsData.payload?.emailAddress ?: ""
             )
 
-            ErrorDialoggWithRetry(
+            ErrorDialogWithRetry(
                 showDialog = openDialog,
                 alertDialogHeaderMessage = alertDialogHeaderMessage,
                 alertDialogMessage = alertDialogMessage,
@@ -163,10 +159,9 @@ fun TransferHomeScreen(
                         transactionViewModel.queryTransaction(paymentReference ?: "")
                     }
                     SUCCESS -> {
-                        alertDialogHeaderMessage = "Success!!"
+                        alertDialogHeaderMessage = "Transaction Successful!"
                         openDialog.value = true
-                        alertDialogMessage =
-                            queryTransactionStateState.data.data.payments?.reason ?: ""
+                        alertDialogMessage = ""//queryTransactionStateState.data.data.payments?.reason ?:
                         showCircularProgressBar = false
                         exitOnSuccess.value = true
                         transactionViewModel.resetTransactionState()
