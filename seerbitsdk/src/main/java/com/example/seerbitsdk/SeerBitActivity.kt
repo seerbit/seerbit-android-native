@@ -52,6 +52,7 @@ import com.example.seerbitsdk.models.RequiredFields
 import com.example.seerbitsdk.models.card.CardDTO
 import com.example.seerbitsdk.component.OtherPaymentScreen
 import com.example.seerbitsdk.helper.*
+import com.example.seerbitsdk.models.MerchantBanksItem
 import com.example.seerbitsdk.models.OnCloseSeerBitSdkListener
 import com.example.seerbitsdk.momo.MOMOOTPScreen
 import com.example.seerbitsdk.momo.MomoHomeScreen
@@ -94,7 +95,7 @@ class SeerBitActivity : ComponentActivity() {
             ErrorDialogg(
                 showDialog = openDialog,
                 alertDialogHeaderMessage = "Error",
-                alertDialogMessage = "Error occurred while loading sdk. Please check your Internet or public key.",
+                alertDialogMessage = "Error occurred while loading sdk. Please check your internet or public key.",
                 exitOnSuccess = true
             ) {
                 openDialog.value = false
@@ -236,9 +237,14 @@ fun SeerBitApp(
 
 fun NavHostController.navigatePopUpToOtherPaymentScreen(route: String) {
     this.navigate(route) {
-        popUpTo(Route.OTHER_PAYMENT_SCREEN) {
-            inclusive = true
+        popUpTo(this@navigatePopUpToOtherPaymentScreen.graph.findStartDestination().id) {
+            inclusive = false
+            clearBackStack(BankAccount.route)
+            clearBackStack(UssdSelectBank.route)
+            clearBackStack(Transfer.route)
         }
+        this.launchSingleTop = true
+        this.
 
         launchSingleTop = true
         restoreState = true
@@ -426,7 +432,7 @@ fun CardHomeScreen(
 
 
             if (cardBinState.hasError) {
-                openDialog.value = true
+                openDialog.value = false
                 alertDialogMessage = "Invalid Card Details"
                 alertDialogHeaderMessage = "Error Occurred"
                 transactionViewModel.clearCardBinState()
@@ -1030,12 +1036,20 @@ fun MyAppNavHost(
         startDestination = mStartDestination
     ) {
 
-        composable(Route.OTHER_PAYMENT_SCREEN) {
+        composable("${Route.OTHER_PAYMENT_SCREEN}/{cardTypeToRemove}",
+           arguments = listOf(
+                //declaring argument type
+                navArgument("cardTypeToRemove") { type = NavType.StringType }
+            )
+
+        ){  navBackStackEntry ->
+            val cardTypeToRemove = navBackStackEntry.arguments?.getString("cardTypeToRemove")
             OtherPaymentScreen(
                 onCancelButtonClicked = { navController.navigateSingleTopTo(Debit_CreditCard.route) },
                 navController = navController,
                 merchantDetailsState = merchantDetailsState,
-                transactionViewModel = transactionViewModel
+                transactionViewModel = transactionViewModel,
+                removeCardType = cardTypeToRemove!!
             )
         }
 
@@ -1056,7 +1070,7 @@ fun MyAppNavHost(
                 },
                 navController = navController,
                 merchantDetailsState = merchantDetailsState,
-                onOtherPaymentButtonClicked = { navController.navigateSingleTopTo(Route.OTHER_PAYMENT_SCREEN) },
+                onOtherPaymentButtonClicked = { navController.navigateSingleTopTo("${Route.OTHER_PAYMENT_SCREEN}/${TransactionType.CARD.type}") },
                 transactionViewModel = transactionViewModel
             )
         }
@@ -1097,7 +1111,7 @@ fun MyAppNavHost(
                 navController = navController,
                 merchantDetailsState = merchantDetailsState,
                 cardEnterPinViewModel = cardEnterPinViewModel,
-                onOtherPaymentButtonClicked = { navController.navigateSingleTopTo(Route.OTHER_PAYMENT_SCREEN) },
+                onOtherPaymentButtonClicked = { navController.navigateSingleTopTo("${Route.OTHER_PAYMENT_SCREEN}/dummy") },
                 paymentReference = paymentReference!!,
                 cvv = cvv!!,
                 cardNumber = cardNumber!!,
@@ -1366,7 +1380,7 @@ fun MyAppNavHost(
                 paymentReference = paymentReference,
                 navController = navController,
                 onCancelButtonClicked = { navController.navigateSingleTopTo(Debit_CreditCard.route) },
-                onOtherPaymentButtonClicked = { navController.navigate(Route.OTHER_PAYMENT_SCREEN) }
+                onOtherPaymentButtonClicked = { navController.navigate("${Route.OTHER_PAYMENT_SCREEN}/dummy") }
             )
         }
 

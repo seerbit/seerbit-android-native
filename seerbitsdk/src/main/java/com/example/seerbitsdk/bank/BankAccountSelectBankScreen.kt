@@ -144,7 +144,7 @@ fun BankAccountSelectBankScreen(
                     alertDialogMessage ="Error while fetching banks"
                 }
 
-                showCircularProgressBar = availableBanksState.isLoading
+                //showCircularProgressBar = availableBanksState.isLoading
 
                 var merchantBankList: List<MerchantBanksItem?>? = listOf()
                 availableBanksState.data?.availableBankData?.let {
@@ -178,7 +178,7 @@ fun BankAccountSelectBankScreen(
                                 navController.navigateSingleTopNoSavedState(
                                     "${Route.BANK_ACCOUNT_NUMBER_SCREEN}/$bankName/$json/$bankCode"
                                 )
-                                selectBankViewModel.resetTransactionState()
+
                             } else { //this means it uses web redirect url link
                                 navController.navigateSingleTopNoSavedState(
                                     "${Route.BANK_ACCOUNT_REDIRECT_URL_SCREEN}/$bankName/$bankCode"

@@ -250,7 +250,7 @@ fun MOMOOTPScreen(
                 )
 
                 OtherPaymentButtonComponent(
-                    onOtherPaymentButtonClicked = { navController.navigatePopUpToOtherPaymentScreen(Route.OTHER_PAYMENT_SCREEN) },
+                    onOtherPaymentButtonClicked = { navController.navigatePopUpToOtherPaymentScreen("${Route.OTHER_PAYMENT_SCREEN}/dummy") },
                     onCancelButtonClicked = {navController.navigateSingleTopTo(Debit_CreditCard.route)},
                     enable = true
                 )

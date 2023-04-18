@@ -3,6 +3,7 @@ package com.example.seerbitsdk.bank
 
 import android.app.Activity
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
@@ -30,6 +31,8 @@ import com.example.seerbitsdk.models.bankaccount.BankAccountDTO
 import com.example.seerbitsdk.screenstate.InitiateTransactionState
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.screenstate.QueryTransactionState
+import com.example.seerbitsdk.ui.theme.DeepRed
+import com.example.seerbitsdk.ui.theme.Faktpro
 import com.example.seerbitsdk.ui.theme.SignalRed
 import com.example.seerbitsdk.ussd.ErrorDialogg
 import com.example.seerbitsdk.viewmodels.TransactionViewModel
@@ -94,8 +97,8 @@ fun BankRedirectUrlScreen(
                 var totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
 
 
-                if(isMerchantFeeBearer(merchantDetailsData)){
-                    totalAmount =amount?.toDouble()
+                if (isMerchantFeeBearer(merchantDetailsData)) {
+                    totalAmount = amount?.toDouble()
                 }
 
                 SeerbitPaymentDetailHeaderTwo(
@@ -242,7 +245,7 @@ fun BankRedirectUrlScreen(
                             transactionViewModel.queryTransaction(
                                 paymentReferenceAfterInitiate
                             )
-                            query.value=false
+                            query.value = false
                         }
 
                     } else {
@@ -275,12 +278,37 @@ fun BankRedirectUrlScreen(
 
                 Spacer(modifier = Modifier.height(100.dp))
 
-                OtherPaymentButtonComponent(
-                    onOtherPaymentButtonClicked = { navController.navigatePopUpToOtherPaymentScreen(Route.OTHER_PAYMENT_SCREEN) },
-                    onCancelButtonClicked = {navController.navigateSingleTopTo(Debit_CreditCard.route)},
-                    enable = !showCircularProgressBar
-                )
 
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+
+                    Button(
+                        onClick = { navController.navigateSingleTopNoSavedState(Debit_CreditCard.route) },
+                        colors = ButtonDefaults.buttonColors(backgroundColor = SignalRed),
+                        shape = RoundedCornerShape(4.dp),
+                        modifier = Modifier
+                            .width(160.dp)
+                            .height(50.dp)
+
+                    ) {
+                        Text(
+                            text = "Cancel Payment",
+
+                            style = TextStyle(
+                                fontSize = 14.sp,
+                                fontFamily = Faktpro,
+                                fontWeight = FontWeight.Normal,
+                                lineHeight = 10.sp,
+                                color = DeepRed,
+                                textAlign = TextAlign.Center
+                            ),
+                            modifier = Modifier.align(alignment = Alignment.CenterVertically)
+                        )
+                    }
+
+                }
                 Spacer(modifier = Modifier.height(100.dp))
                 BottomSeerBitWaterMark(modifier = Modifier.align(alignment = Alignment.CenterHorizontally))
 
@@ -289,5 +317,6 @@ fun BankRedirectUrlScreen(
             }
         }
     }
+
 }
 

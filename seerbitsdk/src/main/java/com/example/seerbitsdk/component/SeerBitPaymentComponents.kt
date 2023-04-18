@@ -176,6 +176,90 @@ fun SeerbitPaymentDetailHeaderTwo(
     }
 }
 
+@Composable
+fun SeerbitPaymentDetailHeaderNoFee(
+    charges: String = "",
+    amount: String,
+    currencyText: String,
+    actionDescription: String,
+    businessName: String,
+    email: String
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.seerbit_logo),
+                contentDescription = null,
+                modifier = Modifier.size(50.dp)
+            )
+            Column(
+                modifier = Modifier.height(50.dp),
+                verticalArrangement = Arrangement.SpaceEvenly,
+                horizontalAlignment = Alignment.End
+            ) {
+                Text(
+                    text = businessName,
+                    style = TextStyle(
+                        fontSize = 14.sp,
+                        fontFamily = Faktpro,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Justify
+                    ),
+                    modifier = Modifier.weight(1f)
+                )
+                Text(
+                    text = email, style = TextStyle(
+                        fontSize = 14.sp,
+                        fontFamily = Faktpro,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Justify
+                    ),
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(35.dp))
+
+        Text(
+            text = "$currencyText${formatAmount(amount.toDouble())}".capitalize(Locale.current),
+            style = TextStyle(
+                fontSize = 24.sp,
+                fontFamily = Faktpro,
+                fontWeight = FontWeight.Bold,
+            ),
+        )
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Text(
+            text = "",
+            style = TextStyle(
+                fontSize = 14.sp,
+                fontFamily = Faktpro,
+                fontWeight = FontWeight.Light
+            )
+        )
+
+        Spacer(modifier = Modifier.height(21.dp))
+        Text(
+            text = actionDescription,
+            style = TextStyle(
+                fontSize = 14.sp,
+                fontFamily = Faktpro,
+                fontWeight = FontWeight.Normal,
+                lineHeight = 10.sp
+            ),
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+    }
+}
+
 
 @Preview(showBackground = true, widthDp = 320)
 @Composable

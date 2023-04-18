@@ -1,16 +1,19 @@
 package com.example.seerbitsdk.component
 
+import android.view.SurfaceControl.Transaction
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -22,14 +25,17 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.seerbitsdk.*
 import com.example.seerbitsdk.helper.*
+import com.example.seerbitsdk.models.MerchantBanksItem
 import com.example.seerbitsdk.models.home.MerchantDetailsResponse
 import com.example.seerbitsdk.models.transfer.TransferDTO
 import com.example.seerbitsdk.screenstate.InitiateTransactionState
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
+import com.example.seerbitsdk.screenstate.MomoNetworkState
 import com.example.seerbitsdk.ui.theme.DeepRed
 import com.example.seerbitsdk.ui.theme.Faktpro
 import com.example.seerbitsdk.ui.theme.SignalRed
 import com.example.seerbitsdk.ussd.ErrorDialogg
+import com.example.seerbitsdk.viewmodels.SelectBankViewModel
 import com.example.seerbitsdk.viewmodels.TransactionViewModel
 
 
@@ -39,7 +45,8 @@ fun OtherPaymentScreen(
     onCancelButtonClicked: () -> Unit,
     transactionViewModel: TransactionViewModel,
     navController: NavHostController,
-    merchantDetailsState: MerchantDetailsState?
+    merchantDetailsState: MerchantDetailsState?,
+    removeCardType : String
 ) {
     var walletName by remember { mutableStateOf("") }
     var paymentRef by remember { mutableStateOf("") }
@@ -68,10 +75,10 @@ fun OtherPaymentScreen(
             ) {
                 Spacer(modifier = Modifier.height(25.dp))
                 var amount= merchantDetailsData.payload?.amount
-                    val fee =   calculateTransactionFee(merchantDetailsData, TransactionType.TRANSFER.type, amount = amount?.toDouble()?: 0.0)
+                val fee =   calculateTransactionFee(merchantDetailsData, TransactionType.TRANSFER.type, amount = amount?.toDouble()?: 0.0)
 
-                SeerbitPaymentDetailHeader(
-                    charges = 0.0,
+                SeerbitPaymentDetailHeaderNoFee(
+                    charges = "",
                     amount = amount.toString(),
                     currencyText = merchantDetailsData.payload?.defaultCurrency?:"",
                     "Other Payment Channels",
@@ -81,7 +88,7 @@ fun OtherPaymentScreen(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 val addedButtons: ArrayList<SeerBitDestination> = arrayListOf()
-                if(displayPaymentMethod(TransactionType.CARD.type, merchantDetailsData))addedButtons.add(Debit_CreditCard)
+                if(displayPaymentMethod(TransactionType.CARD.type, merchantDetailsData) && removeCardType != TransactionType.CARD.type) addedButtons.add(Debit_CreditCard)
                 if(displayPaymentMethod(TransactionType.USSD.type, merchantDetailsData))addedButtons.add(UssdSelectBank)
                 if(displayPaymentMethod(TransactionType.MOMO.type, merchantDetailsData))addedButtons.add(MOMO)
                 if(displayPaymentMethod(TransactionType.TRANSFER.type, merchantDetailsData))addedButtons.add(Transfer)
@@ -227,6 +234,7 @@ fun HeaderScreenPreview() {
         onCancelButtonClicked = { /*TODO*/ },
         navController = rememberNavController(),
         merchantDetailsState = null,
-        transactionViewModel = viewModel
+        transactionViewModel = viewModel,
+        removeCardType = ""
     )
 }
