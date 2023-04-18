@@ -5,7 +5,9 @@ import android.widget.Toast
 import androidx.compose.material.Snackbar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import java.math.RoundingMode
 import java.text.DecimalFormat
+import java.text.NumberFormat
 import java.util.*
 
 fun String.isValidCardNumber(): Boolean {
@@ -47,7 +49,17 @@ fun String.maskedPhoneNumber(): String {
 }
 
 fun formatAmount(amount: Double?): String {
-    return AmountDecimalFormat.format(amount)
+
+    val formatter = NumberFormat.getInstance()
+    formatter.minimumFractionDigits = 2
+    formatter.maximumFractionDigits = 2
+    formatter.roundingMode = RoundingMode.CEILING
+    return try {
+        formatter.format(amount)
+    } catch (e: Exception) {
+        "$amount"
+    }
+
 }
 
 
