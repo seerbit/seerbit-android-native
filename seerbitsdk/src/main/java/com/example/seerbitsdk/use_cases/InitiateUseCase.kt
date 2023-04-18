@@ -96,7 +96,7 @@ class InitiateUseCase {
 
 
         } catch (e: IOException) {
-            emit(Resource.Error("IO exception occurred"))
+            emit(Resource.Error("No internet connection"))
         } catch (e: TimeoutException) {
             emit(Resource.Error("Timeout exception occurred"))
         } catch (e: HttpException) {
@@ -124,7 +124,7 @@ class InitiateUseCase {
             }
 
         } catch (e: IOException) {
-            emit(Resource.Error("IO exception occurred"))
+            emit(Resource.Error("No internet connection"))
         } catch (e: TimeoutException) {
             emit(Resource.Error("Timeout exception occurred"))
         } catch (e: HttpException) {
@@ -153,7 +153,7 @@ class InitiateUseCase {
             }
 
         } catch (e: IOException) {
-            emit(Resource.Error("IO exception occurred"))
+            emit(Resource.Error("No internet connection"))
         } catch (e: TimeoutException) {
             emit(Resource.Error("Timeout exception occurred"))
         } catch (e: HttpException) {
