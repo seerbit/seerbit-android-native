@@ -34,7 +34,9 @@ import com.example.seerbitsdk.models.Transaction
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.screenstate.OTPState
 import com.example.seerbitsdk.screenstate.QueryTransactionState
+import com.example.seerbitsdk.ui.theme.DeepRed
 import com.example.seerbitsdk.ui.theme.Faktpro
+import com.example.seerbitsdk.ui.theme.SignalRed
 import com.example.seerbitsdk.ussd.ErrorDialogg
 import com.example.seerbitsdk.viewmodels.CardEnterPinViewModel
 import com.example.seerbitsdk.viewmodels.TransactionViewModel
@@ -272,12 +274,49 @@ fun OTPScreen(
                 }
 
                 Spacer(modifier = Modifier.height(100.dp))
-                OtherPaymentButtonComponent(
-                    onOtherPaymentButtonClicked = { navController.navigatePopUpToOtherPaymentScreen("${Route.OTHER_PAYMENT_SCREEN}/${TransactionType.CARD.type}") },
-                    onCancelButtonClicked = {navController.navigateSingleTopNoSavedState(
-                        Debit_CreditCard.route)},
-                    enable = true
-                )
+               if (merchantDetailsData.payload?.tokenize != true){
+                    OtherPaymentButtonComponent(
+                        onOtherPaymentButtonClicked = { navController.navigatePopUpToOtherPaymentScreen("${Route.OTHER_PAYMENT_SCREEN}/${TransactionType.CARD.type}") },
+                        onCancelButtonClicked = {navController.navigateSingleTopNoSavedState(
+                            Debit_CreditCard.route)},
+                        enable = !showCircularProgressBar
+                    )}
+                else{
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+
+                        Button(
+                            onClick = {  activity?.finish()
+                                actionListener?.onClose()
+                            },
+                            colors = ButtonDefaults.buttonColors(backgroundColor = SignalRed),
+                            shape = RoundedCornerShape(4.dp),
+                            modifier = Modifier
+                                .width(160.dp)
+                                .height(50.dp)
+
+                        ) {
+                            Text(
+                                text = "Cancel Payment",
+
+                                style = TextStyle(
+                                    fontSize = 14.sp,
+                                    fontFamily = Faktpro,
+                                    fontWeight = FontWeight.Normal,
+                                    lineHeight = 10.sp,
+                                    color = DeepRed,
+                                    textAlign = TextAlign.Center
+                                ),
+                                modifier = Modifier.align(alignment = Alignment.CenterVertically)
+                            )
+                        }
+
+                    }
+
+
+                }
 
                 Spacer(modifier = Modifier.height(100.dp))
                 BottomSeerBitWaterMark(modifier = Modifier.align(alignment = Alignment.CenterHorizontally))
