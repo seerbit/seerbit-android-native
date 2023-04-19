@@ -36,11 +36,11 @@ class GetMomoNetworkUseCase {
             }
 
         } catch (e: IOException) {
-            emit(Resource.Error("IO Exception: ${e.message}"))
+            emit(Resource.Error("No internet connection"))
         } catch (e: TimeoutException) {
-            emit(Resource.Error("Timeout Exception: ${e.message}"))
+            emit(Resource.Error("Timeout exception occurred"))
         } catch (e: HttpException) {
-            emit(Resource.Error("Http Exception: ${e.message}"))
+            emit(Resource.Error("No internet connection"))
         }
 
     }

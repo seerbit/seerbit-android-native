@@ -26,6 +26,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.seerbitsdk.ErrorDialog
+import com.example.seerbitsdk.*
 import com.example.seerbitsdk.R
 import com.example.seerbitsdk.card.AuthorizeButton
 import com.example.seerbitsdk.card.showCircularProgress
@@ -247,6 +248,16 @@ fun TransferHomeScreen(
             )
             Spacer(modifier = Modifier.height(50.dp))
 
+
+            OtherPaymentButtonComponent(
+                onOtherPaymentButtonClicked = { navController.clearBackStack(Transfer.route)
+                    navController.navigatePopUpToOtherPaymentScreen("${Route.OTHER_PAYMENT_SCREEN}/${TransactionType.CARD.type}") },
+                onCancelButtonClicked = {navController.navigateSingleTopTo(Debit_CreditCard.route)},
+                enable = !showCircularProgressBar
+            )
+
+            Spacer(modifier = Modifier.height(25.dp))
+            BottomSeerBitWaterMark(modifier = Modifier.align(alignment = Alignment.CenterHorizontally))
 
         }
 

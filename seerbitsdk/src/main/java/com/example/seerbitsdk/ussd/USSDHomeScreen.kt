@@ -218,7 +218,7 @@ fun USSDHomeScreen(
                     OtherPaymentButtonComponent(
                         onOtherPaymentButtonClicked = {
                             navController.navigatePopUpToOtherPaymentScreen(
-                                Route.OTHER_PAYMENT_SCREEN
+                                "${Route.OTHER_PAYMENT_SCREEN}/dummy"
                             )
                         },
                         onCancelButtonClicked = onCancelButtonClicked,

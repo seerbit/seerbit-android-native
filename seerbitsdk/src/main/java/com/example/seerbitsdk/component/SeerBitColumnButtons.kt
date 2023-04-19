@@ -41,7 +41,7 @@ fun SeerBitNavButtons(
                 enabled = enabled
 
                 )
-            .padding(4.dp),
+            .padding(2.dp),
         color = LighterGray,
 
         ) {
@@ -66,6 +66,12 @@ fun SeerBitNavButtons(
                         painter = painterResource(id = R.drawable.verve_logo),
                         contentDescription = null
                     )
+                    Spacer(modifier = Modifier.width(4.dp))
+
+                    Image(
+                        painter = painterResource(id = R.drawable.visa),
+                        contentDescription = null
+                    )
                 }
             }
         }
@@ -84,7 +90,7 @@ fun SeerBitNavButtonsColumn(
     Surface(
         Modifier
             .fillMaxWidth()
-            .padding(8.dp)
+            .padding(top=8.dp)
     ) {
 
         Column(Modifier.selectableGroup()) {
