@@ -145,8 +145,8 @@ fun BankAccountBVNScreen(
                 Spacer(modifier = Modifier.height(100.dp))
 
                 OtherPaymentButtonComponent(
-                    onOtherPaymentButtonClicked = { navController.navigatePopUpToOtherPaymentScreen("${Route.OTHER_PAYMENT_SCREEN}/dummy") },
-                    onCancelButtonClicked = {navController.navigateSingleTopTo(Debit_CreditCard.route)},
+                    onOtherPaymentButtonClicked = { navController.navigatePopUpToOtherPaymentScreen("${Route.OTHER_PAYMENT_SCREEN}/${TransactionType.ACCOUNT.type}") },
+                    onCancelButtonClicked = {navController.navigateSingleTopNoSavedState(Debit_CreditCard.route)},
                     enable = true
                 )
 

@@ -30,6 +30,7 @@ import com.example.seerbitsdk.card.AuthorizeButton
 import com.example.seerbitsdk.card.showCircularProgress
 import com.example.seerbitsdk.component.*
 import com.example.seerbitsdk.helper.*
+import com.example.seerbitsdk.interfaces.ActionListener
 import com.example.seerbitsdk.models.RequiredFields
 import com.example.seerbitsdk.models.bankaccount.BankAccountDTO
 import com.example.seerbitsdk.screenstate.InitiateTransactionState
@@ -51,6 +52,8 @@ fun BankAccountDOBScreen(
     bankCode: String,
     requiredFields: RequiredFields?,
     bankName: String?,
+    actionListener: ActionListener?,
+
     ) {
     var showCircularProgressBar by remember { mutableStateOf(false) }
     val openDialog = remember { mutableStateOf(false) }
@@ -106,7 +109,7 @@ fun BankAccountDOBScreen(
                     bankCode = bankCode,
                     amount = totalAmount.toString(),
                     redirectUrl = "http://localhost:3002/#/",
-                    productId = "",
+                    productId = merchantDetailsData.payload?.productId,
                     mobileNumber = merchantDetailsData.payload?.userPhoneNumber,
                     paymentReference = paymentRef,
                     fee = fee,
@@ -121,10 +124,12 @@ fun BankAccountDOBScreen(
                     currency = merchantDetailsData.payload?.defaultCurrency,
                     bvn = bvn,
                     email = merchantDetailsData.payload?.emailAddress,
-                    productDescription = "",
+                    productDescription = merchantDetailsData.payload?.productDescription,
                     scheduleId = "",
                     accountNumber = bankAccountNumber,
-                    retry = transactionViewModel.retry.value
+                    retry = transactionViewModel.retry.value,
+                    pocketReference =merchantDetailsData.payload?.pocketReference,
+                    vendorId = merchantDetailsData.payload?.vendorId
                 )
 
                 if (showCircularProgressBar) {
@@ -207,8 +212,8 @@ fun BankAccountDOBScreen(
                 Spacer(modifier = Modifier.height(100.dp))
 
                 OtherPaymentButtonComponent(
-                    onOtherPaymentButtonClicked = { navController.navigatePopUpToOtherPaymentScreen("${Route.OTHER_PAYMENT_SCREEN}/dummy") },
-                    onCancelButtonClicked = {navController.navigateSingleTopTo(Debit_CreditCard.route)},
+                    onOtherPaymentButtonClicked = { navController.navigatePopUpToOtherPaymentScreen("${Route.OTHER_PAYMENT_SCREEN}/${TransactionType.ACCOUNT.type}") },
+                    onCancelButtonClicked = {navController.navigateSingleTopNoSavedState(Debit_CreditCard.route)},
                     enable = !showCircularProgressBar
                 )
 

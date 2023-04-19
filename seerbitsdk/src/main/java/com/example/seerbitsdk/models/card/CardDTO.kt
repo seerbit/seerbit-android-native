@@ -27,7 +27,7 @@ data class CardDTO(
 	val mobileNumber: String? = null,
 
 	@field:SerializedName("paymentReference")
-    var paymentReference: String? = null,
+	var paymentReference: String? = null,
 
 	@field:SerializedName("fee")
 	val fee: String? = null,
@@ -57,7 +57,7 @@ data class CardDTO(
 	val sourceIP: String? = null,
 
 	@field:SerializedName("pin")
-    var pin: String? = null,
+	var pin: String? = null,
 
 	@field:SerializedName("currency")
 	val currency: String? = null,
@@ -75,5 +75,18 @@ data class CardDTO(
 	val cardNumber: String? = null,
 
 	@field:SerializedName("retry")
-	val retry: Boolean? = null
+	val retry: Boolean? = null,
+
+	@field:SerializedName("tokenize")
+	val tokenize: Boolean?,
+
+	@field:SerializedName("pocketReference")
+	val pocketReference: String?,
+
+	@field:SerializedName("productDescription")
+	val productDescription: String?,
+
+	@field:SerializedName("vendorId")
+	val vendorId: String?
+
 ) : TransactionDTO

@@ -4,9 +4,7 @@ import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import android.widget.Space
 import android.widget.Toast
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -38,6 +36,7 @@ import com.example.seerbitsdk.card.showCircularProgress
 import com.example.seerbitsdk.component.*
 import com.example.seerbitsdk.helper.TransactionType
 import com.example.seerbitsdk.helper.calculateTransactionFee
+import com.example.seerbitsdk.interfaces.ActionListener
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.screenstate.QueryTransactionState
 import com.example.seerbitsdk.ui.theme.*
@@ -53,7 +52,8 @@ fun USSDHomeScreen(
     paymentReference: String?,
     ussdCode: String?,
     onCancelButtonClicked: () -> Unit,
-    onOtherPaymentButtonClicked: () -> Unit
+    onOtherPaymentButtonClicked: () -> Unit,
+    actionListener: ActionListener?
 ) {
     var showLoadingScreen by remember { mutableStateOf(false) }
     val context = LocalContext.current
@@ -145,6 +145,7 @@ fun USSDHomeScreen(
                             openDialog.value = true
                             alertDialogMessage = queryTransactionStateState.data.data.message ?: ""
                             alertDialogHeaderMessage = "Success!"
+                            actionListener?.onSuccess(it)
                             showLoadingScreen = false
                             exitOnSuccess.value = true
                             transactionViewModel.resetTransactionState()
@@ -218,11 +219,7 @@ fun USSDHomeScreen(
                     Spacer(modifier = Modifier.height(100.dp))
 
                     OtherPaymentButtonComponent(
-                        onOtherPaymentButtonClicked = {
-                            navController.navigatePopUpToOtherPaymentScreen(
-                                "${Route.OTHER_PAYMENT_SCREEN}/dummy"
-                            )
-                        },
+                        onOtherPaymentButtonClicked = { navController.navigatePopUpToOtherPaymentScreen("${Route.OTHER_PAYMENT_SCREEN}/${TransactionType.USSD.type}") },
                         onCancelButtonClicked = onCancelButtonClicked,
                         enable = !showCircularProgressBar
                     )
@@ -289,13 +286,15 @@ fun HeaderScreenPreview() {
     val viewModel: TransactionViewModel by viewModel()
     SeerBitTheme {
         USSDHomeScreen(
+            navController = rememberNavController(),
             merchantDetailsState = MerchantDetailsState(),
             transactionViewModel = viewModel,
             paymentReference = "",
             ussdCode = "",
-            navController = rememberNavController(),
-            onCancelButtonClicked = {}
-        ) {}
+            onCancelButtonClicked = {},
+            onOtherPaymentButtonClicked = {},
+            actionListener = null
+        )
     }
 }
 

@@ -60,5 +60,11 @@ data class UssdDTO(
 	val productDescription: String? = null,
 
 	@field:SerializedName("retry")
-	val retry: Boolean? = null
+	val retry: Boolean? = null,
+
+	@field:SerializedName("pocketReference")
+	val pocketReference: String?,
+
+	@field:SerializedName("vendorId")
+	val vendorId: String?
 )

@@ -23,11 +23,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.example.seerbitsdk.ErrorDialog
+import com.example.seerbitsdk.*
 import com.example.seerbitsdk.R
 import com.example.seerbitsdk.component.*
 import com.example.seerbitsdk.helper.TransactionType
 import com.example.seerbitsdk.helper.calculateTransactionFee
+import com.example.seerbitsdk.interfaces.ActionListener
 import com.example.seerbitsdk.models.CardOTPDTO
 import com.example.seerbitsdk.models.Transaction
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
@@ -46,7 +47,9 @@ fun OTPScreen(
     linkingRef: String,
     merchantDetailsState: MerchantDetailsState,
     cardEnterPinViewModel: CardEnterPinViewModel,
-    transactionViewModel: TransactionViewModel
+    transactionViewModel: TransactionViewModel,
+    navController: NavHostController,
+    actionListener: ActionListener?
 
 ) {
     Column(modifier = modifier) {
@@ -214,8 +217,8 @@ fun OTPScreen(
                             if (queryTransactionStateState.data.data?.code == SUCCESS) {
                                 showCircularProgressBar = false
                                 openDialog.value = true
-                                alertDialogMessage =
-                                    queryTransactionStateState.data.data.payments?.reason!!
+                                alertDialogMessage = queryTransactionStateState.data.data.payments?.reason?:""
+                                actionListener?.onSuccess(queryTransactionStateState.data.data)
                                 alertDialogHeaderMessage = "Success"
                                 exitOnSuccess.value = true
                                 cardEnterPinViewModel.resetTransactionState()
@@ -267,6 +270,21 @@ fun OTPScreen(
                 if (queryTransactionStateState.isLoading) {
                     showCircularProgressBar = true
                 }
+
+                Spacer(modifier = Modifier.height(100.dp))
+                OtherPaymentButtonComponent(
+                    onOtherPaymentButtonClicked = { navController.navigatePopUpToOtherPaymentScreen("${Route.OTHER_PAYMENT_SCREEN}/${TransactionType.CARD.type}") },
+                    onCancelButtonClicked = {navController.navigateSingleTopNoSavedState(
+                        Debit_CreditCard.route)},
+                    enable = true
+                )
+
+                Spacer(modifier = Modifier.height(100.dp))
+                BottomSeerBitWaterMark(modifier = Modifier.align(alignment = Alignment.CenterHorizontally))
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+
 
 
 

@@ -129,7 +129,7 @@ fun USSDSelectBanksScreen(
                     bankCode = bankCode,
                     amount = totalAmount.toString(),
                     redirectUrl = "http://localhost:3002/#/",
-                    productId = "",
+                    productId = merchantDetailsData.payload?.productId,
                     mobileNumber = merchantDetailsData.payload?.number,
                     paymentReference = paymentReference,
                     fee = merchantDetailsData.payload?.vatFee,
@@ -140,10 +140,12 @@ fun USSDSelectBanksScreen(
                     paymentType = "USSD",
                     sourceIP = generateSourceIp(true),
                     currency = merchantDetailsData.payload?.defaultCurrency,
-                    productDescription = "",
+                    productDescription = merchantDetailsData.payload?.productDescription,
                     email = merchantDetailsData.payload?.emailAddress,
                     retry = transactionViewModel.retry.value,
-                    ddeviceType = "Android"
+                    ddeviceType = "Android",
+                    pocketReference =merchantDetailsData.payload?.pocketReference,
+                    vendorId = merchantDetailsData.payload?.vendorId
                 )
 
                 //HANDLE INITIATE TRANSACTION RESPONSE

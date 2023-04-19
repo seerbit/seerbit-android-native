@@ -6,11 +6,12 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -52,8 +53,7 @@ import com.example.seerbitsdk.models.RequiredFields
 import com.example.seerbitsdk.models.card.CardDTO
 import com.example.seerbitsdk.component.OtherPaymentScreen
 import com.example.seerbitsdk.helper.*
-import com.example.seerbitsdk.models.MerchantBanksItem
-import com.example.seerbitsdk.models.OnCloseSeerBitSdkListener
+import com.example.seerbitsdk.interfaces.ActionListener
 import com.example.seerbitsdk.momo.MOMOOTPScreen
 import com.example.seerbitsdk.momo.MomoHomeScreen
 import com.example.seerbitsdk.screenstate.*
@@ -66,8 +66,8 @@ import com.example.seerbitsdk.viewmodels.*
 import com.google.gson.Gson
 
 class SeerBitActivity : ComponentActivity() {
-    private val viewModel: MerchantDetailsViewModel by viewModels()
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -83,6 +83,17 @@ class SeerBitActivity : ComponentActivity() {
             val fullName = intent.extras?.getString("fullName")
             val emailAddress = intent.extras?.getString("emailAddress")
             val paymentRef = intent.extras?.getString("paymentRef")
+
+            val pocketReference = intent.extras?.getString("pocketReference")
+            val vendorId = intent.extras?.getString("vendorId")
+            val productDescription = intent.extras?.getString("productDescription")
+            val country = intent.extras?.getString("country")
+            val currency = intent.extras?.getString("currency")
+            val productId = intent.extras?.getString("productId")
+            val tokenize = intent.extras?.getBoolean("tokenize")
+
+            val actionListener = getActionListener()
+
             val openDialog = remember {
                 mutableStateOf(false)
             }
@@ -130,12 +141,39 @@ class SeerBitActivity : ComponentActivity() {
                     phoneNumber ?: "",
                     fullName ?: "",
                     emailAddress ?: "",
-                    paymentRef ?: ""
+                    paymentRef ?: "",
+                    pocketReference ?: "",
+                    vendorId?: "",
+                    productDescription?: "",
+                    country?: "",
+                    currency?: "",
+                    productId?: "",
+                    tokenize?:false,
+                    actionListener = actionListener
+
                 )
             }
 
         }
     }
+
+}
+
+
+var mActionListener: ActionListener? = null
+
+/**
+ * sets te ActionListener
+ */
+fun setActionListener(actionListener: ActionListener?){
+    mActionListener = actionListener
+}
+
+/**
+ * return te ActionListener
+ */
+fun getActionListener(): ActionListener? {
+    return mActionListener
 }
 
 
@@ -146,7 +184,16 @@ fun startSeerBitSDK(
     publicKey: String,
     fullName: String,
     emailAddress: String,
-    optionalPaymentReference: String = "",
+    transactionPaymentReference: String = "",
+    actionListener: ActionListener,
+    pocketReference : String,
+    vendorId: String,
+    productDescription: String,
+    country:String,
+    currency:String,
+    productId: String,
+    tokenize: Boolean
+
 ) {
 
     val intent = Intent(context, SeerBitActivity::class.java)
@@ -156,7 +203,19 @@ fun startSeerBitSDK(
     intent.putExtra("publicKey", publicKey)
     intent.putExtra("fullName", fullName)
     intent.putExtra("emailAddress", emailAddress)
-    intent.putExtra("paymentRef", optionalPaymentReference)
+    intent.putExtra("paymentRef", transactionPaymentReference)
+    //intent.putExtra("actionListener", actionListener )
+
+    intent.putExtra("pocketReference",pocketReference )
+    intent.putExtra("vendorId" , vendorId  )
+    intent.putExtra(" productDescription",  productDescription )
+    intent.putExtra("country", country )
+    intent.putExtra("productId",  productId)
+    intent.putExtra("tokenize",  tokenize )
+    intent.putExtra("currency",  currency)
+
+
+    setActionListener(actionListener = actionListener)
 
     context.startActivity(intent)
 
@@ -174,7 +233,15 @@ fun SeerBitApp(
     phoneNumber: String,
     fullName: String,
     emailAddress: String,
-    paymentRef: String
+    paymentRef: String,
+    pocketReference : String,
+    vendorId: String,
+    productDescription: String,
+    country:String,
+    currency:String,
+    productId: String,
+    tokenize: Boolean,
+    actionListener: ActionListener?
 ) {
     SeerBitTheme {
         // A surface container using the 'background' color from the theme
@@ -216,6 +283,22 @@ fun SeerBitApp(
                 viewModel.merchantState.value.data?.payload?.paymentReference = paymentRef
             }
 
+            //newly added
+            viewModel.merchantState.value.data?.payload?. pocketReference =  pocketReference
+            viewModel.merchantState.value.data?.payload?.vendorId = vendorId
+            viewModel.merchantState.value.data?.payload?.currency = currency
+            viewModel.merchantState.value.data?.payload?.productId = productId
+            viewModel.merchantState.value.data?.payload?. productDescription =  productDescription
+            viewModel.merchantState.value.data?.payload?.tokenize = tokenize
+            viewModel.merchantState.value.data?.payload?.countrySetByUser = country
+
+            if (country.isNotEmpty()){
+                viewModel.merchantState.value.data?.payload?.country?.countryCode = country
+            }
+            if (currency.isNotEmpty()){
+                viewModel.merchantState.value.data?.payload?.defaultCurrency = currency
+            }
+
             MyAppNavHost(
                 navController = navController,
                 modifier = Modifier.padding(8.dp),
@@ -226,6 +309,7 @@ fun SeerBitApp(
                 selectBankViewModel = selectBankViewModel,
                 merchantDetailsViewModel = viewModel,
                 startDestination = Debit_CreditCard.route,
+                actionListener = actionListener
             )
 
 
@@ -314,6 +398,7 @@ fun CardHomeScreen(
     merchantDetailsState: MerchantDetailsState,
     onOtherPaymentButtonClicked: () -> Unit,
     transactionViewModel: TransactionViewModel,
+    actionListener: ActionListener?,
 ) {
 
     var cardDetailsData: CardDetails by remember { mutableStateOf(CardDetails("", "", "", "")) }
@@ -384,7 +469,7 @@ fun CardHomeScreen(
                 amount = totalAmount,
                 cvv = cvv,
                 redirectUrl = "https://com.example.seerbit_sdk",
-                productId = "",
+                productId = merchantDetailsData.payload?.productId,
                 mobileNumber = merchantDetailsData.payload?.userPhoneNumber,
                 paymentReference = paymentReference,
                 fee = fee,
@@ -402,8 +487,13 @@ fun CardHomeScreen(
                 false,
                 email = merchantDetailsData.payload?.emailAddress,
                 cardNumber = cardNumber,
-                retry = transactionViewModel.retry.value
+                retry = transactionViewModel.retry.value,
+                tokenize = merchantDetailsData.payload?.tokenize,
+                pocketReference = merchantDetailsData.payload?.pocketReference,
+                productDescription = merchantDetailsData.payload?.productDescription,
+                vendorId = merchantDetailsData.payload?.vendorId
             )
+
             Spacer(modifier = Modifier.height(25.dp))
 
             //SeerBit Header
@@ -573,6 +663,7 @@ fun CardHomeScreen(
                         alertDialogMessage = it.message ?: ""
                         exitOnSuccess.value = true
                         transactionViewModel.resetTransactionState()
+                        actionListener?.onSuccess(it)
                         return@let
                     }
                     else -> {
@@ -636,13 +727,51 @@ fun CardHomeScreen(
             }
             Spacer(modifier = Modifier.height(100.dp))
 
+            if (merchantDetailsData.payload?.tokenize != true){
             OtherPaymentButtonComponent(
                 onOtherPaymentButtonClicked = onOtherPaymentButtonClicked,
                 onCancelButtonClicked = {
                     activity?.finish()
+                    actionListener?.onClose() //callback
                 },
                 enable = !showCircularProgressBar
-            )
+            )}
+            else{
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+
+                    Button(
+                        onClick = {  activity?.finish()
+                                actionListener?.onClose()
+                                  },
+                        colors = ButtonDefaults.buttonColors(backgroundColor = SignalRed),
+                        shape = RoundedCornerShape(4.dp),
+                        modifier = Modifier
+                            .width(160.dp)
+                            .height(50.dp)
+
+                    ) {
+                        Text(
+                            text = "Cancel Payment",
+
+                            style = TextStyle(
+                                fontSize = 14.sp,
+                                fontFamily = Faktpro,
+                                fontWeight = FontWeight.Normal,
+                                lineHeight = 10.sp,
+                                color = DeepRed,
+                                textAlign = TextAlign.Center
+                            ),
+                            modifier = Modifier.align(alignment = Alignment.CenterVertically)
+                        )
+                    }
+
+                }
+
+
+            }
 
             Spacer(modifier = Modifier.height(100.dp))
             BottomSeerBitWaterMark(modifier = Modifier.align(alignment = Alignment.CenterHorizontally))
@@ -674,12 +803,20 @@ fun HeaderScreenPreview() {
         transactionViewModel,
         cardEnterPinViewModel,
         selectBankViewModel,
+        amount = "",
         publicKey = "",
         phoneNumber = "",
         fullName = "",
-        amount = "",
         emailAddress = "",
-        paymentRef = ""
+        paymentRef = "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        false,
+        null
     )
 }
 
@@ -1023,6 +1160,7 @@ fun MyAppNavHost(
     cardEnterPinViewModel: CardEnterPinViewModel,
     selectBankViewModel: SelectBankViewModel,
     merchantDetailsViewModel: MerchantDetailsViewModel,
+    actionListener: ActionListener?,
 ) {
     var mStartDestination: String = Debit_CreditCard.route
     if (!displayPaymentMethod(TransactionType.CARD.type, merchantDetailsState.data))
@@ -1045,7 +1183,7 @@ fun MyAppNavHost(
         ){  navBackStackEntry ->
             val cardTypeToRemove = navBackStackEntry.arguments?.getString("cardTypeToRemove")
             OtherPaymentScreen(
-                onCancelButtonClicked = { navController.navigateSingleTopTo(Debit_CreditCard.route) },
+                onCancelButtonClicked = { navController.navigateSingleTopNoSavedState(Debit_CreditCard.route)},
                 navController = navController,
                 merchantDetailsState = merchantDetailsState,
                 transactionViewModel = transactionViewModel,
@@ -1071,7 +1209,8 @@ fun MyAppNavHost(
                 navController = navController,
                 merchantDetailsState = merchantDetailsState,
                 onOtherPaymentButtonClicked = { navController.navigateSingleTopTo("${Route.OTHER_PAYMENT_SCREEN}/${TransactionType.CARD.type}") },
-                transactionViewModel = transactionViewModel
+                transactionViewModel = transactionViewModel,
+                actionListener = actionListener
             )
         }
 
@@ -1140,7 +1279,10 @@ fun MyAppNavHost(
                 linkingRef = linkingRef!!,
                 merchantDetailsState = merchantDetailsState,
                 cardEnterPinViewModel = cardEnterPinViewModel,
-                transactionViewModel = transactionViewModel
+                transactionViewModel = transactionViewModel,
+                navController = navController,
+                actionListener = actionListener
+
             )
 
         }
@@ -1256,7 +1398,8 @@ fun MyAppNavHost(
                 bankAccountNumber = accountNumber!!,
                 bvn = bvn!!,
                 requiredFields = requiredField,
-                bankName = bankName
+                bankName = bankName,
+                actionListener = actionListener
             )
         }
 
@@ -1298,7 +1441,8 @@ fun MyAppNavHost(
                 bvn = bvn!!,
                 requiredFields = requiredField,
                 bankName = bankName,
-                linkingReference = linkingReference
+                linkingReference = linkingReference,
+                actionListener = actionListener
             )
         }
 
@@ -1320,7 +1464,8 @@ fun MyAppNavHost(
                 transactionViewModel = transactionViewModel,
                 bankCode = bankCode!!,
                 bankName = bankName!!,
-                navController = navController
+                navController = navController,
+                actionListener = actionListener
             )
         }
 
@@ -1352,6 +1497,7 @@ fun MyAppNavHost(
                 walletName = walletName,
                 bankName = bankName,
                 accountNumber = accountNumber,
+                actionListener = actionListener
 
                 )
         }
@@ -1379,8 +1525,9 @@ fun MyAppNavHost(
                 ussdCode = "$ussdCode#",
                 paymentReference = paymentReference,
                 navController = navController,
-                onCancelButtonClicked = { navController.navigateSingleTopTo(Debit_CreditCard.route) },
-                onOtherPaymentButtonClicked = { navController.navigate("${Route.OTHER_PAYMENT_SCREEN}/dummy") }
+                onCancelButtonClicked = { navController.navigateSingleTopNoSavedState(Debit_CreditCard.route) },
+                onOtherPaymentButtonClicked = { navController.navigate("${Route.OTHER_PAYMENT_SCREEN}/dummy") },
+                actionListener = actionListener
             )
         }
 
@@ -1417,7 +1564,8 @@ fun MyAppNavHost(
                 navController = navController,
                 merchantDetailsState = merchantDetailsState,
                 transactionViewModel = transactionViewModel,
-                linkingReference = linkingReference
+                linkingReference = linkingReference,
+                actionListener = actionListener
             )
 
         }

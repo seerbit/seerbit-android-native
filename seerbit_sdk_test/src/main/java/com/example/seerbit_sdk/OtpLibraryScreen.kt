@@ -26,7 +26,6 @@ class SeerBitActivity2 : ComponentActivity() {
 
         setContent {
 
-            goToPaymentGateway()
         }
 
 

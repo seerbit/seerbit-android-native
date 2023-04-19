@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName
 data class QueryTransactionResponse(
 
 	@field:SerializedName("data")
-	val data: Data? = null,
+	val data: QueryData? = null,
 
 	@field:SerializedName("status")
 	val status: String? = null
@@ -86,7 +86,7 @@ data class Payments(
 	val redirectLink: String? = null
 )
 
-data class Data(
+data class QueryData(
 
 	@field:SerializedName("code")
 	val code: String? = null,

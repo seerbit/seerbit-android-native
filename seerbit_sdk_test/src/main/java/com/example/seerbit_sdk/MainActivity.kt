@@ -2,6 +2,7 @@ package com.example.seerbit_sdk
 
 import android.content.Context
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.BorderStroke
@@ -24,10 +25,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.seerbit_sdk.ui.theme.SeerBitTheme
 import com.example.seerbitsdk.R
-import com.example.seerbitsdk.models.OnCloseSeerBitSdkListener
+import com.example.seerbitsdk.interfaces.ActionListener
+
 import com.example.seerbitsdk.startSeerBitSDK
 
-class MainActivity : ComponentActivity(), OnCloseSeerBitSdkListener {
+class MainActivity : ComponentActivity(), ActionListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,21 +40,26 @@ class MainActivity : ComponentActivity(), OnCloseSeerBitSdkListener {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    goToPaymentGateway()
+                    GoToPaymentGateway(actionListener=this)
                 }
             }
         }
     }
 
-    override fun onCloseSeerBitSDK() {
-        super.onCloseSeerBitSDK()
+    override fun onSuccess(data: Any?) {
+
     }
+
+    override fun onClose() {
+        Toast.makeText(this, "Payment cancelled", Toast.LENGTH_SHORT).show()
+    }
+
+
 }
 
 
-@Preview(showBackground = true, heightDp = 300)
 @Composable
-fun goToPaymentGateway(context: Context = LocalContext.current) {
+fun GoToPaymentGateway(context: Context = LocalContext.current, actionListener: ActionListener) {
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -89,14 +96,22 @@ fun goToPaymentGateway(context: Context = LocalContext.current) {
         Spacer(modifier = Modifier.height(40.dp))
         Button(
             onClick = {
-
                 startSeerBitSDK(
                     context,
                     amount,
                     phoneNumber,
                     "SBPUBK_SCAD2TXCTYVZOORZEGXR17OTLECBGUAI",
                     fullName,
-                    email
+                    email,
+                    actionListener = actionListener,
+                    productDescription = "",
+                    productId = "",
+                    pocketReference = "",
+                    transactionPaymentReference = "",
+                    vendorId = "",
+                    country = "",
+                    currency = "USD",
+                    tokenize = true
                 )
 
             }, modifier = Modifier
