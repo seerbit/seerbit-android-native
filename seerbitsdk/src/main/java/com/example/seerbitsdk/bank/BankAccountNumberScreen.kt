@@ -37,7 +37,7 @@ import com.example.seerbitsdk.models.bankaccount.BankAccountDTO
 import com.example.seerbitsdk.screenstate.InitiateTransactionState
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.ui.theme.SeerBitTheme
-import com.example.seerbitsdk.ussd.ErrorDialogg
+import com.example.seerbitsdk.ussd.ModalDialog
 import com.example.seerbitsdk.viewmodels.TransactionViewModel
 import com.google.gson.Gson
 
@@ -111,7 +111,7 @@ fun BankAccountNumberScreen(
                     merchantDetailsData.payload?.emailAddress ?: ""
                 )
 
-                ErrorDialogg(
+                ModalDialog(
                     showDialog = openDialog,
                     alertDialogHeaderMessage = alertDialogHeaderMessage,
                     alertDialogMessage = alertDialogMessage,

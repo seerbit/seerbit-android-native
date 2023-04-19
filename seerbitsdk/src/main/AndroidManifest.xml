@@ -11,12 +11,6 @@
             android:theme="@style/Theme.SeerBit"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize">
-<!--            <intent-filter>-->
-<!--                <action android:name="android.intent.action.MAIN" />-->
-
-<!--                <category android:name="android.intent.category.LAUNCHER" />-->
-<!--            </intent-filter>-->
-
             <intent-filter>
                 <data android:host="com.example.seerbit_sdk"
                     android:scheme="https"/>

@@ -105,7 +105,7 @@ fun USSDSelectBanksScreen(
                 Spacer(modifier = Modifier.height(41.dp))
 
 
-                    ErrorDialogg(
+                    ModalDialog(
                         showDialog = openDialog,
                         alertDialogHeaderMessage = "Failed",
                         alertDialogMessage = "Kindly select a bank",

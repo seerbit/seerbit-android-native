@@ -59,7 +59,7 @@ import com.example.seerbitsdk.momo.MomoHomeScreen
 import com.example.seerbitsdk.screenstate.*
 import com.example.seerbitsdk.transfer.TransferHomeScreen
 import com.example.seerbitsdk.ui.theme.*
-import com.example.seerbitsdk.ussd.ErrorDialogg
+import com.example.seerbitsdk.ussd.ModalDialog
 import com.example.seerbitsdk.ussd.USSDHomeScreen
 import com.example.seerbitsdk.ussd.USSDSelectBanksScreen
 import com.example.seerbitsdk.viewmodels.*
@@ -103,7 +103,7 @@ class SeerBitActivity : ComponentActivity() {
 
             val merchantDetailsState = merchantDetailsViewModel.merchantState.value
 
-            ErrorDialogg(
+            ModalDialog(
                 showDialog = openDialog,
                 alertDialogHeaderMessage = "Error",
                 alertDialogMessage = "Error occurred while loading sdk. Please check your internet or public key.",
@@ -402,7 +402,8 @@ fun CardHomeScreen(
 ) {
 
     var cardDetailsData: CardDetails by remember { mutableStateOf(CardDetails("", "", "", "")) }
-
+    val cardBinState: CardBinState =
+        transactionViewModel.cardBinState.value
     //card details
     var cvv by rememberSaveable { mutableStateOf("") }
     var cardNumber by rememberSaveable { mutableStateOf("") }
@@ -454,8 +455,14 @@ fun CardHomeScreen(
             val fee = calculateTransactionFee(
                 merchantDetailsData,
                 TransactionType.CARD.type,
-                amount = amount?.toDouble() ?: 0.0
+                amount = amount?.toDouble() ?: 0.0,
+                cardCountry = cardBinState.data?.country ?: ""
             )
+            val isLocal: String = if (merchantDetailsData.payload?.country?.nameCode?.let {
+                    cardBinState.data?.country?.contains(
+                        it, true
+                    )
+                } == true) "LOCAL" else "INTERNATIONAL"
             var totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
             val defaultCurrency = merchantDetailsData.payload?.defaultCurrency ?: ""
 
@@ -483,11 +490,12 @@ fun CardHomeScreen(
                 sourceIP = generateSourceIp(useIPv4 = true),
                 pin = "",
                 currency = merchantDetailsData.payload?.defaultCurrency,
-                "LOCAL",
+                isCardInternational =  isLocal,
                 false,
                 email = merchantDetailsData.payload?.emailAddress,
                 cardNumber = cardNumber,
                 retry = transactionViewModel.retry.value,
+
                 tokenize = merchantDetailsData.payload?.tokenize,
                 pocketReference = merchantDetailsData.payload?.pocketReference,
                 productDescription = merchantDetailsData.payload?.productDescription,
@@ -508,7 +516,7 @@ fun CardHomeScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            ErrorDialogg(
+            ModalDialog(
                 showDialog = openDialog,
                 alertDialogHeaderMessage = alertDialogHeaderMessage,
                 alertDialogMessage = alertDialogMessage,
@@ -517,8 +525,8 @@ fun CardHomeScreen(
                 openDialog.value = false
             }
 
-            val cardBinState: CardBinState =
-                transactionViewModel.cardBinState.value
+//            val cardBinState: CardBinState =
+//                transactionViewModel.cardBinState.value
 
 
             if (cardBinState.hasError) {
