@@ -15,7 +15,10 @@ enum class TransactionType(val type: String) {
     ACCOUNT("ACCOUNT")
 }
 
-fun displayPaymentMethod(paymentMethod: String, merchantDetailsResponse: MerchantDetailsResponse?): Boolean {
+fun displayPaymentMethod(
+    paymentMethod: String,
+    merchantDetailsResponse: MerchantDetailsResponse?
+): Boolean {
 //    if (paymentMethod == TransactionType.USSD.type) {
     if (merchantDetailsResponse?.payload?.paymentConfigs?.isNotEmpty() == true) {
         //merchant has payment configuration
@@ -23,12 +26,12 @@ fun displayPaymentMethod(paymentMethod: String, merchantDetailsResponse: Merchan
             if (it?.code == paymentMethod) {
                 if (merchantDetailsResponse.payload.channelOptionStatus?.isNotEmpty() == true) {
                     merchantDetailsResponse.payload.channelOptionStatus.forEach { channelOptionStatus ->
-                        if (it.code == channelOptionStatus?.code && channelOptionStatus.allowOption == true) return true
+                        if (it.code == channelOptionStatus?.code && channelOptionStatus.allowOption == true && it.status == "ACTIVE") return true
                     }
                 } else {
                     //channel option status is empty
                     merchantDetailsResponse.payload.paymentConfigs.forEach { paymentConfigs ->
-                        if (paymentConfigs?.code == paymentMethod && paymentConfigs.allowOption == true) return true
+                        if (paymentConfigs?.code == paymentMethod && paymentConfigs.allowOption == true && paymentConfigs.status == "ACTIVE") return true
                     }
                 }
             }
@@ -39,11 +42,11 @@ fun displayPaymentMethod(paymentMethod: String, merchantDetailsResponse: Merchan
 
                 if (merchantDetailsResponse.payload.channelOptionStatus?.isNotEmpty() == true) {
                     merchantDetailsResponse.payload.channelOptionStatus.forEach { channelOptionStatus ->
-                        if (it.code == channelOptionStatus?.code && channelOptionStatus.allowOption == true) return true
+                        if (it.code == channelOptionStatus?.code && channelOptionStatus.allowOption == true && it.status == "ACTIVE") return true
                     }
                 } else {
                     merchantDetailsResponse.payload.country.defaultPaymentOptions.forEach { defaultPaymentOptions ->
-                        if (defaultPaymentOptions?.code == paymentMethod && defaultPaymentOptions.allowOption == true) return true
+                        if (defaultPaymentOptions?.code == paymentMethod && defaultPaymentOptions.allowOption == true && defaultPaymentOptions.status == "ACTIVE") return true
                     }
                 }
             }
@@ -259,7 +262,8 @@ fun calculateTransactionFee(
                     val isCardInternational: Boolean =
                         merchantDetailsResponse.payload.country?.nameCode?.let { it1 ->
                             cardCountry.contains(
-                                it1, true)
+                                it1, true
+                            )
                         } == false
 //                        merchantDetailsResponse.payload.country?.nameCode?.contains(cardCountry, true) == false
                     if (isCardInternational) {
@@ -511,6 +515,6 @@ fun calculateTransactionFee(
     return formatInputDouble("")
 }
 
-fun isMerchantFeeBearer(merchantDetailsResponse: MerchantDetailsResponse?):Boolean{
-    return merchantDetailsResponse?.payload?.setting?.chargeOption=="MERCHANT"
+fun isMerchantFeeBearer(merchantDetailsResponse: MerchantDetailsResponse?): Boolean {
+    return merchantDetailsResponse?.payload?.setting?.chargeOption == "MERCHANT"
 }

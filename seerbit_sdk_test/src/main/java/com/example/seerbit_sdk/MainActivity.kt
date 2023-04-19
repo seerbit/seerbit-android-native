@@ -111,7 +111,7 @@ fun GoToPaymentGateway(context: Context = LocalContext.current, actionListener: 
                     vendorId = "",
                     country = "",
                     currency = "USD",
-                    tokenize = true
+                    tokenize = false
                 )
 
             }, modifier = Modifier
