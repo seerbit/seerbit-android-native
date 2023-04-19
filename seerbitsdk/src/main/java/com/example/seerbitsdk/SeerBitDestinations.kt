@@ -1,5 +1,8 @@
 package com.example.seerbitsdk
 
+import android.net.Uri
+import androidx.core.net.toUri
+
 
 interface SeerBitDestination {
     val name: String
@@ -54,3 +57,9 @@ object MOMO : SeerBitDestination {
 
 // Screens to be displayed in the top RallyTabRow
 val rallyTabRowScreens = listOf(Debit_CreditCard, BankAccount, UssdSelectBank, Transfer)
+
+object DeepLinkPattern{
+    private val BaseUri = "https://com.example.seerbit_sdk".toUri()
+    val HomePattern = "$BaseUri"
+    fun getHomeUri() : Uri = HomePattern.toUri()
+}

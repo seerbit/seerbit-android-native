@@ -13,6 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 
@@ -414,10 +415,10 @@ fun ModalDialog(
                         .padding(32.dp)
                         .height(40.dp),
                     colors = ButtonDefaults.buttonColors(
-                        backgroundColor = Teal500
+                        backgroundColor = Color.Black
                     )
                 ) {
-                    Text(text = "Close")
+                    Text(text = "Close", style = TextStyle(color = Color.White))
 
                 }
 
@@ -490,7 +491,7 @@ fun ErrorDialogWithRetry(
                     else if (alertDialogHeaderMessage.contains("Success", ignoreCase = true)) {
                         Image(
                             painter = painterResource(id = R.drawable.success),
-                            contentDescription = "", modifier = Modifier.size(60.dp)
+                            contentDescription = "", modifier = Modifier.size(120.dp)
                         )
                     } else Image(
                         painter = painterResource(id = R.drawable.failed),
@@ -513,13 +514,13 @@ fun ErrorDialogWithRetry(
                         .padding(32.dp)
                         .height(40.dp),
                     colors = ButtonDefaults.buttonColors(
-                        backgroundColor = Teal500
+                        backgroundColor = Color.Black
                     )
                 ) {
                     val text: String = if (exitOnSuccess) {
                         "Close"
                     } else "Retry"
-                    Text(text = text)
+                    Text(text = text, style = TextStyle(color = Color.White))
                 }
 
             },

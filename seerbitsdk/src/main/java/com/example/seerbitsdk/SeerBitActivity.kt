@@ -43,6 +43,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.seerbitsdk.bank.*
 import com.example.seerbitsdk.card.CardEnterPinScreen
+import com.example.seerbitsdk.card.OTPScreen
 import com.example.seerbitsdk.component.*
 import com.example.seerbitsdk.models.CardDetails
 import com.example.seerbitsdk.models.RequiredFields
@@ -98,7 +99,7 @@ class SeerBitActivity : ComponentActivity() {
 
 
             if (merchantDetailsState.hasError) {
-               openDialog.value = true
+                openDialog.value = true
             }
 
 
@@ -230,8 +231,8 @@ fun SeerBitApp(
 
 }
 
-fun NavHostController.navigatePopUpToOtherPaymentScreen(route: String){
-    this.navigate(route){
+fun NavHostController.navigatePopUpToOtherPaymentScreen(route: String) {
+    this.navigate(route) {
         popUpTo(Route.OTHER_PAYMENT_SCREEN) {
             inclusive = true
         }
@@ -307,7 +308,8 @@ fun CardHomeScreen(
 ) {
 
     var cardDetailsData: CardDetails by remember { mutableStateOf(CardDetails("", "", "", "")) }
-
+    val cardBinState: CardBinState =
+        transactionViewModel.cardBinState.value
     //card details
     var cvv by rememberSaveable { mutableStateOf("") }
     var cardNumber by rememberSaveable { mutableStateOf("") }
@@ -359,8 +361,14 @@ fun CardHomeScreen(
             val fee = calculateTransactionFee(
                 merchantDetailsData,
                 TransactionType.CARD.type,
-                amount = amount?.toDouble() ?: 0.0
+                amount = amount?.toDouble() ?: 0.0,
+                cardCountry = cardBinState.data?.country ?: ""
             )
+            val isLocal: String = if (merchantDetailsData.payload?.country?.nameCode?.let {
+                    cardBinState.data?.country?.contains(
+                        it, true
+                    )
+                } == true) "LOCAL" else "INTERNATIONAL"
             var totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
             val defaultCurrency = merchantDetailsData.payload?.defaultCurrency ?: ""
 
@@ -373,7 +381,7 @@ fun CardHomeScreen(
                 country = merchantDetailsData.payload?.country?.countryCode ?: "",
                 amount = totalAmount,
                 cvv = cvv,
-                redirectUrl = "http://localhost:3002/#/",
+                redirectUrl = "https://com.example.seerbit_sdk",
                 productId = "",
                 mobileNumber = merchantDetailsData.payload?.userPhoneNumber,
                 paymentReference = paymentReference,
@@ -388,11 +396,11 @@ fun CardHomeScreen(
                 sourceIP = generateSourceIp(useIPv4 = true),
                 pin = "",
                 currency = merchantDetailsData.payload?.defaultCurrency,
-                "LOCAL",
+                isCardInternational =  isLocal,
                 false,
                 email = merchantDetailsData.payload?.emailAddress,
                 cardNumber = cardNumber,
-                retry = transactionViewModel.retry.value
+                retry = transactionViewModel.retry.value,
             )
             Spacer(modifier = Modifier.height(25.dp))
 
@@ -417,8 +425,8 @@ fun CardHomeScreen(
                 openDialog.value = false
             }
 
-            val cardBinState: CardBinState =
-                transactionViewModel.cardBinState.value
+//            val cardBinState: CardBinState =
+//                transactionViewModel.cardBinState.value
 
 
             if (cardBinState.hasError) {
@@ -451,7 +459,7 @@ fun CardHomeScreen(
 
                         if (cardBinState.data != null) {
                             var split: List<String?>
-                            if (cardBinState.data.responseMessage != "BIN not Found") {
+                            if (cardBinState.data.responseMessage != "BIN not found") {
                                 transactionViewModel.clearCardBinState()
                                 split = cardBinState.data.cardName?.split(" ")!!
 
@@ -508,7 +516,7 @@ fun CardHomeScreen(
 
                         } else {
                             openDialog.value = true
-                            alertDialogMessage = "Invalid Card Details"
+                            alertDialogMessage = "Invalid card details"
                             alertDialogHeaderMessage = "Error Occurred"
                         }
                     }, !showCircularProgressBar
@@ -595,10 +603,15 @@ fun CardHomeScreen(
                         redirectUrl = it
                         canRedirectToUrl = true
                     }
-                    if (toEnterPinScreen || useOtp) {
+                    if (toEnterPinScreen) {
                         redirectUrl = ""
                         navController.navigateSingleTopTo(
                             "${Route.PIN_SCREEN}/$paymentRef/$cvv/$cardNumber/$cardExpiryMonth/$cardExpiryYear/$toEnterPinScreen/$useOtp/$otpText/$linkingRef"
+                        )
+                        return@let
+                    } else if (useOtp) {
+                        navController.navigateSingleTopTo(
+                            "${Route.CARD_OTP_SCREEN}/$paymentRef/$otpText/$linkingRef"
                         )
                         return@let
                     } else if (canRedirectToUrl) {
@@ -1032,7 +1045,12 @@ fun MyAppNavHost(
 
         composable(
             route = Debit_CreditCard.route,
-
+//            deepLinks = listOf(
+//                navDeepLink {
+//                    uriPattern = DeepLinkPattern.HomePattern
+//                }
+//
+//            )
         ) {
             transactionViewModel.resetTransactionState()
             CardHomeScreen(
@@ -1089,11 +1107,32 @@ fun MyAppNavHost(
                 cardNumber = cardNumber!!,
                 cardExpiryMonth = cardExpiryMonth!!,
                 cardExpiryYear = cardExpiryYear!!,
-                isEnterPin = isEnterPin!!,
-                useOtp = useOtp!!,
-                otpText = otpText!!,
-                linkingRef = linkingRef!!
             )
+        }
+
+        composable(
+            "${Route.CARD_OTP_SCREEN}/{paymentRef}/{otpText}/{linkingRef}",
+            arguments = listOf(
+                // declaring argument type
+                navArgument("paymentRef") { type = NavType.StringType },
+                navArgument("otpText") { type = NavType.StringType },
+                navArgument("linkingRef") { type = NavType.StringType },
+
+                )
+        ) { navBackStackEntry ->
+            val useOtp = navBackStackEntry.arguments?.getBoolean("useOtp")
+            val otpText = navBackStackEntry.arguments?.getString("otpText")
+            val linkingRef = navBackStackEntry.arguments?.getString("linkingRef")
+
+            cardEnterPinViewModel.resetTransactionState()
+            OTPScreen(
+                otpText = otpText!!,
+                linkingRef = linkingRef!!,
+                merchantDetailsState = merchantDetailsState,
+                cardEnterPinViewModel = cardEnterPinViewModel,
+                transactionViewModel = transactionViewModel
+            )
+
         }
 
         //BANK ACCOUUT HOME SCREEN

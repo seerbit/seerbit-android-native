@@ -102,7 +102,8 @@ fun formatInputDouble(input: String?): String {
 fun calculateTransactionFee(
     merchantDetailsResponse: MerchantDetailsResponse?,
     transactionType: String,
-    amount: Double
+    amount: Double,
+    cardCountry: String = ""
 ): String? {
 
     if (transactionType == TransactionType.USSD.type) {
@@ -255,15 +256,20 @@ fun calculateTransactionFee(
             merchantDetailsResponse.payload.paymentConfigs.forEach {
 
                 if (it?.code == "CARD") {
-                    val isCardInternational: Boolean = false
+                    val isCardInternational: Boolean =
+                        merchantDetailsResponse.payload.country?.nameCode?.let { it1 ->
+                            cardCountry.contains(
+                                it1, true)
+                        } == false
+//                        merchantDetailsResponse.payload.country?.nameCode?.contains(cardCountry, true) == false
                     if (isCardInternational) {
                         // use international charges
                         val feeModeIsPercentage: Boolean =
                             it.internationalPaymentOptionMode == "PERCENTAGE"
                         val isCappedSettlement: Boolean =
-                            it.paymentOptionCapStatus?.cappedSettlement == "CAPPED" //not clear yet
+                            it.paymentOptionCapStatus?.cappedSettlement == "CAPPED"
                         val cappedFee: String? =
-                            it.internationalPaymentOptionCapStatus?.inCappedAmount?.toString() //not clear yet
+                            it.internationalPaymentOptionCapStatus?.inCappedAmount?.toString()
 
                         val feePercentage: Double? = it.internationalPaymentOptionFee?.toDouble()
 

@@ -12,7 +12,7 @@
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
-                <data android:host="localhost:3002/#/"
+                <data android:host="com.example.seerbit_sdk"
                     android:scheme="https"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
@@ -20,7 +20,7 @@
             </intent-filter>
 
             <intent-filter>
-                <data android:host="localhost:3002/#/"
+                <data android:host="com.example.seerbit_sdk"
                     android:scheme="http"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
