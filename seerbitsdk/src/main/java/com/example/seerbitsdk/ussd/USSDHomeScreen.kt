@@ -110,7 +110,7 @@ fun USSDHomeScreen(
                 )
 
 
-                ErrorDialogg(
+                ModalDialog(
                     showDialog = openDialog,
                     alertDialogHeaderMessage = alertDialogHeaderMessage,
                     alertDialogMessage = alertDialogMessage,
@@ -143,6 +143,8 @@ fun USSDHomeScreen(
                         }
                         SUCCESS -> {
                             openDialog.value = true
+                            alertDialogMessage =  ""//queryTransactionStateState.data.data.message ?:
+                            alertDialogHeaderMessage = "Transaction Successful!"
                             alertDialogMessage = queryTransactionStateState.data.data.message ?: ""
                             alertDialogHeaderMessage = "Success!"
                             actionListener?.onSuccess(it)
@@ -327,7 +329,7 @@ fun showLoaderLayout() {
 
 
 @Composable
-fun ErrorDialogg(
+fun ModalDialog(
     context: Context = LocalContext.current,
     showDialog: MutableState<Boolean>,
     alertDialogHeaderMessage: String,
@@ -395,7 +397,7 @@ fun ErrorDialogg(
                     else if (alertDialogHeaderMessage.contains("Success", ignoreCase = true)) {
                         Image(
                             painter = painterResource(id = R.drawable.success),
-                            contentDescription = "", modifier = Modifier.size(60.dp)
+                            contentDescription = "", modifier = Modifier.size(120.dp)
                         )
                     } else Image(
                         painter = painterResource(id = R.drawable.failed),
@@ -431,7 +433,7 @@ fun ErrorDialogg(
 
 
 @Composable
-fun ErrorDialoggWithRetry(
+fun ErrorDialogWithRetry(
     context: Context = LocalContext.current, showDialog: MutableState<Boolean>,
     alertDialogHeaderMessage: String,
     alertDialogMessage: String, exitOnSuccess: Boolean,
@@ -456,7 +458,8 @@ fun ErrorDialoggWithRetry(
                         text = alertDialogHeaderMessage, style = TextStyle(
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp
-                        )
+                        ),
+                        textAlign = TextAlign.Center
                     )
                 }
 
@@ -470,8 +473,9 @@ fun ErrorDialoggWithRetry(
                         alertDialogMessage, style = TextStyle(
                             fontWeight = FontWeight.Bold,
                             fontSize = 14.sp,
-                            lineHeight = 1.sp
-                        )
+                            lineHeight = 19.sp,
+                        ),
+                        textAlign = TextAlign.Center
                     )
                 }
             },
@@ -490,7 +494,7 @@ fun ErrorDialoggWithRetry(
                     else if (alertDialogHeaderMessage.contains("Success", ignoreCase = true)) {
                         Image(
                             painter = painterResource(id = R.drawable.success),
-                            contentDescription = "", modifier = Modifier.size(60.dp)
+                            contentDescription = "", modifier = Modifier.size(120.dp)
                         )
                     } else Image(
                         painter = painterResource(id = R.drawable.failed),

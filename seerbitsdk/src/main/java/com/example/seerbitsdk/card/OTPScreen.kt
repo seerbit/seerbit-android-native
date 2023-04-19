@@ -36,6 +36,7 @@ import com.example.seerbitsdk.screenstate.OTPState
 import com.example.seerbitsdk.screenstate.QueryTransactionState
 import com.example.seerbitsdk.ui.theme.DeepRed
 import com.example.seerbitsdk.ui.theme.Faktpro
+import com.example.seerbitsdk.ussd.ModalDialog
 import com.example.seerbitsdk.ui.theme.SignalRed
 import com.example.seerbitsdk.ussd.ErrorDialogg
 import com.example.seerbitsdk.viewmodels.CardEnterPinViewModel
@@ -120,7 +121,7 @@ fun OTPScreen(
                 }
 
 
-                ErrorDialogg(
+                ModalDialog(
                     showDialog = openDialog,
                     alertDialogHeaderMessage = alertDialogHeaderMessage,
                     alertDialogMessage = alertDialogMessage,
