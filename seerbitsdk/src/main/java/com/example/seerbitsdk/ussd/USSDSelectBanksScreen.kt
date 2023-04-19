@@ -160,7 +160,7 @@ fun USSDSelectBanksScreen(
                 if (initiateUssdPayment.hasError) {
                     showCircularProgressBar = false
                     openDialog.value = true
-                    alertDialogHeaderMessage = initiateUssdPayment.errorMessage?: ""
+                    alertDialogMessage  = initiateUssdPayment.errorMessage?: ""
                     transactionViewModel.resetTransactionState()
                 }
 
@@ -192,7 +192,7 @@ fun USSDSelectBanksScreen(
                             transactionViewModel.initiateUssdTransaction(ussdDTO)
                         } else {
                             openDialog.value = true
-                            alertDialogHeaderMessage  = "Kindly select a bank"
+                            alertDialogMessage  = "Kindly select a bank"
                         }
                     }, !showCircularProgressBar
                 )
