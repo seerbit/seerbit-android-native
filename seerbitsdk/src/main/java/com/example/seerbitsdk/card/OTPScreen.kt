@@ -38,7 +38,6 @@ import com.example.seerbitsdk.ui.theme.DeepRed
 import com.example.seerbitsdk.ui.theme.Faktpro
 import com.example.seerbitsdk.ussd.ModalDialog
 import com.example.seerbitsdk.ui.theme.SignalRed
-import com.example.seerbitsdk.ussd.ErrorDialogg
 import com.example.seerbitsdk.viewmodels.CardEnterPinViewModel
 import com.example.seerbitsdk.viewmodels.TransactionViewModel
 
