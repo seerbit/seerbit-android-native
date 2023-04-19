@@ -71,7 +71,16 @@ fun GoToPaymentGateway(context: Context = LocalContext.current, actionListener: 
         var email by remember { mutableStateOf("seerbit@gmail.com") }
         var publicKey by remember { mutableStateOf("") }
         var phoneNumber by remember { mutableStateOf("09098987676") }
+        var productDescription by remember { mutableStateOf("MEME") }
+        var productId by remember { mutableStateOf("") }
+        var vendorId by remember { mutableStateOf("") }
+        var currency by remember { mutableStateOf("NGN") }
+        var country by remember { mutableStateOf("") }
+        var pocketReference by remember { mutableStateOf("") }
         var amount by remember { mutableStateOf("43") }
+        var tokenize by remember { mutableStateOf(false) }
+
+
 
         MyTextField(placeholder = "Enter Use Name") {
             fullName = it
@@ -84,15 +93,46 @@ fun GoToPaymentGateway(context: Context = LocalContext.current, actionListener: 
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        MyTextField(placeholder = "Enter User email") {
+        MyTextField(placeholder = "Enter productDescription ") {
             email = it
         }
         Spacer(modifier = Modifier.height(10.dp))
 
+        MyTextField(placeholder = "Enter product Description") {
+            productDescription = it
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        MyTextField(placeholder = "Enter country") {
+            country = it
+        }
+        Spacer(modifier = Modifier.height(10.dp))
+
+        MyTextField(placeholder = "Enter currency") {
+            currency = it
+        }
+        Spacer(modifier = Modifier.height(10.dp))
+
+        MyTextField(placeholder = "Enter vendorId") {
+            vendorId = it
+        }
+        Spacer(modifier = Modifier.height(10.dp))
 
         PhoneNumberField(placeholder = "Enter Phone Number") {
             phoneNumber = it
         }
+        Spacer(modifier = Modifier.height(10.dp))
+        MyTextField(placeholder = "Enter productId") {
+            productId = it
+        }
+        Spacer(modifier = Modifier.height(10.dp))
+        MyTextField(placeholder = "Enter pocketReference") {
+            pocketReference = it
+        }
+
+
+
         Spacer(modifier = Modifier.height(40.dp))
         Button(
             onClick = {
@@ -104,14 +144,14 @@ fun GoToPaymentGateway(context: Context = LocalContext.current, actionListener: 
                     fullName,
                     email,
                     actionListener = actionListener,
-                    productDescription = "",
-                    productId = "",
-                    pocketReference = "",
+                    productDescription = productDescription,
+                    productId = productId,
+                    pocketReference = pocketReference,
                     transactionPaymentReference = "",
-                    vendorId = "",
-                    country = "",
-                    currency = "USD",
-                    tokenize = true
+                    vendorId = vendorId,
+                    country = country,
+                    currency = currency,
+                    tokenize = false
                 )
 
             }, modifier = Modifier
