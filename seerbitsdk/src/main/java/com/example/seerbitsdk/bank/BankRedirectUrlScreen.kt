@@ -27,6 +27,7 @@ import com.example.seerbitsdk.helper.TransactionType
 import com.example.seerbitsdk.helper.calculateTransactionFee
 import com.example.seerbitsdk.helper.generateSourceIp
 import com.example.seerbitsdk.helper.isMerchantFeeBearer
+import com.example.seerbitsdk.interfaces.ActionListener
 import com.example.seerbitsdk.models.bankaccount.BankAccountDTO
 import com.example.seerbitsdk.screenstate.InitiateTransactionState
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
@@ -44,7 +45,8 @@ fun BankRedirectUrlScreen(
     merchantDetailsState: MerchantDetailsState?,
     bankCode: String,
     bankName: String,
-    navController:NavHostController
+    navController:NavHostController,
+    actionListener: ActionListener?,
 ) {
 
 
@@ -142,7 +144,7 @@ fun BankRedirectUrlScreen(
                     bankCode = bankCode,
                     amount = totalAmount.toString(),
                     redirectUrl = "http://localhost:3002/#/",
-                    productId = "",
+                    productId = merchantDetailsData.payload?.productId,
                     mobileNumber = merchantDetailsData.payload?.userPhoneNumber,
                     paymentReference = paymentRef,
                     fee = fee,
@@ -157,10 +159,12 @@ fun BankRedirectUrlScreen(
                     currency = merchantDetailsData.payload?.defaultCurrency,
                     bvn = "",
                     email = merchantDetailsData.payload?.emailAddress,
-                    productDescription = "",
+                    productDescription = merchantDetailsData.payload?.productDescription,
                     scheduleId = "",
                     accountNumber = "",
-                    retry = transactionViewModel.retry.value
+                    retry = transactionViewModel.retry.value,
+                    pocketReference =merchantDetailsData.payload?.pocketReference,
+                    vendorId = merchantDetailsData.payload?.vendorId
                 )
 
                 Spacer(modifier = Modifier.height(10.dp))
@@ -210,6 +214,7 @@ fun BankRedirectUrlScreen(
                             alertDialogMessage =
                                 queryTransactionStateState.data.data.payments?.reason!!
                             alertDialogHeaderMessage = "Success"
+                            actionListener?.onSuccess(it.data)
                             transactionViewModel.resetTransactionState()
                             return@let
                         }

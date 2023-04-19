@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -16,7 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -34,8 +32,6 @@ import com.example.seerbitsdk.helper.TransactionType
 import com.example.seerbitsdk.helper.calculateTransactionFee
 import com.example.seerbitsdk.helper.generateSourceIp
 import com.example.seerbitsdk.helper.isMerchantFeeBearer
-import com.example.seerbitsdk.models.CardOTPDTO
-import com.example.seerbitsdk.models.Transaction
 import com.example.seerbitsdk.models.card.CardDTO
 import com.example.seerbitsdk.screenstate.InitiateTransactionState
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
@@ -169,9 +165,7 @@ fun CardEnterPinScreen(
                 }
 
 
-
-
-                    Text(
+                Text(
                         text = "Enter your four digit card pin to authorize the payment",
                         style = TextStyle(
                             fontSize = 14.sp,
@@ -189,13 +183,14 @@ fun CardEnterPinScreen(
                     }
 
 
+
                 val cardDTO = CardDTO(
                     deviceType = "Android",
                     country = merchantDetailsData.payload?.country?.countryCode ?: "",
                     amount = totalAmount ?: 0.0,
                     cvv = cvv,
                     redirectUrl = "http://localhost:3002/#/",
-                    productId = "",
+                    productId = merchantDetailsData.payload?.productId,
                     mobileNumber = merchantDetailsData.payload?.userPhoneNumber,
                     paymentReference = paymentRef,
                     fee = fee,
@@ -213,7 +208,11 @@ fun CardEnterPinScreen(
                     false,
                     email = merchantDetailsData.payload?.emailAddress,
                     cardNumber = cardNumber,
-                    retry = true
+                    retry = true,
+                    tokenize = merchantDetailsData.payload?.tokenize,
+                    pocketReference =merchantDetailsData.payload?.pocketReference,
+                    productDescription = merchantDetailsData.payload?.productDescription,
+                    vendorId = merchantDetailsData.payload?.vendorId
                 )
 
 

@@ -87,7 +87,7 @@ fun OtherPaymentScreen(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 val addedButtons: ArrayList<SeerBitDestination> = arrayListOf()
-                if(displayPaymentMethod(TransactionType.CARD.type, merchantDetailsData) && removeCardType != TransactionType.CARD.type) addedButtons.add(Debit_CreditCard)
+                if(displayPaymentMethod(TransactionType.CARD.type, merchantDetailsData)) addedButtons.add(Debit_CreditCard)
                 if(displayPaymentMethod(TransactionType.USSD.type, merchantDetailsData))addedButtons.add(UssdSelectBank)
                 if(displayPaymentMethod(TransactionType.MOMO.type, merchantDetailsData))addedButtons.add(MOMO)
                 if(displayPaymentMethod(TransactionType.TRANSFER.type, merchantDetailsData))addedButtons.add(Transfer)
@@ -205,7 +205,7 @@ fun generateTransferDTO(merchantDetailsData: MerchantDetailsResponse, transactio
         country = merchantDetailsData.payload?.country?.countryCode ?: "",
         bankCode = "044",
         amount = totalAmount.toString(),
-        productId = "",
+        productId = merchantDetailsData.payload?.productId,
         mobileNumber = merchantDetailsData.payload?.userPhoneNumber,
         paymentReference = merchantDetailsData.payload?.paymentReference,
         fee = fee,
@@ -216,12 +216,14 @@ fun generateTransferDTO(merchantDetailsData: MerchantDetailsResponse, transactio
         paymentType = "TRANSFER",
         sourceIP = generateSourceIp(true),
         currency = merchantDetailsData.payload?.defaultCurrency,
-        productDescription = "",
+        productDescription = merchantDetailsData.payload?.productDescription,
         email = merchantDetailsData.payload?.emailAddress,
         retry = transactionViewModel.retry.value,
         deviceType = "Android",
         amountControl = "FIXEDAMOUNT",
-        walletDaysActive = "1"
+        walletDaysActive = "1",
+        pocketReference =merchantDetailsData.payload?.pocketReference,
+        vendorId = merchantDetailsData.payload?.vendorId
     )
 }
 

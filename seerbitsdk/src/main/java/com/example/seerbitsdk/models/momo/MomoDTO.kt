@@ -64,5 +64,12 @@ data class MomoDTO(
 	val retry: Boolean? = null,
 
 	@field:SerializedName("voucherCode")
-	val voucherCode: String? = null
+	val voucherCode: String? = null,
+
+	@field:SerializedName("pocketReference")
+	val pocketReference: String?,
+
+	@field:SerializedName("vendorId")
+	val vendorId: String?
+
 ) : TransactionDTO

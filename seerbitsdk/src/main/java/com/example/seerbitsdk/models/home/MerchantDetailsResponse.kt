@@ -366,7 +366,7 @@ data class Country(
 	val websiteUrl: String? = null,
 
 	@field:SerializedName("countryCode")
-	val countryCode: String? = null,
+	var countryCode: String? = null,
 
 	@field:SerializedName("defaultCurrency")
 	val defaultCurrency: DefaultCurrency? = null,
@@ -546,7 +546,7 @@ data class Payload(
 	val partnerId: String? = null,
 
 	@field:SerializedName("default_currency")
-	val defaultCurrency: String? = null,
+	var defaultCurrency: String? = null,
 
 	@field:SerializedName("businessType")
 	val businessType: String? = null,
@@ -556,7 +556,15 @@ data class Payload(
 	var userPhoneNumber : String? = null,
 	var amount : String? = null,
     var emailAddress : String? = null,
-	var paymentReference : String? = null
+
+	var paymentReference : String? = null,
+	var pocketReference : String? = null,
+	var vendorId: String? = null,
+	var productDescription: String? = null,
+	var countrySetByUser :String? = null,
+	var currency:String? = null,
+	var productId: String? = null,
+	var tokenize: Boolean
 )
 
 data class InternationalPaymentOptionCapStatus(

@@ -124,7 +124,7 @@ fun MomoHomeScreen(
                         deviceType = "Android",
                         country = merchantDetailsData.payload?.country?.countryCode ?: "",
                         amount = totalAmount.toString(),
-                        productId = "",
+                        productId = merchantDetailsData.payload?.productId,
                         redirectUrl = "http://localhost:3002/#/",
                         mobileNumber = accountNumber,
                         paymentReference = paymentRef,
@@ -136,11 +136,13 @@ fun MomoHomeScreen(
                         paymentType = "MOMO",
                         sourceIP = generateSourceIp(true),
                         currency = merchantDetailsData.payload?.defaultCurrency,
-                        productDescription = "",
+                        productDescription = merchantDetailsData.payload?.productDescription,
                         email = merchantDetailsData.payload?.emailAddress,
                         retry = transactionViewModel.retry.value,
                         network = momoNetwork,
-                        voucherCode = ""
+                        voucherCode = "",
+                        pocketReference =merchantDetailsData.payload?.pocketReference,
+                        vendorId = merchantDetailsData.payload?.vendorId
                     )
 
 

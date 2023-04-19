@@ -35,6 +35,7 @@ import com.example.seerbitsdk.helper.TransactionType
 import com.example.seerbitsdk.helper.calculateTransactionFee
 import com.example.seerbitsdk.helper.formatInputDouble
 import com.example.seerbitsdk.helper.isMerchantFeeBearer
+import com.example.seerbitsdk.interfaces.ActionListener
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.screenstate.QueryTransactionState
 import com.example.seerbitsdk.ui.theme.*
@@ -53,7 +54,8 @@ fun TransferHomeScreen(
     navController: NavHostController,
     walletName: String?,
     bankName: String?,
-    accountNumber: String?
+    accountNumber: String?,
+    actionListener: ActionListener?,
 ) {
 
     var transferAmount by remember { mutableStateOf("") }
@@ -163,6 +165,9 @@ fun TransferHomeScreen(
                         alertDialogHeaderMessage = "Transaction Successful!"
                         openDialog.value = true
                         alertDialogMessage = ""//queryTransactionStateState.data.data.payments?.reason ?:
+                        alertDialogMessage =
+                            queryTransactionStateState.data.data.payments?.reason ?: ""
+                        actionListener?.onSuccess(queryTransactionStateState.data.data)
                         showCircularProgressBar = false
                         exitOnSuccess.value = true
                         transactionViewModel.resetTransactionState()
@@ -251,12 +256,12 @@ fun TransferHomeScreen(
 
             OtherPaymentButtonComponent(
                 onOtherPaymentButtonClicked = { navController.clearBackStack(Transfer.route)
-                    navController.navigatePopUpToOtherPaymentScreen("${Route.OTHER_PAYMENT_SCREEN}/${TransactionType.CARD.type}") },
-                onCancelButtonClicked = {navController.navigateSingleTopTo(Debit_CreditCard.route)},
+                    navController.navigatePopUpToOtherPaymentScreen("${Route.OTHER_PAYMENT_SCREEN}/${TransactionType.TRANSFER.type}") },
+                onCancelButtonClicked = {navController.navigateSingleTopNoSavedState(Debit_CreditCard.route)},
                 enable = !showCircularProgressBar
             )
 
-            Spacer(modifier = Modifier.height(25.dp))
+            Spacer(modifier = Modifier.height(50.dp))
             BottomSeerBitWaterMark(modifier = Modifier.align(alignment = Alignment.CenterHorizontally))
 
         }
@@ -278,7 +283,8 @@ fun TransferHomeScreenPreview() {
             navController = rememberNavController(),
             walletName = "walletName",
             bankName = "bankName",
-            accountNumber = "accountNumber"
+            accountNumber = "accountNumber",
+            actionListener = null
         )
     }
 }
