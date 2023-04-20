@@ -54,6 +54,7 @@ import com.example.seerbitsdk.models.card.CardDTO
 import com.example.seerbitsdk.component.OtherPaymentScreen
 import com.example.seerbitsdk.helper.*
 import com.example.seerbitsdk.interfaces.ActionListener
+import com.example.seerbitsdk.models.query.QueryData
 import com.example.seerbitsdk.momo.MOMOOTPScreen
 import com.example.seerbitsdk.momo.MomoHomeScreen
 import com.example.seerbitsdk.screenstate.*
@@ -107,7 +108,8 @@ class SeerBitActivity : ComponentActivity() {
                 showDialog = openDialog,
                 alertDialogHeaderMessage = "Error",
                 alertDialogMessage = "Error occurred while loading sdk. Please check your internet or public key.",
-                exitOnSuccess = true
+                exitOnSuccess = true,
+                onSuccess = {}
             ) {
                 openDialog.value = false
             }
@@ -422,6 +424,7 @@ fun CardHomeScreen(
     val openDialog = remember { mutableStateOf(false) }
     val exitOnSuccess = remember { mutableStateOf(false) }
     val activity = (LocalContext.current as? Activity)
+    var queryData : QueryData? = null
 
 
     if (merchantDetailsState.hasError) {
@@ -451,6 +454,7 @@ fun CardHomeScreen(
             ) {
 
             var paymentReference = merchantDetailsData.payload?.paymentReference ?: ""
+
             val amount = merchantDetailsData.payload?.amount
             val fee = calculateTransactionFee(
                 merchantDetailsData,
@@ -520,7 +524,8 @@ fun CardHomeScreen(
                 showDialog = openDialog,
                 alertDialogHeaderMessage = alertDialogHeaderMessage,
                 alertDialogMessage = alertDialogMessage,
-                exitOnSuccess = exitOnSuccess.value
+                exitOnSuccess = exitOnSuccess.value,
+                onSuccess = {actionListener?.onSuccess(queryData)}
             ) {
                 openDialog.value = false
             }
@@ -670,8 +675,7 @@ fun CardHomeScreen(
                         alertDialogHeaderMessage = "Success!!!"
                         alertDialogMessage = it.message ?: ""
                         exitOnSuccess.value = true
-                        transactionViewModel.resetTransactionState()
-                        actionListener?.onSuccess(it)
+                        queryData = it
                         return@let
                     }
                     else -> {

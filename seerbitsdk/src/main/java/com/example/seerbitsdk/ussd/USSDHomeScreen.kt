@@ -37,6 +37,7 @@ import com.example.seerbitsdk.component.*
 import com.example.seerbitsdk.helper.TransactionType
 import com.example.seerbitsdk.helper.calculateTransactionFee
 import com.example.seerbitsdk.interfaces.ActionListener
+import com.example.seerbitsdk.models.query.QueryData
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.screenstate.QueryTransactionState
 import com.example.seerbitsdk.ui.theme.*
@@ -63,6 +64,8 @@ fun USSDHomeScreen(
     var alertDialogHeaderMessage by remember { mutableStateOf("") }
     val exitOnSuccess = remember { mutableStateOf(false) }
     val activity = (LocalContext.current as? Activity)
+    var queryData : QueryData? = null
+
 
 
 
@@ -97,6 +100,7 @@ fun USSDHomeScreen(
                     amount = amount?.toDouble() ?: 0.0
                 )
                 val totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
+                var onSuccess: () -> Unit
 
                 Spacer(modifier = Modifier.height(21.dp))
                 SeerbitPaymentDetailHeader(
@@ -114,7 +118,8 @@ fun USSDHomeScreen(
                     showDialog = openDialog,
                     alertDialogHeaderMessage = alertDialogHeaderMessage,
                     alertDialogMessage = alertDialogMessage,
-                    exitOnSuccess = exitOnSuccess.value
+                    exitOnSuccess = exitOnSuccess.value,
+                    onSuccess = {actionListener?.onSuccess(queryData)}
                 ) {
                     openDialog.value = false
                 }
@@ -147,10 +152,9 @@ fun USSDHomeScreen(
                             alertDialogHeaderMessage = "Transaction Successful!"
                             alertDialogMessage = queryTransactionStateState.data.data.message ?: ""
                             alertDialogHeaderMessage = "Success!"
-                            actionListener?.onSuccess(it)
+                            queryData = it
                             showLoadingScreen = false
                             exitOnSuccess.value = true
-                            transactionViewModel.resetTransactionState()
                             return@let
 
                         }
@@ -334,6 +338,7 @@ fun ModalDialog(
     showDialog: MutableState<Boolean>,
     alertDialogHeaderMessage: String,
     alertDialogMessage: String, exitOnSuccess: Boolean,
+    onSuccess: () -> Unit,
     onDismiss: () -> Unit
 ) {
     //The alert dialog occurs here
@@ -410,6 +415,7 @@ fun ModalDialog(
                         onDismiss()
                         if (exitOnSuccess) {
                             activity?.finish()
+                            onSuccess()
                         }
                     },
                     shape = RoundedCornerShape(8.dp),
@@ -438,7 +444,8 @@ fun ErrorDialogWithRetry(
     alertDialogHeaderMessage: String,
     alertDialogMessage: String, exitOnSuccess: Boolean,
     onDismiss: () -> Unit,
-    onRetry: () -> Unit
+    onSuccess: () -> Unit?,
+    onRetry: () -> Unit,
 ) {
     //The alert dialog occurs here
     val activity = context as? Activity
@@ -507,6 +514,7 @@ fun ErrorDialogWithRetry(
                     onClick = {
                         if (exitOnSuccess) {
                             activity?.finish()
+                            onSuccess()
                         } else {
                             onRetry()
                         }

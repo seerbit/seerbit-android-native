@@ -159,7 +159,8 @@ fun CardEnterPinScreen(
                     showDialog = openDialog,
                     alertDialogHeaderMessage = alertDialogHeaderMessage,
                     alertDialogMessage = alertDialogMessage,
-                    exitOnSuccess = exitOnSuccess.value
+                    exitOnSuccess = exitOnSuccess.value,
+                    onSuccess = {}
                 ) {
                     openDialog.value = false
                 }

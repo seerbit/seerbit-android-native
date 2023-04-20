@@ -29,6 +29,7 @@ import com.example.seerbitsdk.helper.calculateTransactionFee
 import com.example.seerbitsdk.interfaces.ActionListener
 import com.example.seerbitsdk.models.otp.MomoOtpDto
 import com.example.seerbitsdk.models.otp.Transaction
+import com.example.seerbitsdk.models.query.QueryData
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.screenstate.OTPState
 import com.example.seerbitsdk.screenstate.QueryTransactionState
@@ -92,6 +93,7 @@ fun MOMOOTPScreen(
                 val amount = merchantDetailsData.payload?.amount
                 val fee =   calculateTransactionFee(merchantDetailsData, TransactionType.MOMO.type, amount = amount?.toDouble()?: 0.0)
                 val totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
+                var queryData : QueryData? = null
 
                 SeerbitPaymentDetailHeaderTwo(
                     charges = fee?.toDouble()?:0.0,
@@ -105,7 +107,8 @@ fun MOMOOTPScreen(
                     showDialog = openDialog,
                     alertDialogHeaderMessage = alertDialogHeaderMessage,
                     alertDialogMessage = alertDialogMessage,
-                    exitOnSuccess = exitOnSuccess.value
+                    exitOnSuccess = exitOnSuccess.value,
+                    onSuccess = {actionListener?.onSuccess(queryData)}
                 ) {
                     openDialog.value = exitOnSuccess.value
                 }
@@ -158,8 +161,8 @@ fun MOMOOTPScreen(
                                     exitOnSuccess.value = true
                                     alertDialogMessage =
                                         queryTransactionStateState.data.data.payments?.reason?:""
+                                    queryData = queryTransactionStateState.data.data
                                     alertDialogHeaderMessage = "Success!!"
-                                    transactionViewModel.resetTransactionState()
                                     return@let
                                 }
                                 PENDING_CODE -> {

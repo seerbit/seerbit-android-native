@@ -29,6 +29,7 @@ import com.example.seerbitsdk.helper.generateSourceIp
 import com.example.seerbitsdk.helper.isMerchantFeeBearer
 import com.example.seerbitsdk.interfaces.ActionListener
 import com.example.seerbitsdk.models.bankaccount.BankAccountDTO
+import com.example.seerbitsdk.models.query.QueryData
 import com.example.seerbitsdk.screenstate.InitiateTransactionState
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.screenstate.QueryTransactionState
@@ -97,6 +98,7 @@ fun BankRedirectUrlScreen(
                     amount = amount?.toDouble() ?: 0.0
                 )
                 var totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
+                var queryData : QueryData? = null
 
 
                 if (isMerchantFeeBearer(merchantDetailsData)) {
@@ -115,7 +117,8 @@ fun BankRedirectUrlScreen(
                     showDialog = openDialog,
                     alertDialogHeaderMessage = alertDialogHeaderMessage,
                     alertDialogMessage = alertDialogMessage,
-                    exitOnSuccess = exitOnSuccess.value
+                    exitOnSuccess = exitOnSuccess.value,
+                    onSuccess = {actionListener?.onSuccess(queryData)}
                 ) {
                     openDialog.value = false
                 }
@@ -214,8 +217,7 @@ fun BankRedirectUrlScreen(
                             alertDialogMessage =
                                 queryTransactionStateState.data.data.payments?.reason!!
                             alertDialogHeaderMessage = "Success"
-                            actionListener?.onSuccess(it.data)
-                            transactionViewModel.resetTransactionState()
+                            queryData = it.data
                             return@let
                         }
                         PENDING_CODE -> {

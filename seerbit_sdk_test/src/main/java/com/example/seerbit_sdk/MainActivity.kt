@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.sp
 import com.example.seerbit_sdk.ui.theme.SeerBitTheme
 import com.example.seerbitsdk.R
 import com.example.seerbitsdk.interfaces.ActionListener
+import com.example.seerbitsdk.models.query.QueryData
 
 import com.example.seerbitsdk.startSeerBitSDK
 
@@ -46,8 +47,12 @@ class MainActivity : ComponentActivity(), ActionListener {
         }
     }
 
-    override fun onSuccess(data: Any?) {
+    override fun onSuccess(data: QueryData?) {
 
+        if (data!=null){
+            // do something .....
+            Toast.makeText(this, "Payment of ${data.payments?.amount} was successful", Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun onClose() {
