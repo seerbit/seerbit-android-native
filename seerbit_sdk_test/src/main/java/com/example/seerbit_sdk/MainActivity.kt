@@ -93,7 +93,7 @@ fun GoToPaymentGateway(context: Context = LocalContext.current, actionListener: 
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        MyTextField(placeholder = "Enter productDescription ") {
+        MyTextField(placeholder = "Enter email" ) {
             email = it
         }
         Spacer(modifier = Modifier.height(10.dp))
