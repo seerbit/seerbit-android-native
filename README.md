@@ -97,7 +97,9 @@ fun GoToPaymentGateway(context: Context = LocalContext.current, actionListener: 
              var currency = "NGN" 
              var country = "NG"
              var pocketReference = "SBT-PBK_SCAD2T"
+             var transactionPaymentReference = "SBT-RTEUW_SCAD2T"
              var tokenize = false
+             var productDescription = "seerbit"
              
              startSeerBitSDK(
                                 context,
