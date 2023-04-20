@@ -54,6 +54,8 @@ fun OtherPaymentScreen(
     var accountNumber by remember { mutableStateOf("") }
     var showCircularProgressBar by rememberSaveable { mutableStateOf(false) }
     var openDialog = remember { mutableStateOf(false) }
+    var alertDialogMessage by remember { mutableStateOf("") }
+    var alertDialogHeaderMessage by remember { mutableStateOf("") }
 
     merchantDetailsState?.data?.let { merchantDetailsData ->
         Column(
@@ -106,7 +108,7 @@ fun OtherPaymentScreen(
                 ModalDialog(
                     showDialog = openDialog,
                     alertDialogHeaderMessage = "Failed",
-                    alertDialogMessage = "This action could not be completed",
+                    alertDialogMessage =  alertDialogMessage,
                     exitOnSuccess = false
                 ) {
                     openDialog.value = false
@@ -114,6 +116,7 @@ fun OtherPaymentScreen(
                 if (initiateTransferPayment.hasError) {
                     showCircularProgressBar = false
                     openDialog.value = true
+                    alertDialogMessage = initiateTransferPayment.errorMessage?:"This action could not be completed"
                     transactionViewModel.resetTransactionState()
                 }
 

@@ -55,6 +55,9 @@ fun USSDSelectBanksScreen(
     var ussdCode by remember { mutableStateOf("") }
     var defaultCurrency: String = ""
     val openDialog = rememberSaveable { mutableStateOf(false) }
+    var alertDialogMessage by remember { mutableStateOf("") }
+    var alertDialogHeaderMessage by remember { mutableStateOf("") }
+    val exitOnSuccess = remember { mutableStateOf(false) }
 
     // if there is an error loading the report
     if (merchantDetailsState?.hasError!!) {
@@ -108,7 +111,7 @@ fun USSDSelectBanksScreen(
                     ModalDialog(
                         showDialog = openDialog,
                         alertDialogHeaderMessage = "Failed",
-                        alertDialogMessage = "Kindly select a bank",
+                        alertDialogMessage = alertDialogMessage,
                         exitOnSuccess = false
                     ) {
                         openDialog.value = false
@@ -156,6 +159,8 @@ fun USSDSelectBanksScreen(
 
                 if (initiateUssdPayment.hasError) {
                     showCircularProgressBar = false
+                    openDialog.value = true
+                    alertDialogHeaderMessage = initiateUssdPayment.errorMessage?: ""
                     transactionViewModel.resetTransactionState()
                 }
 
@@ -187,6 +192,7 @@ fun USSDSelectBanksScreen(
                             transactionViewModel.initiateUssdTransaction(ussdDTO)
                         } else {
                             openDialog.value = true
+                            alertDialogHeaderMessage  = "Kindly select a bank"
                         }
                     }, !showCircularProgressBar
                 )
