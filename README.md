@@ -123,6 +123,24 @@ fun GoToPaymentGateway(context: Context = LocalContext.current, actionListener: 
  ```
  
  Calling this method with the parameters will initiate the sdk.
+
+## Properties:
+| Property                    | type   | required  | default | Desc                                                                        |
+|-----------------------------|--------|-----------|---------|-----------------------------------------------------------------------------|
+| currency                    | String | Optional  | NGN     | The currency for the transaction e.g NGN                                    |
+| email                       | String | Required  | None    | The email of the user to be charged                                         |
+| publicKey                   | String | Required  | None    | Your Public key or see above step to get yours                              |
+| amount                      | String | Required  | None    | The transaction amount                                                      |
+| fullName                    | String | Required  | None    | The fullname of the user to be charged                                      |
+| phoneNumber                 | String | Required  | None    | User phone Number                                                           |
+| pocketReference             | String | Optional  | None    | This is your pocket reference for vendors with pocket                       |
+| vendorId                    | String | Optional  | None    | This is the vendorId of your business using pocket                          |
+| tokenize                    | bool   | Optional  | False   | Tokenize card                                                               |
+| country                     | String | Optional  | NG      | Transaction country which can be optional                                   |
+| transactionPaymentReference | String | Optional  | None    | Set a unique transaction reference for every transaction                    |
+| productId                   | String | Optional  | None    | This is the productId which is optional                                     |
+| productDescription          | String | Optional  | None    | The transaction description which is optional                               |
+| actionListener              | String | Optional  | null    | actionListener which listens to if the transaction was successful or closed |
  
  ## Support:
  
