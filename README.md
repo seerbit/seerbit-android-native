@@ -92,14 +92,14 @@ fun GoToPaymentGateway(context: Context = LocalContext.current, actionListener: 
              val publicKey: String = "SMPPBK_SCAD2TXCYUUYYYTT17OTLECBGUAI"
              val fullName: String  = "SeerBit SeerBit"
              val email:String = "seerbitseerbit@gmail.com"
-             var productId = "seerbit"
-             var vendorId = "seerbit"
-             var currency = "NGN" 
-             var country = "NG"
-             var pocketReference = "SBT-PBK_SCAD2T"
-             var transactionPaymentReference = "SBT-RTEUW_SCAD2T"
-             var tokenize = false
-             var productDescription = "seerbit"
+             val productId : String  = "seerbit"
+             val vendorId: String  = "seerbit"
+             val currency: String  = "NGN" 
+             val country: String  = "NG"
+             val pocketReference: String  = "SBT-PBK_SCAD2T"
+             val transactionPaymentReference: String  = "SBT-RTEUW_SCAD2T"
+             val tokenize: Boolean = false
+             val productDescription: String  = "seerbit"
              
              startSeerBitSDK(
                                 context,
