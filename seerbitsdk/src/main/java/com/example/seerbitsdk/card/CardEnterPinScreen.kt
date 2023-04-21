@@ -79,8 +79,8 @@ fun CardEnterPinScreen(
     state : String,
     postalCode : String,
     billingCountry : String,
-
     cardEnterPinViewModel: CardEnterPinViewModel,
+    transactionViewModel: TransactionViewModel
 
     ) {
     Column(modifier = modifier) {
@@ -213,7 +213,7 @@ fun CardEnterPinScreen(
                     country = merchantDetailsData.payload?.country?.countryCode ?: "",
                     amount = totalAmount ?: 0.0,
                     cvv = cvv,
-                    redirectUrl = "http://localhost:3002/#/",
+                    redirectUrl = "https://com.example.seerbit_sdk",
                     productId = merchantDetailsData.payload?.productId,
                     mobileNumber = merchantDetailsData.payload?.userPhoneNumber,
                     paymentReference = paymentRef,
@@ -228,11 +228,11 @@ fun CardEnterPinScreen(
                     sourceIP = generateSourceIp(useIPv4 = true),
                     pin = pin,
                     currency = merchantDetailsData.payload?.defaultCurrency,
-                    "LOCAL",
+                    transactionViewModel.locality.value,
                     false,
                     email = merchantDetailsData.payload?.emailAddress,
                     cardNumber = cardNumber,
-                    retry = true,
+                    retry = transactionViewModel.retry.value,
                     tokenize = merchantDetailsData.payload?.tokenize,
                     pocketReference =merchantDetailsData.payload?.pocketReference,
                     productDescription = merchantDetailsData.payload?.productDescription,
@@ -343,7 +343,8 @@ fun HeaderScreenPreview() {
             city = "",
             state = "",
             postalCode = "",
-            billingCountry = ""
+            billingCountry = "",
+            transactionViewModel = viewModel2
 
 
         )

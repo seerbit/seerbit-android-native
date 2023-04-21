@@ -564,7 +564,8 @@ data class Payload(
 	var countrySetByUser :String? = null,
 	var currency:String? = null,
 	var productId: String? = null,
-	var tokenize: Boolean
+	var tokenize: Boolean,
+	var isLocal : String? = "LOCAL",
 )
 
 data class InternationalPaymentOptionCapStatus(

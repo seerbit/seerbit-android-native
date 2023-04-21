@@ -65,7 +65,13 @@ class TransactionViewModel : ViewModel() {
     val cardDeepLink: State<String>
         get() = _cardDeepLink
 
+    private var _locality = mutableStateOf("")
+    val locality: State<String>
+        get() = _locality
 
+    fun setLocality(locality: String) {
+        _locality.value = locality
+    }
 
     fun setRetry(setRetry: Boolean) {
         _retry.value = setRetry

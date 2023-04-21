@@ -253,6 +253,7 @@ fun CardRedirectUrlScreen(
                 }
 
                 initiateCardPayment.data?.let {
+                    transactionViewModel.setRetry(true)
                     showCircularProgressBar = true
                     if (initiateCardPayment.data.data?.code == PENDING_CODE) {
                         val paymentReferenceAfterInitiate =

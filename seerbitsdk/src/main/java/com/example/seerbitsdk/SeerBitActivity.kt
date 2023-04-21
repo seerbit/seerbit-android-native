@@ -212,7 +212,7 @@ fun startSeerBitSDK(
 
     intent.putExtra("pocketReference",pocketReference )
     intent.putExtra("vendorId" , vendorId  )
-    intent.putExtra(" productDescription",  productDescription )
+    intent.putExtra("productDescription",  productDescription )
     intent.putExtra("country", country )
     intent.putExtra("productId",  productId)
     intent.putExtra("tokenize",  tokenize )
@@ -292,7 +292,7 @@ fun SeerBitApp(
             viewModel.merchantState.value.data?.payload?.vendorId = vendorId
             viewModel.merchantState.value.data?.payload?.currency = currency
             viewModel.merchantState.value.data?.payload?.productId = productId
-            viewModel.merchantState.value.data?.payload?. productDescription =  productDescription
+            viewModel.merchantState.value.data?.payload?.productDescription =  productDescription
             viewModel.merchantState.value.data?.payload?.tokenize = tokenize
             viewModel.merchantState.value.data?.payload?.countrySetByUser = country
 
@@ -465,11 +465,13 @@ fun CardHomeScreen(
                 amount = amount?.toDouble() ?: 0.0,
                 cardCountry = cardBinState.data?.country ?: ""
             )
-            val isLocal: String = if (merchantDetailsData.payload?.country?.countryCode?.let {
+            val locality: String = if (merchantDetailsData.payload?.country?.countryCode?.let {
                     cardBinState.data?.country?.contains(
                         it, true
                     )
                 } == true) "LOCAL" else "INTERNATIONAL"
+            transactionViewModel.setLocality(locality)
+
             var totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
             val defaultCurrency = merchantDetailsData.payload?.defaultCurrency ?: ""
 
@@ -497,7 +499,7 @@ fun CardHomeScreen(
                 sourceIP = generateSourceIp(useIPv4 = true),
                 pin = "",
                 currency = merchantDetailsData.payload?.defaultCurrency,
-                isCardInternational =  isLocal,
+                isCardInternational =  locality,
                 false,
                 email = merchantDetailsData.payload?.emailAddress,
                 cardNumber = cardNumber,
@@ -573,7 +575,7 @@ fun CardHomeScreen(
 
                         if (cardBinState.data != null) {
                             var split: List<String?>
-                            if (cardBinState.data.responseMessage != "BIN not found") {
+                            if (cardBinState.data.responseMessage?.contains("BIN not found",true) ==false ) {
                                 transactionViewModel.clearCardBinState()
                                 split = cardBinState.data.cardName?.split(" ")!!
 
@@ -625,7 +627,7 @@ fun CardHomeScreen(
                                 cardExpiryMonth.isValidCardExpiryMonth()
                             )
                         ) {
-                            if (isLocal == "INTERNATIONAL"){
+                            if (locality == "INTERNATIONAL"){
                                 openOnBoardingScreen.value = true
 
                                 navController.navigateSingleTopTo(
@@ -1322,7 +1324,8 @@ fun MyAppNavHost(
                 state =  state!!,
                 postalCode = postalCode!!,
                 billingCountry = billingCountry!!,
-                phoneNumber = ""
+                phoneNumber = "",
+                transactionViewModel = transactionViewModel
             )
         }
 
@@ -1397,7 +1400,6 @@ fun MyAppNavHost(
 
                 )
         ) { navBackStackEntry ->
-            val useOtp = navBackStackEntry.arguments?.getBoolean("useOtp")
             val otpText = navBackStackEntry.arguments?.getString("otpText")
             val linkingRef = navBackStackEntry.arguments?.getString("linkingRef")
 
@@ -1646,7 +1648,6 @@ fun MyAppNavHost(
         )
         { navBackStackEntry ->
             val paymentRef = navBackStackEntry.arguments?.getString("paymentRef")
-            val wallet = navBackStackEntry.arguments?.getString("wallet")
             val walletName = navBackStackEntry.arguments?.getString("walletName")
             val bankName = navBackStackEntry.arguments?.getString("bankName")
             val accountNumber = navBackStackEntry.arguments?.getString("accountNumber")
