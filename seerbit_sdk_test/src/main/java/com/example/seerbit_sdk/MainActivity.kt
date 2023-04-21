@@ -2,6 +2,7 @@ package com.example.seerbit_sdk
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -47,11 +48,15 @@ class MainActivity : ComponentActivity(), ActionListener {
     }
 
     override fun onSuccess(data: Any?) {
+        Toast.makeText(this, "Payment success, DO any other thing here", Toast.LENGTH_SHORT).show()
+        Log.d("rerrt", "successs to show")
 
     }
 
     override fun onClose() {
         Toast.makeText(this, "Payment cancelled", Toast.LENGTH_SHORT).show()
+        Log.d("rerrt", "failure to show")
+
     }
 
 

@@ -8,6 +8,7 @@ import android.content.pm.ActivityInfo
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -463,6 +464,7 @@ fun CardHomeScreen(
                         it, true
                     )
                 } == true) "LOCAL" else "INTERNATIONAL"
+            Log.d("popikij", "$isLocal")
             var totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
             val defaultCurrency = merchantDetailsData.payload?.defaultCurrency ?: ""
 
