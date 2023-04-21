@@ -182,7 +182,7 @@ fun CardRedirectUrlScreen(
                     sourceIP = generateSourceIp(useIPv4 = true),
                     pin = "",
                     currency = merchantDetailsData.payload?.defaultCurrency,
-                    isCardInternational =  "INTERNATIONAL",
+                    isCardInternational =  transactionViewModel.locality.value,
                     false,
                     email = merchantDetailsData.payload?.emailAddress,
                     cardNumber = cardNumber,
