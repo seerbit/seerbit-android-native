@@ -227,7 +227,7 @@ fun OnBoardingScreen(
                 }
             }
             //Address
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(15.dp))
             OutlinedTextField(
                     modifier =
                     modifier
@@ -238,7 +238,7 @@ fun OnBoardingScreen(
                 }
 
             //Country
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(15.dp))
             OutlinedTextField(
                 modifier =
                 modifier
@@ -249,7 +249,7 @@ fun OnBoardingScreen(
             }
 
             //City
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(15.dp))
                 OutlinedTextField(
                     modifier =
                     modifier
@@ -261,7 +261,7 @@ fun OnBoardingScreen(
                 }
 
             //State
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(15.dp))
                 OutlinedTextField(
                     modifier =
                     modifier
@@ -273,7 +273,7 @@ fun OnBoardingScreen(
                 }
 
             //Postal Code
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(15.dp))
                 OutlinedTextField(
                     modifier =
                     modifier
