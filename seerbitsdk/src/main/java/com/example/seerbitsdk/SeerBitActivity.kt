@@ -44,8 +44,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.seerbitsdk.authentication.OnBoardingScreen
 import com.example.seerbitsdk.bank.*
 import com.example.seerbitsdk.card.CardEnterPinScreen
+import com.example.seerbitsdk.card.CardRedirectUrlScreen
 import com.example.seerbitsdk.card.OTPScreen
 import com.example.seerbitsdk.component.*
 import com.example.seerbitsdk.models.CardDetails
@@ -424,6 +426,7 @@ fun CardHomeScreen(
     val openDialog = remember { mutableStateOf(false) }
     val exitOnSuccess = remember { mutableStateOf(false) }
     val activity = (LocalContext.current as? Activity)
+    val openOnBoardingScreen = remember { mutableStateOf(false) }
     var queryData : QueryData? = null
 
 
@@ -462,7 +465,7 @@ fun CardHomeScreen(
                 amount = amount?.toDouble() ?: 0.0,
                 cardCountry = cardBinState.data?.country ?: ""
             )
-            val isLocal: String = if (merchantDetailsData.payload?.country?.nameCode?.let {
+            val isLocal: String = if (merchantDetailsData.payload?.country?.countryCode?.let {
                     cardBinState.data?.country?.contains(
                         it, true
                     )
@@ -503,7 +506,13 @@ fun CardHomeScreen(
                 tokenize = merchantDetailsData.payload?.tokenize,
                 pocketReference = merchantDetailsData.payload?.pocketReference,
                 productDescription = merchantDetailsData.payload?.productDescription,
-                vendorId = merchantDetailsData.payload?.vendorId
+                vendorId = merchantDetailsData.payload?.vendorId,
+
+                address = "",
+                city  = "",
+                state =  "",
+                postalCode = "",
+                billingCountry = ""
             )
 
             Spacer(modifier = Modifier.height(25.dp))
@@ -610,14 +619,23 @@ fun CardHomeScreen(
                     amount = "$defaultCurrency ${formatAmount(cardDTO.amount)}",
                     onClick = {
 
-                        if (validateCardDetails(
+                        if (isValidCardDetails(
                                 cvv.isValidCvv(),
                                 cardNumber.isValidCardNumber(),
                                 cardExpiryMonth.isValidCardExpiryMonth()
                             )
                         ) {
-                            onNavigateToPinScreen(cardDTO)
-                            transactionViewModel.setRetry(true)
+                            if (isLocal == "INTERNATIONAL"){
+                                openOnBoardingScreen.value = true
+
+                                navController.navigateSingleTopTo(
+                                    "${Route.OnBoardingScreen}/$cvv/$cardNumber/$cardExpiryMonth/$cardExpiryYear"
+                                )
+                            }
+                            else {
+                                onNavigateToPinScreen(cardDTO)
+                                transactionViewModel.setRetry(true)
+                            }
 
                         } else {
                             openDialog.value = true
@@ -711,7 +729,7 @@ fun CardHomeScreen(
                     if (toEnterPinScreen) {
                         redirectUrl = ""
                         navController.navigateSingleTopTo(
-                            "${Route.PIN_SCREEN}/$paymentRef/$cvv/$cardNumber/$cardExpiryMonth/$cardExpiryYear/$toEnterPinScreen/$useOtp/$otpText/$linkingRef"
+                            "${Route.PIN_SCREEN}/$paymentRef/$cvv/$cardNumber/$cardExpiryMonth/$cardExpiryYear/$Dummy/$Dummy/$Dummy/$Dummy/$Dummy"
                         )
                         return@let
                     } else if (useOtp) {
@@ -720,11 +738,10 @@ fun CardHomeScreen(
                         )
                         return@let
                     } else if (canRedirectToUrl) {
-                        redirectUrl(redirectUrl = redirectUrl)
-                        transactionViewModel.queryTransaction(paymentRef)
-                        transactionViewModel.resetTransactionState()
-                        canRedirectToUrl = false
-                        showCircularProgressBar = true
+
+                        navController.navigateSingleTopTo(
+                            "${Route.CARD_ACCOUNT_REDIRECT_URL_SCREEN}/$paymentRef/$cvv/$cardNumber/$cardExpiryMonth/$cardExpiryYear/$Dummy/$Dummy/$Dummy/$Dummy/$Dummy"
+                        )
                         return@let
                     }
                 } else {
@@ -739,7 +756,7 @@ fun CardHomeScreen(
             }
             Spacer(modifier = Modifier.height(100.dp))
 
-            if (merchantDetailsData.payload?.tokenize != true){
+            if (merchantDetailsData.payload?.tokenize != true && merchantDetailsData.payload?.defaultCurrency !="USD"){
             OtherPaymentButtonComponent(
                 onOtherPaymentButtonClicked = onOtherPaymentButtonClicked,
                 onCancelButtonClicked = {
@@ -1152,6 +1169,34 @@ fun PayButton(
 
 }
 
+@Composable
+fun PayButton2(
+    amount: String,
+    onClick: () -> Unit, enabled: Boolean
+) {
+    Button(
+        onClick = onClick,
+        colors = ButtonDefaults.buttonColors(backgroundColor = Color.Black),
+        shape = RoundedCornerShape(8.dp),
+        enabled = enabled,
+        modifier = Modifier
+            .height(56.dp)
+
+    ) {
+        Text(
+            text = "Pay $amount",
+            style = TextStyle(
+                fontSize = 14.sp,
+                fontFamily = Faktpro,
+                fontWeight = FontWeight.Normal,
+                lineHeight = 10.sp,
+                color = Color.White
+            )
+        )
+    }
+
+}
+
 
 @Preview(showBackground = true, widthDp = 320)
 @Composable
@@ -1228,7 +1273,7 @@ fun MyAppNavHost(
 
         composable(
 
-            "${Route.PIN_SCREEN}/{paymentRef}/{cvv}/{cardNumber}/{cardExpiryMonth}/{cardExpiryYear}/{isEnterPin}/{useOtp}/{otpText}/{linkingRef}",
+            "${Route.PIN_SCREEN}/{paymentRef}/{cvv}/{cardNumber}/{cardExpiryMonth}/{cardExpiryYear}/{address}/{city}/{state}/{postalCode}/{billingCountry}",
             arguments = listOf(
                 // declaring argument type
                 navArgument("paymentRef") { type = NavType.StringType },
@@ -1236,10 +1281,12 @@ fun MyAppNavHost(
                 navArgument("cardNumber") { type = NavType.StringType },
                 navArgument("cardExpiryMonth") { type = NavType.StringType },
                 navArgument("cardExpiryYear") { type = NavType.StringType },
-                navArgument("isEnterPin") { type = NavType.BoolType },
-                navArgument("useOtp") { type = NavType.BoolType },
-                navArgument("otpText") { type = NavType.StringType },
-                navArgument("linkingRef") { type = NavType.StringType },
+
+                navArgument("address") { type = NavType.StringType },
+                navArgument("city") { type = NavType.StringType },
+                navArgument("state") { type = NavType.StringType },
+                navArgument("postalCode") { type = NavType.StringType },
+                navArgument("billingCountry") { type = NavType.StringType },
 
                 )
         ) { navBackStackEntry ->
@@ -1248,10 +1295,12 @@ fun MyAppNavHost(
             val cardNumber = navBackStackEntry.arguments?.getString("cardNumber")
             val cardExpiryMonth = navBackStackEntry.arguments?.getString("cardExpiryMonth")
             val cardExpiryYear = navBackStackEntry.arguments?.getString("cardExpiryYear")
-            val isEnterPin = navBackStackEntry.arguments?.getBoolean("isEnterPin")
-            val useOtp = navBackStackEntry.arguments?.getBoolean("useOtp")
-            val otpText = navBackStackEntry.arguments?.getString("otpText")
-            val linkingRef = navBackStackEntry.arguments?.getString("linkingRef")
+            val address = navBackStackEntry.arguments?.getString("address")
+            val city = navBackStackEntry.arguments?.getString("city")
+            val state = navBackStackEntry.arguments?.getString(" state")
+            val postalCode = navBackStackEntry.arguments?.getString("postalCode")
+            val billingCountry = navBackStackEntry.arguments?.getString("billingCountry")
+
 
             cardEnterPinViewModel.resetTransactionState()
             CardEnterPinScreen(
@@ -1268,8 +1317,75 @@ fun MyAppNavHost(
                 cardNumber = cardNumber!!,
                 cardExpiryMonth = cardExpiryMonth!!,
                 cardExpiryYear = cardExpiryYear!!,
+                address = address!!,
+                city  = city!!,
+                state =  state!!,
+                postalCode = postalCode!!,
+                billingCountry = billingCountry!!,
+                phoneNumber = ""
             )
         }
+
+
+        //CARD_ACCOUNT_REDIRECT_URL_SCREEN
+        composable(
+
+            "${Route.CARD_ACCOUNT_REDIRECT_URL_SCREEN}/{paymentRef}/{cvv}/{cardNumber}/{cardExpiryMonth}/{cardExpiryYear}/{address}/{city}/{state}/{postalCode}/{billingCountry}",
+            arguments = listOf(
+                // declaring argument type
+                navArgument("paymentRef") { type = NavType.StringType },
+                navArgument("cvv") { type = NavType.StringType },
+                navArgument("cardNumber") { type = NavType.StringType },
+                navArgument("cardExpiryMonth") { type = NavType.StringType },
+                navArgument("cardExpiryYear") { type = NavType.StringType },
+
+                navArgument("address") { type = NavType.StringType },
+                navArgument("city") { type = NavType.StringType },
+                navArgument("state") { type = NavType.StringType },
+                navArgument("postalCode") { type = NavType.StringType },
+                navArgument("billingCountry") { type = NavType.StringType },
+
+                )
+        ) { navBackStackEntry ->
+            val paymentReference = navBackStackEntry.arguments?.getString("paymentRef")
+            val cvv = navBackStackEntry.arguments?.getString("cvv")
+            val cardNumber = navBackStackEntry.arguments?.getString("cardNumber")
+            val cardExpiryMonth = navBackStackEntry.arguments?.getString("cardExpiryMonth")
+            val cardExpiryYear = navBackStackEntry.arguments?.getString("cardExpiryYear")
+            val address = navBackStackEntry.arguments?.getString("address")
+            val city = navBackStackEntry.arguments?.getString("city")
+            val state = navBackStackEntry.arguments?.getString("state")
+            val postalCode = navBackStackEntry.arguments?.getString("postalCode")
+            val billingCountry = navBackStackEntry.arguments?.getString("billingCountry")
+
+
+            cardEnterPinViewModel.resetTransactionState()
+            CardRedirectUrlScreen(
+                navController = navController,
+                merchantDetailsState = merchantDetailsState,
+                transactionViewModel =transactionViewModel,
+                paymentReference = paymentReference!!,
+                cvv = cvv!!,
+                cardNumber = cardNumber!!,
+                cardExpiryMonth = cardExpiryMonth!!,
+                cardExpiryYear = cardExpiryYear!!,
+                address = address!!,
+                city  = city!!,
+                state =  state!!,
+                postalCode = postalCode!!,
+                billingCountry = billingCountry!!,
+                phoneNumber = "",
+                actionListener = actionListener
+            )
+        }
+
+
+
+
+
+
+
+
 
         composable(
             "${Route.CARD_OTP_SCREEN}/{paymentRef}/{otpText}/{linkingRef}",
@@ -1298,6 +1414,40 @@ fun MyAppNavHost(
             )
 
         }
+
+        composable(
+            "${Route.OnBoardingScreen}/{cvv}/{cardNumber}/{cardExpiryMonth}/{cardExpiryYear}",
+            arguments = listOf(
+                // declaring argument type
+                navArgument("cvv") { type = NavType.StringType },
+                navArgument("cardNumber") { type = NavType.StringType },
+                navArgument("cardExpiryMonth") { type = NavType.StringType },
+                navArgument("cardExpiryYear") { type = NavType.StringType },
+                )
+
+        ) { navBackStackEntry ->
+            val cvv = navBackStackEntry.arguments?.getString("cvv")
+            val cardNumber = navBackStackEntry.arguments?.getString("cardNumber")
+            val cardExpiryMonth = navBackStackEntry.arguments?.getString("cardExpiryMonth")
+            val cardExpiryYear = navBackStackEntry.arguments?.getString("cardExpiryYear")
+
+            cardEnterPinViewModel.resetTransactionState()
+            OnBoardingScreen(
+                onPayButtonClicked = { cardDTO ->
+                    cardEnterPinViewModel.initiateTransaction(cardDTO)
+                },
+                currentDestination = currentDestination,
+                navController = navController,
+                merchantDetailsState = merchantDetailsState,
+                transactionViewModel = transactionViewModel,
+                onOtherPaymentButtonClicked = { navController.navigateSingleTopTo("${Route.OTHER_PAYMENT_SCREEN}/dummy") },
+                cvv = cvv!!,
+                cardNumber = cardNumber!!,
+                cardExpiryMonth = cardExpiryMonth!!,
+                cardExpiryYear = cardExpiryYear!!,
+            )
+        }
+
 
         //BANK ACCOUUT HOME SCREEN
         composable(route = BankAccount.route) {

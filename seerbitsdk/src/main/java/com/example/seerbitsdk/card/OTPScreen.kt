@@ -276,7 +276,7 @@ fun OTPScreen(
                 }
 
                 Spacer(modifier = Modifier.height(100.dp))
-               if (merchantDetailsData.payload?.tokenize != true){
+               if (merchantDetailsData.payload?.tokenize != true && merchantDetailsData.payload?.defaultCurrency !="USD"){
                     OtherPaymentButtonComponent(
                         onOtherPaymentButtonClicked = { navController.navigatePopUpToOtherPaymentScreen("${Route.OTHER_PAYMENT_SCREEN}/${TransactionType.CARD.type}") },
                         onCancelButtonClicked = {navController.navigateSingleTopNoSavedState(
