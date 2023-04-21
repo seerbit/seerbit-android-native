@@ -428,7 +428,7 @@ fun CardHomeScreen(
     val activity = (LocalContext.current as? Activity)
     val openOnBoardingScreen = remember { mutableStateOf(false) }
     var queryData : QueryData? = null
-
+    var locality: String = ""
 
     if (merchantDetailsState.hasError) {
         ErrorDialog(message = merchantDetailsState.errorMessage ?: "Something went wrong")
@@ -465,7 +465,7 @@ fun CardHomeScreen(
                 amount = amount?.toDouble() ?: 0.0,
                 cardCountry = cardBinState.data?.country ?: ""
             )
-            val locality: String = if (merchantDetailsData.payload?.country?.countryCode?.let {
+             locality = if (merchantDetailsData.payload?.country?.nameCode?.let {
                     cardBinState.data?.country?.contains(
                         it, true
                     )
@@ -610,6 +610,7 @@ fun CardHomeScreen(
                 showCircularProgress(showProgress = true)
             }
 
+            
             Spacer(modifier = Modifier.height(16.dp))
             //Payment Button Login
             Row(
@@ -620,6 +621,12 @@ fun CardHomeScreen(
                 PayButton(
                     amount = "$defaultCurrency ${formatAmount(cardDTO.amount)}",
                     onClick = {
+
+                        locality = if (merchantDetailsData.payload?.country?.nameCode?.let {
+                                cardBinState.data?.country?.contains(
+                                    it, true
+                                )
+                            } == true) "LOCAL" else "INTERNATIONAL"
 
                         if (isValidCardDetails(
                                 cvv.isValidCvv(),
