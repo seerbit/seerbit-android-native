@@ -1299,7 +1299,7 @@ fun MyAppNavHost(
             val cardExpiryYear = navBackStackEntry.arguments?.getString("cardExpiryYear")
             val address = navBackStackEntry.arguments?.getString("address")
             val city = navBackStackEntry.arguments?.getString("city")
-            val state = navBackStackEntry.arguments?.getString(" state")
+            val state = navBackStackEntry.arguments?.getString("state")
             val postalCode = navBackStackEntry.arguments?.getString("postalCode")
             val billingCountry = navBackStackEntry.arguments?.getString("billingCountry")
 
