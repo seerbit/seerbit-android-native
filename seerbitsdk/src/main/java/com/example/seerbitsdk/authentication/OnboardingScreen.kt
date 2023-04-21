@@ -203,7 +203,7 @@ fun OnBoardingScreen(
             Text(
                 text = "Address Verification",
                 style = TextStyle(
-                    fontSize = 14.sp,
+                    fontSize = 16.sp,
                     fontFamily = FontFamily.SansSerif,
                     fontWeight = FontWeight.Bold,
                     lineHeight = 14.sp,
