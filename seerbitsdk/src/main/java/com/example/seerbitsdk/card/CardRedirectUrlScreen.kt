@@ -105,6 +105,22 @@ fun CardRedirectUrlScreen(
                 var totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
                 var queryData : QueryData? = null
 
+                var mPhoneNumber by remember { mutableStateOf(phoneNumber) }
+                var mAddress by remember { mutableStateOf(address) }
+                var mCity by remember { mutableStateOf(city) }
+                var mState  by remember { mutableStateOf(state) }
+                var mPostalCode by remember { mutableStateOf(postalCode) }
+                var mBillingCountry by remember { mutableStateOf(billingCountry) }
+
+
+                if (address== Dummy){ mAddress = "" }
+                if (phoneNumber== Dummy){ mPhoneNumber = "" }
+                if (city== Dummy){ mCity = "" }
+                if (state== Dummy){ mState = "" }
+                if (postalCode== Dummy){  mPostalCode = "" }
+                if (billingCountry== Dummy){ mBillingCountry = "" }
+
+
 
                 if (isMerchantFeeBearer(merchantDetailsData)) {
                     totalAmount = amount?.toDouble()
@@ -176,11 +192,12 @@ fun CardRedirectUrlScreen(
                     pocketReference = merchantDetailsData.payload?.pocketReference,
                     productDescription = merchantDetailsData.payload?.productDescription,
                     vendorId = merchantDetailsData.payload?.vendorId,
-                    address = address,
-                    city  = city,
-                    state =  state,
-                    postalCode = postalCode,
-                    billingCountry = billingCountry
+
+                    address = mAddress,
+                    city  = mCity,
+                    state =  mState,
+                    postalCode = mPostalCode,
+                    billingCountry = mBillingCountry
                 )
 
                 Spacer(modifier = Modifier.height(10.dp))
