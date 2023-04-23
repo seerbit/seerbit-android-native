@@ -160,7 +160,7 @@ fun USSDHomeScreen(
                         }
                         else -> {
                             openDialog.value = true
-                            alertDialogMessage = queryTransactionStateState.data.data.message ?: ""
+                            alertDialogMessage = queryTransactionStateState.data.data.payments?.reason ?: ""
                             alertDialogHeaderMessage = "Failed"
                             showLoadingScreen = false
                             transactionViewModel.resetTransactionState()

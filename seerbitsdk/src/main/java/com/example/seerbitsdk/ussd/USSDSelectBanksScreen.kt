@@ -172,7 +172,7 @@ fun USSDSelectBanksScreen(
                 initiateUssdPayment.data?.let {
                     transactionViewModel.setRetry(true)
                     paymentRef = it.data?.payments?.paymentReference ?: ""
-                    ussdCode = it.data?.payments?.ussdDailCode ?: ""
+                    ussdCode = it.data?.payments?.ussdDailCode ?: "no ussd code"
                     Log.d("ussdCodesss", ussdCode)
                     showCircularProgressBar = false
                     navController.navigateSingleTopNoSavedState(
