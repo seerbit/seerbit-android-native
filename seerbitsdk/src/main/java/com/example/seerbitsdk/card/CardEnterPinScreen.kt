@@ -264,6 +264,7 @@ fun CardEnterPinScreen(
                         navController.navigateSingleTopNoSavedState(
                             "${Route.CARD_OTP_SCREEN}/$paymentRef/$otpHeaderText/$linkingReference"
                         )
+                        cardEnterPinViewModel.resetTransactionState()
                     }
 
                     if (it.data?.code == "S12") {
@@ -271,6 +272,7 @@ fun CardEnterPinScreen(
                         alertDialogMessage = it.data.message.toString()
                         openDialog.value = true
                         alertDialogHeaderMessage = "Failed"
+                        cardEnterPinViewModel.resetTransactionState()
                     }
 
                 }

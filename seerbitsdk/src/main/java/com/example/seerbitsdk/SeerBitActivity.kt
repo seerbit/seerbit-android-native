@@ -22,6 +22,8 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -556,8 +558,11 @@ fun CardHomeScreen(
             }
 
 
+            val focusRequester = remember { FocusRequester() }
             //Card Details Screen
             CardDetailsScreen(
+                modifier = Modifier
+                    .focusRequester(focusRequester),
                 cardNumber = cardDetailsData.cardNumber,
                 onChangeCardCvv = {
                     cvv = it
@@ -571,6 +576,7 @@ fun CardHomeScreen(
                     cardNumber = it
                     if (it.length >= 16 || it.length >= 6) {
 
+                        transactionViewModel.clearCardBinState()
                         transactionViewModel.fetchCardBin(it)
 
                         if (cardBinState.data != null) {
@@ -622,11 +628,37 @@ fun CardHomeScreen(
                     amount = "$defaultCurrency ${formatAmount(cardDTO.amount)}",
                     onClick = {
 
+                        transactionViewModel.clearCardBinState()
+                        transactionViewModel.fetchCardBin(cardNumber)
+
+                        if (cardBinState.data != null) {
+                            var split: List<String?>
+                            if (cardBinState.data.responseMessage?.contains("BIN not found",true) ==false ) {
+                                transactionViewModel.clearCardBinState()
+                                split = cardBinState.data.cardName?.split(" ")!!
+
+                                trailingIcon = if (split[0].equals("MASTERCARD")) {
+                                    R.drawable.mastercard
+
+                                } else if (split[0].equals("VISA")) {
+                                    R.drawable.visa
+                                } else if (split[0].equals("Interswitch", ignoreCase = true)) {
+                                    0
+                                } else if (split[0].equals("VERVE")) {
+                                    R.drawable.verve_logo
+                                } else 0
+                            } else {
+                                trailingIcon = 0
+
+                            }
+
+                        }
                         locality = if (merchantDetailsData.payload?.country?.nameCode?.let {
                                 cardBinState.data?.country?.contains(
                                     it, true
                                 )
                             } == true) "LOCAL" else "INTERNATIONAL"
+                        transactionViewModel.setLocality(locality)
 
                         if (isValidCardDetails(
                                 cvv.isValidCvv(),
@@ -874,9 +906,9 @@ fun CardDetailsScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-
+        val focusRequester = remember { FocusRequester() }
         Card(
-            modifier = modifier,
+            modifier = modifier.focusRequester(focusRequester),
             elevation = 1.dp,
             border = BorderStroke(0.5.dp, Color.LightGray)
         ) {
@@ -889,6 +921,7 @@ fun CardDetailsScreen(
                     if (newText.length <= 20) {
                         value = newText
                         onChangeCardNumber(newText)
+                        modifier.focusRequester(focusRequester)
                     }
 
 
