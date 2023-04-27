@@ -346,7 +346,7 @@ fun NavHostController.navigatePopUpToOtherPaymentScreen(route: String) {
 fun NavHostController.navigateSingleTopTo(route: String) =
     this.navigate(route) {
         popUpTo(this@navigateSingleTopTo.graph.findStartDestination().id) {
-            saveState = true
+            saveState = false
         }
         launchSingleTop = true
         restoreState = true
@@ -356,7 +356,7 @@ fun NavHostController.navigateSingleTopTo(route: String) =
 fun NavHostController.navigateSingleTopNoPopUpToHome(route: String) =
     this.navigate(route) {
         popUpTo(this@navigateSingleTopNoPopUpToHome.graph.findNode(route)!!.id) {
-            saveState = true
+            saveState = false
         }
         launchSingleTop = true
         restoreState = true
@@ -411,10 +411,10 @@ fun CardHomeScreen(
     val cardBinState: CardBinState =
         transactionViewModel.cardBinState.value
     //card details
-    var cvv by rememberSaveable { mutableStateOf("") }
-    var cardNumber by rememberSaveable { mutableStateOf("") }
-    var cardExpiryMonth by rememberSaveable { mutableStateOf("") }
-    var cardExpiryYear by rememberSaveable { mutableStateOf("") }
+    var cvv by remember { mutableStateOf("") }
+    var cardNumber by remember { mutableStateOf("") }
+    var cardExpiryMonth by remember{ mutableStateOf("") }
+    var cardExpiryYear by remember { mutableStateOf("") }
     var redirectUrl by rememberSaveable { mutableStateOf("") }
     var canRedirectToUrl by remember { mutableStateOf(false) }
     var trailingIcon by rememberSaveable { mutableStateOf(0) }
@@ -672,6 +672,7 @@ fun CardHomeScreen(
                                 navController.navigateSingleTopTo(
                                     "${Route.OnBoardingScreen}/$cvv/$cardNumber/$cardExpiryMonth/$cardExpiryYear"
                                 )
+                                transactionViewModel.clearCardBinState()
                             }
                             else {
                                 onNavigateToPinScreen(cardDTO)
@@ -772,17 +773,20 @@ fun CardHomeScreen(
                         navController.navigateSingleTopTo(
                             "${Route.PIN_SCREEN}/$paymentRef/$cvv/$cardNumber/$cardExpiryMonth/$cardExpiryYear/$Dummy/$Dummy/$Dummy/$Dummy/$Dummy"
                         )
+                        transactionViewModel.clearCardBinState()
                         return@let
                     } else if (useOtp) {
                         navController.navigateSingleTopTo(
                             "${Route.CARD_OTP_SCREEN}/$paymentRef/$otpText/$linkingRef"
                         )
+                        transactionViewModel.clearCardBinState()
                         return@let
                     } else if (canRedirectToUrl) {
 
                         navController.navigateSingleTopTo(
                             "${Route.CARD_ACCOUNT_REDIRECT_URL_SCREEN}/$paymentRef/$cvv/$cardNumber/$cardExpiryMonth/$cardExpiryYear/$Dummy/$Dummy/$Dummy/$Dummy/$Dummy"
                         )
+                        transactionViewModel.clearCardBinState()
                         return@let
                     }
                 } else {
@@ -912,7 +916,7 @@ fun CardDetailsScreen(
             elevation = 1.dp,
             border = BorderStroke(0.5.dp, Color.LightGray)
         ) {
-            var value by rememberSaveable { mutableStateOf(cardNumber) }
+            var value by remember { mutableStateOf(cardNumber) }
 
             OutlinedTextField(
                 value = value,
@@ -972,7 +976,7 @@ fun CardDetailsScreen(
                 elevation = 1.dp,
                 border = BorderStroke(0.5.dp, Color.LightGray)
             ) {
-                var value by rememberSaveable { mutableStateOf("") }
+                var value by remember { mutableStateOf("") }
                 OutlinedTextField(
                     value = value,
                     visualTransformation = { cardExpiryDateFilter(it) },
@@ -1019,7 +1023,7 @@ fun CardDetailsScreen(
                 elevation = 1.dp,
                 border = BorderStroke(0.5.dp, Color.LightGray)
             ) {
-                var value by rememberSaveable { mutableStateOf("") }
+                var value by remember { mutableStateOf("") }
 
                 OutlinedTextField(
                     value = value,
