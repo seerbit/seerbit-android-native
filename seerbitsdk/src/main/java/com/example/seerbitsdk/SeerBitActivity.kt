@@ -417,7 +417,7 @@ fun CardHomeScreen(
     var cardExpiryYear by remember { mutableStateOf("") }
     var redirectUrl by rememberSaveable { mutableStateOf("") }
     var canRedirectToUrl by remember { mutableStateOf(false) }
-    var trailingIcon by rememberSaveable { mutableStateOf(0) }
+    var trailingIcon by remember { mutableStateOf(0) }
 
 
     //determines if to show progress bar when loading
