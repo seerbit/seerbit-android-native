@@ -174,7 +174,7 @@ fun BankAccountNumberScreen(
 
 
                 initiateBankAccountPayment.data?.let {
-
+                    transactionViewModel.setRetry(true)
                     if (initiateBankAccountPayment.data.data?.code == PENDING_CODE) {
                         val linkingReference = it.data?.payments?.linkingReference
                         showCircularProgressBar = false

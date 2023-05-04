@@ -240,6 +240,7 @@ fun BankRedirectUrlScreen(
                 }
 
                 initiateBankAccountPayment.data?.let {
+                    transactionViewModel.setRetry(true)
                     showCircularProgressBar = true
                     if (initiateBankAccountPayment.data.data?.code == PENDING_CODE) {
                         val paymentReferenceAfterInitiate =
