@@ -970,11 +970,11 @@ fun CardDetailsScreen(
 
         }
 
-        if (!value.isValidCardNumber()) {
+        if (!value.isValidCardNumber() && value.isNotEmpty()) {
             Text(
                 text = "Invalid card details",
                 style = TextStyle(
-                    fontSize = 14.sp,
+                    fontSize = 10.sp,
                     fontFamily = Faktpro,
                     fontWeight = FontWeight.Normal,
                     lineHeight = 10.sp,
