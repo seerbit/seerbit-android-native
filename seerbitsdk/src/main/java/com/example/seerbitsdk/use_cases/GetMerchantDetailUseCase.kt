@@ -42,6 +42,8 @@ class GetMerchantDetailUseCase {
             emit(Resource.Error("Timeout exception occurred"))
         } catch (e: HttpException) {
             emit(Resource.Error("No internet connection"))
+        }catch (e: Exception) {
+            emit(Resource.Error("error occurred"))
         }
 
     }

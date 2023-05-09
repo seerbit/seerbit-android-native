@@ -91,7 +91,7 @@ fun OtherPaymentScreen(
                 val addedButtons: ArrayList<SeerBitDestination> = arrayListOf()
                 if(displayPaymentMethod(TransactionType.CARD.type, merchantDetailsData)) addedButtons.add(Debit_CreditCard)
                 if(displayPaymentMethod(TransactionType.USSD.type, merchantDetailsData))addedButtons.add(UssdSelectBank)
-                if(displayPaymentMethod(TransactionType.MOMO.type, merchantDetailsData))addedButtons.add(MOMO)
+                if(displayPaymentMethod(TransactionType.MOMO.type, merchantDetailsData) && merchantDetailsData.payload?.defaultCurrency != ("NGN"))addedButtons.add(MOMO)
                 if(displayPaymentMethod(TransactionType.TRANSFER.type, merchantDetailsData))addedButtons.add(Transfer)
                 if(displayPaymentMethod(TransactionType.ACCOUNT.type, merchantDetailsData))addedButtons.add(BankAccount)
 

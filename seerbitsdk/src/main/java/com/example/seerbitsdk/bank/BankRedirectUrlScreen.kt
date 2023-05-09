@@ -62,6 +62,7 @@ fun BankRedirectUrlScreen(
     val exitOnSuccess = remember { mutableStateOf(false) }
     val activity = (LocalContext.current as? Activity)
     val query = remember { mutableStateOf(true) }
+    val goHome = remember { mutableStateOf(false) }
 
 
     // if there is an error loading the report
@@ -121,6 +122,9 @@ fun BankRedirectUrlScreen(
                     onSuccess = {actionListener?.onSuccess(queryData)}
                 ) {
                     openDialog.value = false
+                    if(goHome.value){
+                        navController.navigateSingleTopNoSavedState(BankAccount.route)
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -194,6 +198,7 @@ fun BankRedirectUrlScreen(
                     alertDialogMessage =
                         initiateBankAccountPayment.errorMessage ?: "Something went wrong"
                     alertDialogHeaderMessage = "Failed"
+                    goHome.value = true
                     transactionViewModel.resetTransactionState()
                 }
 
@@ -262,6 +267,7 @@ fun BankRedirectUrlScreen(
                         alertDialogMessage =
                             initiateBankAccountPayment.data.data?.message.toString()
                         alertDialogHeaderMessage = "Failed"
+                        goHome.value = true
                         transactionViewModel.resetTransactionState()
                         return@let
                     }

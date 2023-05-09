@@ -120,6 +120,7 @@ fun CardEnterPinScreen(
                 var alertDialogMessage by remember { mutableStateOf("") }
                 var alertDialogHeaderMessage by remember { mutableStateOf("") }
                 val paymentRef = merchantDetailsData.payload?.paymentReference ?: ""
+                var goHome = remember { mutableStateOf(false) }
 
                 //HANDLE ENTER OTP STATE
                 val otpState: OTPState = cardEnterPinViewModel.otpState.value
@@ -186,6 +187,9 @@ fun CardEnterPinScreen(
                     onSuccess = {}
                 ) {
                     openDialog.value = false
+                    if(goHome.value){
+                        navController.navigateSingleTopNoSavedState(Debit_CreditCard.route)
+                    }
                 }
 
 
@@ -267,11 +271,12 @@ fun CardEnterPinScreen(
                         cardEnterPinViewModel.resetTransactionState()
                     }
 
-                    if (it.data?.code == "S12") {
+                    if (it.data?.code == "S12" || it.data?.code == "S12-56") {
                         showCircularProgressBar = false
                         alertDialogMessage = it.data.message.toString()
                         openDialog.value = true
                         alertDialogHeaderMessage = "Failed"
+                        goHome.value = true
                         cardEnterPinViewModel.resetTransactionState()
                     }
 
@@ -307,6 +312,7 @@ fun CardEnterPinScreen(
                     alertDialogMessage = initiateCardPaymentEnterPinState.errorMessage
                         ?: "Something went wrong"
                     alertDialogHeaderMessage = "Failed"
+                    goHome.value = true
                     cardEnterPinViewModel.resetTransactionState()
 
                 }
@@ -415,8 +421,7 @@ fun PinInputField(
                                         1.dp,
                                         Color.LightGray,
                                         RoundedCornerShape(8.dp)
-                                    )
-                                    .padding(2.dp),
+                                    ).padding(2.dp),
                                 style = MaterialTheme.typography.h4,
                                 color = Color.Black,
                                 textAlign = TextAlign.Center

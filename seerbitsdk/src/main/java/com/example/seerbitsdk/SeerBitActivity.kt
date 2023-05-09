@@ -574,7 +574,9 @@ fun CardHomeScreen(
                 },
                 onChangeCardNumber = {
                     cardNumber = it
-                    if (it.length >= 16 || it.length >= 6) {
+
+                    if ( cardNumber.isValidCardNumber()){
+                    if ((it.length >= 16 || it.length >= 6 )) {
 
                         transactionViewModel.clearCardBinState()
                         transactionViewModel.fetchCardBin(it)
@@ -604,6 +606,7 @@ fun CardHomeScreen(
                     } else if (it.length < 6) {
                         transactionViewModel.clearCardBinState()
                         trailingIcon = 0
+                    }
                     }
 
 
@@ -684,7 +687,7 @@ fun CardHomeScreen(
                             alertDialogMessage = "Invalid card details"
                             alertDialogHeaderMessage = "Error Occurred"
                         }
-                    }, !showCircularProgressBar
+                    }, !showCircularProgressBar && cardNumber.isValidCardNumber()
                 )
             }
 
@@ -909,14 +912,14 @@ fun CardDetailsScreen(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
+        var value by remember { mutableStateOf(cardNumber) }
         val focusRequester = remember { FocusRequester() }
         Card(
             modifier = modifier.focusRequester(focusRequester),
             elevation = 1.dp,
             border = BorderStroke(0.5.dp, Color.LightGray)
         ) {
-            var value by remember { mutableStateOf(cardNumber) }
+
 
             OutlinedTextField(
                 value = value,
@@ -963,6 +966,21 @@ fun CardDetailsScreen(
                 modifier = modifier
                     .fillMaxWidth()
                     .height(54.dp)
+            )
+
+        }
+
+        if (!value.isValidCardNumber()) {
+            Text(
+                text = "Invalid card details",
+                style = TextStyle(
+                    fontSize = 14.sp,
+                    fontFamily = Faktpro,
+                    fontWeight = FontWeight.Normal,
+                    lineHeight = 10.sp,
+                    color = Color.Red
+                ),
+                modifier = Modifier.align(alignment = Alignment.End)
             )
         }
 

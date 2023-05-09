@@ -94,6 +94,7 @@ fun MOMOOTPScreen(
                 val fee =   calculateTransactionFee(merchantDetailsData, TransactionType.MOMO.type, amount = amount?.toDouble()?: 0.0)
                 val totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
                 var queryData : QueryData? = null
+                var goHome = remember { mutableStateOf(false) }
 
                 SeerbitPaymentDetailHeaderTwo(
                     charges = fee?.toDouble()?:0.0,
@@ -110,7 +111,10 @@ fun MOMOOTPScreen(
                     exitOnSuccess = exitOnSuccess.value,
                     onSuccess = {actionListener?.onSuccess(queryData)}
                 ) {
-                    openDialog.value = exitOnSuccess.value
+                    openDialog.value = false
+                    if(goHome.value){
+                        navController.navigateSingleTopNoSavedState(MOMO.route)
+                    }
                 }
                 val momoOtpDto = MomoOtpDto(transaction = Transaction(linkingReference, otp))
 
@@ -133,6 +137,7 @@ fun MOMOOTPScreen(
                     alertDialogMessage =
                         otpState.errorMessage ?: "Something went wrong"
                     alertDialogHeaderMessage = "Failed"
+                    goHome.value = true
                     transactionViewModel.resetTransactionState()
                 }
 
@@ -189,6 +194,7 @@ fun MOMOOTPScreen(
                         alertDialogMessage =
                             otpState.data.data.message.toString()
                         alertDialogHeaderMessage = "Failed"
+                        goHome.value = true
                         transactionViewModel.resetTransactionState()
                         return@let
                     }

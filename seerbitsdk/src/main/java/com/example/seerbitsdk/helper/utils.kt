@@ -15,6 +15,36 @@ enum class TransactionType(val type: String) {
     ACCOUNT("ACCOUNT")
 }
 
+fun String.isValidCardNumber() : Boolean{
+    try {
+        if(this.length !in 13..20)
+            return false
+
+        val digit = this.map(Character::getNumericValue).toIntArray()
+        for (i in digit.size -2 downTo 0 step 2){
+            var tempValue = digit[i]
+            tempValue *= 2
+            if(tempValue > 9){
+                tempValue = tempValue % 10 + 1
+            }
+            digit[i] = tempValue
+        }
+
+        var total = 0
+        for (num:Int in digit){
+            total +=num
+        }
+
+        return total%10 == 0
+
+    }
+
+    catch (e:Exception){
+        return false
+    }
+
+}
+
 fun displayPaymentMethod(paymentMethod: String, merchantDetailsResponse: MerchantDetailsResponse?): Boolean {
 //    if (paymentMethod == TransactionType.USSD.type) {
     if (merchantDetailsResponse?.payload?.paymentConfigs?.isNotEmpty() == true) {

@@ -64,6 +64,7 @@ fun BankAccountNumberScreen(
     val openDialog = remember { mutableStateOf(false) }
     var alertDialogMessage by remember { mutableStateOf("") }
     var alertDialogHeaderMessage by remember { mutableStateOf("") }
+    var goHome = remember { mutableStateOf(false) }
 
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -119,6 +120,9 @@ fun BankAccountNumberScreen(
                     onSuccess = {}
                 ) {
                     openDialog.value = false
+                    if(goHome.value){
+                        navController.navigateSingleTopNoSavedState(BankAccount.route)
+                    }
                 }
 
                 val paymentRef = merchantDetailsData.payload?.paymentReference ?: ""
@@ -169,6 +173,7 @@ fun BankAccountNumberScreen(
                     alertDialogMessage =
                         initiateBankAccountPayment.errorMessage ?: "Something went wrong"
                     alertDialogHeaderMessage = "Failed"
+                    goHome.value = true
                     transactionViewModel.resetTransactionState()
                 }
 
@@ -189,6 +194,7 @@ fun BankAccountNumberScreen(
                         alertDialogMessage =
                             initiateBankAccountPayment.data.data?.message.toString()
                         alertDialogHeaderMessage = "Failed"
+                        goHome.value = true
                         transactionViewModel.resetTransactionState()
                         return@let
                     }

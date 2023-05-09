@@ -82,7 +82,7 @@ fun OTPScreen(
             ) {
 
 
-
+                var goHome = remember { mutableStateOf(false) }
                 var showCircularProgressBar by remember { mutableStateOf(false) }
                 var otp by remember { mutableStateOf("") }
                 var alertDialogMessage by remember { mutableStateOf("") }
@@ -131,6 +131,9 @@ fun OTPScreen(
                 ) {
                     openDialog.value = false
                     showCircularProgressBar = false
+                    if(goHome.value){
+                        navController.navigateSingleTopNoSavedState(Debit_CreditCard.route)
+                    }
                 }
 
 
@@ -206,6 +209,7 @@ fun OTPScreen(
                     alertDialogMessage = otpState.errorMessage ?: "Something went wrong"
                     alertDialogHeaderMessage = "Error"
                     openDialog.value = true
+                    goHome.value = true
                     cardEnterPinViewModel.resetTransactionState()
                 }
 
@@ -258,6 +262,7 @@ fun OTPScreen(
                         openDialog.value = true
                         alertDialogMessage = otpState.data.data?.message ?: "Error processing otp"
                         alertDialogHeaderMessage = "Failed"
+                        goHome.value = true
                         cardEnterPinViewModel.resetTransactionState()
                     }
                 }
