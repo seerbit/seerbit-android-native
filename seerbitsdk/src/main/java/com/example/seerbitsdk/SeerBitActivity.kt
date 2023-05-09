@@ -608,6 +608,10 @@ fun CardHomeScreen(
                         trailingIcon = 0
                     }
                     }
+                    else {
+                        transactionViewModel.clearCardBinState()
+                        trailingIcon = 0
+                    }
 
 
                 }, trailingIcon = trailingIcon
