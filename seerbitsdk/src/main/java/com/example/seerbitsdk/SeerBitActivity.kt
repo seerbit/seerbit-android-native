@@ -974,7 +974,7 @@ fun CardDetailsScreen(
             Text(
                 text = "Invalid card details",
                 style = TextStyle(
-                    fontSize = 10.sp,
+                    fontSize = 12.sp,
                     fontFamily = Faktpro,
                     fontWeight = FontWeight.Normal,
                     lineHeight = 10.sp,
