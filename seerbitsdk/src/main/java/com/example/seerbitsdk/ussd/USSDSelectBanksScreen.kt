@@ -134,7 +134,7 @@ fun USSDSelectBanksScreen(
                     amount = totalAmount.toString(),
                     redirectUrl = "http://localhost:3002/#/",
                     productId = merchantDetailsData.payload?.productId,
-                    mobileNumber = merchantDetailsData.payload?.number,
+                    mobileNumber = merchantDetailsData.payload?.userPhoneNumber,
                     paymentReference = paymentReference,
                     fee = merchantDetailsData.payload?.vatFee,
                     fullName = merchantDetailsData.payload?.userFullName,
