@@ -13,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -29,6 +30,8 @@ import com.example.seerbitsdk.*
 import com.example.seerbitsdk.R
 import com.example.seerbitsdk.card.AuthorizeButton
 import com.example.seerbitsdk.card.showCircularProgress
+import com.example.seerbitsdk.component.BottomSeerBitWaterMark
+import com.example.seerbitsdk.component.OtherPaymentButtonComponent
 import com.example.seerbitsdk.component.Route
 import com.example.seerbitsdk.component.SeerbitPaymentDetailHeader
 import com.example.seerbitsdk.helper.TransactionType
@@ -189,6 +192,19 @@ fun BankAccountSelectBankScreen(
                         }
                     }, !showCircularProgressBar
                 )
+
+                Spacer(modifier = Modifier.height(100.dp))
+
+
+                OtherPaymentButtonComponent(
+                    onOtherPaymentButtonClicked = { navController.clearBackStack(UssdSelectBank.route)
+                        navController.navigatePopUpToOtherPaymentScreen("${Route.OTHER_PAYMENT_SCREEN}/${TransactionType.TRANSFER.type}") },
+                    onCancelButtonClicked = {navController.navigateSingleTopNoSavedState(
+                        Debit_CreditCard.route)},
+                    enable = !showCircularProgressBar
+                )
+
+
 
             }
         }

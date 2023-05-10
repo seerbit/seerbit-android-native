@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.seerbitsdk.ErrorDialog
+import com.example.seerbitsdk.*
 import com.example.seerbitsdk.R
 import com.example.seerbitsdk.card.AuthorizeButton
 import com.example.seerbitsdk.card.showCircularProgress
@@ -40,7 +40,6 @@ import com.example.seerbitsdk.helper.generateSourceIp
 import com.example.seerbitsdk.helper.isMerchantFeeBearer
 import com.example.seerbitsdk.models.momo.MomoDTO
 import com.example.seerbitsdk.models.momo.MomoNetworkResponseItem
-import com.example.seerbitsdk.navigateSingleTopNoSavedState
 import com.example.seerbitsdk.screenstate.InitiateTransactionState
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.screenstate.QueryTransactionState
@@ -243,17 +242,20 @@ fun MomoHomeScreen(
 
 
 
-                MomoInputAccountNumberField(Modifier, "0 500 000 000") {
-                    accountNumber = it
-                }
-                Spacer(modifier = modifier.height(20.dp))
-
                 SelectProviderButton(momoNetworkList = momoNetworkList) {
                     it?.let {
                         momoNetwork = it.networks ?: ""
                     }
 
                 }
+                Spacer(modifier = modifier.height(20.dp))
+
+                MomoInputAccountNumberField(Modifier, "0500000000") {
+                    accountNumber = it
+                }
+
+
+
 
                 Spacer(modifier = modifier.height(40.dp))
 
@@ -272,6 +274,17 @@ fun MomoHomeScreen(
 
                     }, !showCircularProgressBar
                 )
+
+                Spacer(modifier = Modifier.height(100.dp))
+
+                OtherPaymentButtonComponent(
+                    onOtherPaymentButtonClicked = { navController.clearBackStack(MOMO.route)
+                        navController.navigatePopUpToOtherPaymentScreen("${Route.OTHER_PAYMENT_SCREEN}/${TransactionType.TRANSFER.type}") },
+                    onCancelButtonClicked = {navController.navigateSingleTopNoSavedState(
+                        Debit_CreditCard.route)},
+                    enable = !showCircularProgressBar
+                )
+
 
 
 

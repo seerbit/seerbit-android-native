@@ -233,12 +233,6 @@ fun MOMOOTPScreen(
 
                 Spacer(modifier = modifier.height(20.dp))
 
-                Row(
-                    horizontalArrangement = Arrangement.End,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(text = "Resend OTP")
-                }
                 Spacer(modifier = modifier.height(10.dp))
 
                 AuthorizeButton(
