@@ -22,10 +22,11 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.*
 import androidx.navigation.NavHostController
-import com.example.seerbitsdk.ErrorDialog
+import com.example.seerbitsdk.*
 import com.example.seerbitsdk.R
 import com.example.seerbitsdk.card.AuthorizeButton
 import com.example.seerbitsdk.card.showCircularProgress
+import com.example.seerbitsdk.component.OtherPaymentButtonComponent
 import com.example.seerbitsdk.component.Route
 import com.example.seerbitsdk.component.SeerbitPaymentDetailHeader
 import com.example.seerbitsdk.component.formatAmount
@@ -35,7 +36,6 @@ import com.example.seerbitsdk.helper.generateSourceIp
 import com.example.seerbitsdk.helper.isMerchantFeeBearer
 import com.example.seerbitsdk.models.ussd.UssdBankData
 import com.example.seerbitsdk.models.ussd.UssdDTO
-import com.example.seerbitsdk.navigateSingleTopNoSavedState
 import com.example.seerbitsdk.screenstate.InitiateTransactionState
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.ui.theme.SeerBitTheme
@@ -198,6 +198,18 @@ fun USSDSelectBanksScreen(
                     }, !showCircularProgressBar
                 )
 
+                Spacer(modifier = Modifier.height(100.dp))
+
+
+                OtherPaymentButtonComponent(
+                    onOtherPaymentButtonClicked = { navController.clearBackStack(UssdSelectBank.route)
+                        navController.navigatePopUpToOtherPaymentScreen("${Route.OTHER_PAYMENT_SCREEN}/${TransactionType.TRANSFER.type}") },
+                    onCancelButtonClicked = {navController.navigateSingleTopNoSavedState(
+                        Debit_CreditCard.route)},
+                    enable = !showCircularProgressBar
+                )
+
+
             }
         }
     }
@@ -222,7 +234,7 @@ fun UssdSelectBankButton(modifier: Modifier = Modifier, onBankCodeSelected: (Str
 
     Column {
         Card(
-            modifier = modifier, elevation = 1.dp,
+            modifier = modifier.clickable { expanded = !expanded }, elevation = 1.dp,
             border = BorderStroke(0.5.dp, Color.LightGray)
         ) {
 
@@ -257,7 +269,7 @@ fun UssdSelectBankButton(modifier: Modifier = Modifier, onBankCodeSelected: (Str
                     .onGloballyPositioned { layoutCoordinates ->
                         textFieldSize = layoutCoordinates.size.toSize()
                     }
-                    .fillMaxHeight(),
+                    .fillMaxHeight().clickable { expanded = !expanded  },
                 trailingIcon = {
                     Icon(imageVector = icon, contentDescription = null,
                         Modifier.clickable { expanded = !expanded })
@@ -284,6 +296,8 @@ fun UssdSelectBankButton(modifier: Modifier = Modifier, onBankCodeSelected: (Str
             }
 
         }
+
+
 
     }
 

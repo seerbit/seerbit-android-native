@@ -17,7 +17,7 @@ enum class TransactionType(val type: String) {
 
 fun String.isValidCardNumber() : Boolean{
     try {
-        if(this.length !in 14..20)
+        if(this.length !in 16..20)
             return false
 
         val digit = this.map(Character::getNumericValue).toIntArray()

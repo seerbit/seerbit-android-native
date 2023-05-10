@@ -133,7 +133,7 @@ fun USSDHomeScreen(
                 if (queryTransactionStateState.hasError) {
                     showLoadingScreen = false
                     openDialog.value = true
-                    alertDialogMessage = "This action could not be completed"
+                    alertDialogMessage = "Error processing"
                     alertDialogHeaderMessage = "Failed"
 
                 }
@@ -160,7 +160,7 @@ fun USSDHomeScreen(
                         }
                         else -> {
                             openDialog.value = true
-                            alertDialogMessage = queryTransactionStateState.data.data.payments?.reason ?: ""
+                            alertDialogMessage = queryTransactionStateState.data.data.payments?.reason ?: "Error processing"
                             alertDialogHeaderMessage = "Failed"
                             showLoadingScreen = false
                             transactionViewModel.resetTransactionState()

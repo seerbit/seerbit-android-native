@@ -255,7 +255,16 @@ fun CardEnterPinScreen(
                 }
 
                 initiateCardPaymentEnterPinState.data?.let {
-                    if (it.data?.code == PENDING_CODE) {
+                    if (it.data?.code == SUCCESS) {
+                        showCircularProgressBar = false
+                        alertDialogMessage = it.data.message.toString()
+                        openDialog.value = true
+                        alertDialogHeaderMessage = "Successful"
+                        exitOnSuccess.value = true
+                        cardEnterPinViewModel.resetTransactionState()
+                    }
+
+                    else if (it.data?.code == PENDING_CODE) {
                         var otpHeaderText : String = ""
                         showCircularProgressBar = false
                         paymentReference2 = it.data.payments?.paymentReference!!
@@ -270,10 +279,9 @@ fun CardEnterPinScreen(
                         )
                         cardEnterPinViewModel.resetTransactionState()
                     }
-
-                    if (it.data?.code == "S12" || it.data?.code == "S12-56") {
+                    else  {
                         showCircularProgressBar = false
-                        alertDialogMessage = it.data.message.toString()
+                        alertDialogMessage = it.data?.message.toString()
                         openDialog.value = true
                         alertDialogHeaderMessage = "Failed"
                         goHome.value = true
