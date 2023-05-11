@@ -120,6 +120,7 @@ fun CardEnterPinScreen(
                 var alertDialogMessage by remember { mutableStateOf("") }
                 var alertDialogHeaderMessage by remember { mutableStateOf("") }
                 val paymentRef = merchantDetailsData.payload?.paymentReference ?: ""
+                var goHome = remember { mutableStateOf(false) }
 
                 //HANDLE ENTER OTP STATE
                 val otpState: OTPState = cardEnterPinViewModel.otpState.value
@@ -186,6 +187,9 @@ fun CardEnterPinScreen(
                     onSuccess = {}
                 ) {
                     openDialog.value = false
+                    if(goHome.value){
+                        navController.navigateSingleTopNoSavedState(Debit_CreditCard.route)
+                    }
                 }
 
 
@@ -251,7 +255,16 @@ fun CardEnterPinScreen(
                 }
 
                 initiateCardPaymentEnterPinState.data?.let {
-                    if (it.data?.code == PENDING_CODE) {
+                    if (it.data?.code == SUCCESS) {
+                        showCircularProgressBar = false
+                        alertDialogMessage = it.data.message.toString()
+                        openDialog.value = true
+                        alertDialogHeaderMessage = "Successful"
+                        exitOnSuccess.value = true
+                        cardEnterPinViewModel.resetTransactionState()
+                    }
+
+                    else if (it.data?.code == PENDING_CODE) {
                         var otpHeaderText : String = ""
                         showCircularProgressBar = false
                         paymentReference2 = it.data.payments?.paymentReference!!
@@ -264,13 +277,15 @@ fun CardEnterPinScreen(
                         navController.navigateSingleTopNoSavedState(
                             "${Route.CARD_OTP_SCREEN}/$paymentRef/$otpHeaderText/$linkingReference"
                         )
+                        cardEnterPinViewModel.resetTransactionState()
                     }
-
-                    if (it.data?.code == "S12") {
+                    else  {
                         showCircularProgressBar = false
-                        alertDialogMessage = it.data.message.toString()
+                        alertDialogMessage = it.data?.message.toString()
                         openDialog.value = true
                         alertDialogHeaderMessage = "Failed"
+                        goHome.value = true
+                        cardEnterPinViewModel.resetTransactionState()
                     }
 
                 }
@@ -305,6 +320,7 @@ fun CardEnterPinScreen(
                     alertDialogMessage = initiateCardPaymentEnterPinState.errorMessage
                         ?: "Something went wrong"
                     alertDialogHeaderMessage = "Failed"
+                    goHome.value = true
                     cardEnterPinViewModel.resetTransactionState()
 
                 }
@@ -413,8 +429,7 @@ fun PinInputField(
                                         1.dp,
                                         Color.LightGray,
                                         RoundedCornerShape(8.dp)
-                                    )
-                                    .padding(2.dp),
+                                    ).padding(2.dp),
                                 style = MaterialTheme.typography.h4,
                                 color = Color.Black,
                                 textAlign = TextAlign.Center

@@ -26,13 +26,17 @@ class GetMomoNetworkUseCase {
                 emit(Resource.Success(result))
             } else {
 
-                val jsonObject = JSONObject(
-                    Objects.requireNonNull<ResponseBody>(apiResponse.errorBody()).string()
-                )
-                if (apiResponse.code() == 500)
-                    emit(Resource.Error(jsonObject.getString("message")))
-                else
-                    emit(Resource.Error(jsonObject.getString("message")))
+                if (apiResponse.code() == 404) {
+                    // do notin
+                } else {
+                    val jsonObject = JSONObject(
+                        Objects.requireNonNull<ResponseBody>(apiResponse.errorBody()).string()
+                    )
+                    if (apiResponse.code() == 500)
+                        emit(Resource.Error(jsonObject.getString("message")))
+                    else
+                        emit(Resource.Error(jsonObject.getString("message")))
+                }
             }
 
         } catch (e: IOException) {
@@ -41,6 +45,8 @@ class GetMomoNetworkUseCase {
             emit(Resource.Error("Timeout exception occurred"))
         } catch (e: HttpException) {
             emit(Resource.Error("No internet connection"))
+        } catch (e: Exception) {
+            emit(Resource.Error("error occurred"))
         }
 
     }

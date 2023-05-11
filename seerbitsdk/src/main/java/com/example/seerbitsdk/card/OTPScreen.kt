@@ -82,7 +82,7 @@ fun OTPScreen(
             ) {
 
 
-
+                var goHome = remember { mutableStateOf(false) }
                 var showCircularProgressBar by remember { mutableStateOf(false) }
                 var otp by remember { mutableStateOf("") }
                 var alertDialogMessage by remember { mutableStateOf("") }
@@ -131,14 +131,15 @@ fun OTPScreen(
                 ) {
                     openDialog.value = false
                     showCircularProgressBar = false
+                    if(goHome.value){
+                        navController.navigateSingleTopNoSavedState(Debit_CreditCard.route)
+                    }
                 }
 
 
                 val cardOTPDTO = CardOTPDTO(transaction = Transaction(linkingRef, otp))
                 var otpHeaderText = ""
-                val alternativeOTPText: String =
-                    "Kindly enter the OTP sent to ${merchantDetailsData.payload?.userPhoneNumber?.maskedPhoneNumber()} and\n" +
-                            "${merchantDetailsData.payload?.emailAddress} or enter the OTP generates on your hardware token device"
+                val alternativeOTPText: String = "Enter OTP"
 
 
 
@@ -206,6 +207,7 @@ fun OTPScreen(
                     alertDialogMessage = otpState.errorMessage ?: "Something went wrong"
                     alertDialogHeaderMessage = "Error"
                     openDialog.value = true
+                    goHome.value = true
                     cardEnterPinViewModel.resetTransactionState()
                 }
 
@@ -258,6 +260,7 @@ fun OTPScreen(
                         openDialog.value = true
                         alertDialogMessage = otpState.data.data?.message ?: "Error processing otp"
                         alertDialogHeaderMessage = "Failed"
+                        goHome.value = true
                         cardEnterPinViewModel.resetTransactionState()
                     }
                 }

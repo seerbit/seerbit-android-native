@@ -111,6 +111,7 @@ fun CardRedirectUrlScreen(
                 var mState  by remember { mutableStateOf(state) }
                 var mPostalCode by remember { mutableStateOf(postalCode) }
                 var mBillingCountry by remember { mutableStateOf(billingCountry) }
+                var goHome = remember { mutableStateOf(false) }
 
 
                 if (address== Dummy){ mAddress = "" }
@@ -142,6 +143,9 @@ fun CardRedirectUrlScreen(
                     onSuccess = {actionListener?.onSuccess(queryData)}
                 ) {
                     openDialog.value = false
+                    if(goHome.value){
+                        navController.navigateSingleTopNoSavedState(Debit_CreditCard.route)
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -262,6 +266,7 @@ fun CardRedirectUrlScreen(
                                 queryTransactionStateState.errorMessage
                                     ?: "Something went wrong"
                             alertDialogHeaderMessage = "Failed"
+                            goHome.value = true
                             transactionViewModel.resetTransactionState()
                             return@let
                         }
@@ -292,6 +297,7 @@ fun CardRedirectUrlScreen(
                         alertDialogMessage =
                             initiateCardPayment.data.data?.message.toString()
                         alertDialogHeaderMessage = "Failed"
+                        goHome.value = true
                         transactionViewModel.resetTransactionState()
                         return@let
                     }

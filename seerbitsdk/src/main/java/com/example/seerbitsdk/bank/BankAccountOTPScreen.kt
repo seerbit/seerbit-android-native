@@ -70,6 +70,7 @@ fun BankAccountOTPScreen(
     val keyboardController = LocalSoftwareKeyboardController.current
     val exitOnSuccess = remember { mutableStateOf(false) }
     val activity = (LocalContext.current as? Activity)
+    val goHome = remember { mutableStateOf(false) }
 
 
 // if there is an error loading the report
@@ -112,6 +113,7 @@ fun BankAccountOTPScreen(
                 val totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
                 var queryData : QueryData? = null
 
+
                 SeerbitPaymentDetailHeaderTwo(
                     charges =  fee?.toDouble()?:0.0,
                     amount = amount?:"",
@@ -128,6 +130,9 @@ fun BankAccountOTPScreen(
                     onSuccess = {actionListener?.onSuccess(queryData)}
                 ) {
                     openDialog.value = false
+                    if(goHome.value){
+                        navController.navigateSingleTopNoSavedState(BankAccount.route)
+                    }
                 }
 
                 val bankAccountOtpDtO = BankAccountOtpDto(linkingReference, otp)
@@ -152,6 +157,7 @@ fun BankAccountOTPScreen(
                     alertDialogMessage =
                         otpState.errorMessage ?: "Something went wrong"
                     alertDialogHeaderMessage = "Failed"
+                    goHome.value = true
                     transactionViewModel.resetTransactionState()
                 }
 
@@ -192,6 +198,7 @@ fun BankAccountOTPScreen(
                                     alertDialogMessage =
                                         queryTransactionStateState.errorMessage?: "Something went wrong"
                                     alertDialogHeaderMessage = "Failed"
+
                                     transactionViewModel.resetTransactionState()
                                     return@let
                                 }
@@ -204,6 +211,7 @@ fun BankAccountOTPScreen(
                         alertDialogMessage =
                             otpState.data.data.message.toString()
                         alertDialogHeaderMessage = "Failed"
+                        goHome.value = true
                         transactionViewModel.resetTransactionState()
                         return@let
                     }
@@ -221,8 +229,7 @@ fun BankAccountOTPScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = "Kindly enter the OTP sent to $maskedPhoneNumber and\n" +
-                                "$maskedEmailAddress or enter the OTP generates on your hardware token device",
+                        text = "Enter OTP",
                         style = TextStyle(
                             fontSize = 14.sp,
                             fontFamily = FontFamily.SansSerif,
@@ -242,13 +249,6 @@ fun BankAccountOTPScreen(
                 }
 
                 Spacer(modifier = modifier.height(20.dp))
-
-                Row(
-                    horizontalArrangement = Arrangement.End,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(text = "Resend OTP")
-                }
                 Spacer(modifier = modifier.height(10.dp))
 
                 AuthorizeButton(

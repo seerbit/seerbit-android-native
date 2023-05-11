@@ -23,6 +23,8 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -345,7 +347,7 @@ fun NavHostController.navigatePopUpToOtherPaymentScreen(route: String) {
 fun NavHostController.navigateSingleTopTo(route: String) =
     this.navigate(route) {
         popUpTo(this@navigateSingleTopTo.graph.findStartDestination().id) {
-            saveState = true
+            saveState = false
         }
         launchSingleTop = true
         restoreState = true
@@ -355,7 +357,7 @@ fun NavHostController.navigateSingleTopTo(route: String) =
 fun NavHostController.navigateSingleTopNoPopUpToHome(route: String) =
     this.navigate(route) {
         popUpTo(this@navigateSingleTopNoPopUpToHome.graph.findNode(route)!!.id) {
-            saveState = true
+            saveState = false
         }
         launchSingleTop = true
         restoreState = true
@@ -410,13 +412,13 @@ fun CardHomeScreen(
     val cardBinState: CardBinState =
         transactionViewModel.cardBinState.value
     //card details
-    var cvv by rememberSaveable { mutableStateOf("") }
-    var cardNumber by rememberSaveable { mutableStateOf("") }
-    var cardExpiryMonth by rememberSaveable { mutableStateOf("") }
-    var cardExpiryYear by rememberSaveable { mutableStateOf("") }
+    var cvv by remember { mutableStateOf("") }
+    var cardNumber by remember { mutableStateOf("") }
+    var cardExpiryMonth by remember{ mutableStateOf("") }
+    var cardExpiryYear by remember { mutableStateOf("") }
     var redirectUrl by rememberSaveable { mutableStateOf("") }
     var canRedirectToUrl by remember { mutableStateOf(false) }
-    var trailingIcon by rememberSaveable { mutableStateOf(0) }
+    var trailingIcon by remember { mutableStateOf(0) }
 
 
     //determines if to show progress bar when loading
@@ -550,8 +552,11 @@ fun CardHomeScreen(
             }
 
 
+            val focusRequester = remember { FocusRequester() }
             //Card Details Screen
             CardDetailsScreen(
+                modifier = Modifier
+                    .focusRequester(focusRequester),
                 cardNumber = cardDetailsData.cardNumber,
                 onChangeCardCvv = {
                     cvv = it
@@ -563,8 +568,11 @@ fun CardHomeScreen(
                 },
                 onChangeCardNumber = {
                     cardNumber = it
-                    if (it.length >= 16 || it.length >= 6) {
 
+                    if ( cardNumber.isValidCardNumber()){
+                    if ((it.length >= 16 || it.length >= 6 )) {
+
+                        transactionViewModel.clearCardBinState()
                         transactionViewModel.fetchCardBin(it)
 
                         if (cardBinState.data != null) {
@@ -593,6 +601,11 @@ fun CardHomeScreen(
                         transactionViewModel.clearCardBinState()
                         trailingIcon = 0
                     }
+                    }
+                    else {
+                        transactionViewModel.clearCardBinState()
+                        trailingIcon = 0
+                    }
 
 
                 }, trailingIcon = trailingIcon
@@ -616,11 +629,37 @@ fun CardHomeScreen(
                     amount = "$defaultCurrency ${formatAmount(cardDTO.amount)}",
                     onClick = {
 
+                        transactionViewModel.clearCardBinState()
+                        transactionViewModel.fetchCardBin(cardNumber)
+
+                        if (cardBinState.data != null) {
+                            var split: List<String?>
+                            if (cardBinState.data.responseMessage?.contains("BIN not found",true) ==false ) {
+                                transactionViewModel.clearCardBinState()
+                                split = cardBinState.data.cardName?.split(" ")!!
+
+                                trailingIcon = if (split[0].equals("MASTERCARD")) {
+                                    R.drawable.mastercard
+
+                                } else if (split[0].equals("VISA")) {
+                                    R.drawable.visa
+                                } else if (split[0].equals("Interswitch", ignoreCase = true)) {
+                                    0
+                                } else if (split[0].equals("VERVE")) {
+                                    R.drawable.verve_logo
+                                } else 0
+                            } else {
+                                trailingIcon = 0
+
+                            }
+
+                        }
                         locality = if (merchantDetailsData.payload?.country?.nameCode?.let {
                                 cardBinState.data?.country?.contains(
                                     it, true
                                 )
                             } == true) "LOCAL" else "INTERNATIONAL"
+                        transactionViewModel.setLocality(locality)
 
                         if (isValidCardDetails(
                                 cvv.isValidCvv(),
@@ -634,6 +673,7 @@ fun CardHomeScreen(
                                 navController.navigateSingleTopTo(
                                     "${Route.OnBoardingScreen}/$cvv/$cardNumber/$cardExpiryMonth/$cardExpiryYear"
                                 )
+                                transactionViewModel.clearCardBinState()
                             }
                             else {
                                 onNavigateToPinScreen(cardDTO)
@@ -645,7 +685,7 @@ fun CardHomeScreen(
                             alertDialogMessage = "Invalid card details"
                             alertDialogHeaderMessage = "Error Occurred"
                         }
-                    }, !showCircularProgressBar
+                    }, !showCircularProgressBar && cardNumber.isValidCardNumber()
                 )
             }
 
@@ -734,17 +774,20 @@ fun CardHomeScreen(
                         navController.navigateSingleTopTo(
                             "${Route.PIN_SCREEN}/$paymentRef/$cvv/$cardNumber/$cardExpiryMonth/$cardExpiryYear/$Dummy/$Dummy/$Dummy/$Dummy/$Dummy"
                         )
+                        transactionViewModel.clearCardBinState()
                         return@let
                     } else if (useOtp) {
                         navController.navigateSingleTopTo(
                             "${Route.CARD_OTP_SCREEN}/$paymentRef/$otpText/$linkingRef"
                         )
+                        transactionViewModel.clearCardBinState()
                         return@let
                     } else if (canRedirectToUrl) {
 
                         navController.navigateSingleTopTo(
                             "${Route.CARD_ACCOUNT_REDIRECT_URL_SCREEN}/$paymentRef/$cvv/$cardNumber/$cardExpiryMonth/$cardExpiryYear/$Dummy/$Dummy/$Dummy/$Dummy/$Dummy"
                         )
+                        transactionViewModel.clearCardBinState()
                         return@let
                     }
                 } else {
@@ -867,14 +910,14 @@ fun CardDetailsScreen(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
-
+        var value by remember { mutableStateOf(cardNumber) }
+        val focusRequester = remember { FocusRequester() }
         Card(
-            modifier = modifier,
+            modifier = modifier.focusRequester(focusRequester),
             elevation = 1.dp,
             border = BorderStroke(0.5.dp, Color.LightGray)
         ) {
-            var value by rememberSaveable { mutableStateOf(cardNumber) }
+
 
             OutlinedTextField(
                 value = value,
@@ -883,6 +926,7 @@ fun CardDetailsScreen(
                     if (newText.length <= 20) {
                         value = newText
                         onChangeCardNumber(newText)
+                        modifier.focusRequester(focusRequester)
                     }
 
 
@@ -921,6 +965,21 @@ fun CardDetailsScreen(
                     .fillMaxWidth()
                     .height(54.dp)
             )
+
+        }
+
+        if (!value.isValidCardNumber() && value.isNotEmpty()) {
+            Text(
+                text = "Invalid card details",
+                style = TextStyle(
+                    fontSize = 12.sp,
+                    fontFamily = Faktpro,
+                    fontWeight = FontWeight.Normal,
+                    lineHeight = 10.sp,
+                    color = Color.Red
+                ),
+                modifier = Modifier.align(alignment = Alignment.End)
+            )
         }
 
         Spacer(modifier = modifier.height(16.dp))
@@ -933,7 +992,7 @@ fun CardDetailsScreen(
                 elevation = 1.dp,
                 border = BorderStroke(0.5.dp, Color.LightGray)
             ) {
-                var value by rememberSaveable { mutableStateOf("") }
+                var value by remember { mutableStateOf("") }
                 OutlinedTextField(
                     value = value,
                     visualTransformation = { cardExpiryDateFilter(it) },
@@ -980,7 +1039,7 @@ fun CardDetailsScreen(
                 elevation = 1.dp,
                 border = BorderStroke(0.5.dp, Color.LightGray)
             ) {
-                var value by rememberSaveable { mutableStateOf("") }
+                var value by remember { mutableStateOf("") }
 
                 OutlinedTextField(
                     value = value,

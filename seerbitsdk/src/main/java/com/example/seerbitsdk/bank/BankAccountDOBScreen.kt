@@ -86,6 +86,7 @@ fun BankAccountDOBScreen(
                 val currency = merchantDetailsData.payload?.defaultCurrency?:""
                 val fee =  calculateTransactionFee(merchantDetailsData, TransactionType.ACCOUNT.type, amount = amount?.toDouble()?:0.0)
                 var totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
+                var goHome = remember { mutableStateOf(false) }
 
                 if(isMerchantFeeBearer(merchantDetailsData)){
                     totalAmount =amount?.toDouble()
@@ -142,6 +143,9 @@ fun BankAccountDOBScreen(
                     onSuccess = {}
                 ) {
                     openDialog.value = false
+                    if(goHome.value){
+                        navController.navigateSingleTopNoSavedState(BankAccount.route)
+                    }
                 }
 
                 val initiateBankAccountPayment: InitiateTransactionState =
@@ -157,6 +161,7 @@ fun BankAccountDOBScreen(
                     alertDialogMessage =
                         initiateBankAccountPayment.errorMessage ?: "Something went wrong"
                     alertDialogHeaderMessage = "Failed"
+                    goHome.value = true
                     transactionViewModel.resetTransactionState()
                 }
 
@@ -176,6 +181,7 @@ fun BankAccountDOBScreen(
                         alertDialogMessage =
                             initiateBankAccountPayment.data.data?.message.toString()
                         alertDialogHeaderMessage = "Failed"
+                        goHome.value = true
                         transactionViewModel.resetTransactionState()
                         return@let
                     }

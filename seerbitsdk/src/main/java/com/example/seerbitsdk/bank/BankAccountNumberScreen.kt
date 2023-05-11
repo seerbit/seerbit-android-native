@@ -64,6 +64,7 @@ fun BankAccountNumberScreen(
     val openDialog = remember { mutableStateOf(false) }
     var alertDialogMessage by remember { mutableStateOf("") }
     var alertDialogHeaderMessage by remember { mutableStateOf("") }
+    var goHome = remember { mutableStateOf(false) }
 
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -119,6 +120,9 @@ fun BankAccountNumberScreen(
                     onSuccess = {}
                 ) {
                     openDialog.value = false
+                    if(goHome.value){
+                        navController.navigateSingleTopNoSavedState(BankAccount.route)
+                    }
                 }
 
                 val paymentRef = merchantDetailsData.payload?.paymentReference ?: ""
@@ -169,16 +173,24 @@ fun BankAccountNumberScreen(
                     alertDialogMessage =
                         initiateBankAccountPayment.errorMessage ?: "Something went wrong"
                     alertDialogHeaderMessage = "Failed"
+                    goHome.value = true
                     transactionViewModel.resetTransactionState()
                 }
 
 
                 initiateBankAccountPayment.data?.let {
-
+                    transactionViewModel.setRetry(true)
                     if (initiateBankAccountPayment.data.data?.code == PENDING_CODE) {
                         val linkingReference = it.data?.payments?.linkingReference
                         showCircularProgressBar = false
                         transactionViewModel.setRetry(true)
+
+                        if(initiateBankAccountPayment.data.data.payments?.redirectUrl?.isNotEmpty()==true){
+                            navController.navigateSingleTopNoSavedState(
+                                "${Route.BANK_ACCOUNT_REDIRECT_URL_SCREEN}/$bankName/$bankCode"
+                            )
+                        }
+                        else
                         navController.navigateSingleTopNoSavedState(
                             "${Route.BANK_ACCOUNT_OTP_SCREEN}/$bankName/$json/$bankCode/$accountNumber/$Dummy/$Dummy/$linkingReference"
                         )
@@ -189,6 +201,7 @@ fun BankAccountNumberScreen(
                         alertDialogMessage =
                             initiateBankAccountPayment.data.data?.message.toString()
                         alertDialogHeaderMessage = "Failed"
+                        goHome.value = true
                         transactionViewModel.resetTransactionState()
                         return@let
                     }
@@ -226,10 +239,6 @@ fun BankAccountNumberScreen(
                                 } else if (it.dateOfBirth == YES) {
                                     navController.navigateSingleTopNoSavedState(
                                         "${Route.BANK_ACCOUNT_DOB_SCREEN}/$bankName/$json/$bankCode/$accountNumber/$Dummy"
-                                    )
-                                } else {
-                                    navController.navigateSingleTopNoSavedState(
-                                        "${Route.BANK_ACCOUNT_OTP_SCREEN}/$bankName/$json/$bankCode/$accountNumber/$Dummy/$Dummy"
                                     )
                                 }
 
