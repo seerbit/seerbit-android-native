@@ -184,6 +184,13 @@ fun BankAccountNumberScreen(
                         val linkingReference = it.data?.payments?.linkingReference
                         showCircularProgressBar = false
                         transactionViewModel.setRetry(true)
+
+                        if(initiateBankAccountPayment.data.data.payments?.redirectUrl?.isNotEmpty()==true){
+                            navController.navigateSingleTopNoSavedState(
+                                "${Route.BANK_ACCOUNT_REDIRECT_URL_SCREEN}/$bankName/$bankCode"
+                            )
+                        }
+                        else
                         navController.navigateSingleTopNoSavedState(
                             "${Route.BANK_ACCOUNT_OTP_SCREEN}/$bankName/$json/$bankCode/$accountNumber/$Dummy/$Dummy/$linkingReference"
                         )
@@ -232,10 +239,6 @@ fun BankAccountNumberScreen(
                                 } else if (it.dateOfBirth == YES) {
                                     navController.navigateSingleTopNoSavedState(
                                         "${Route.BANK_ACCOUNT_DOB_SCREEN}/$bankName/$json/$bankCode/$accountNumber/$Dummy"
-                                    )
-                                } else {
-                                    navController.navigateSingleTopNoSavedState(
-                                        "${Route.BANK_ACCOUNT_OTP_SCREEN}/$bankName/$json/$bankCode/$accountNumber/$Dummy/$Dummy"
                                     )
                                 }
 

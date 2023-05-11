@@ -229,8 +229,7 @@ fun BankAccountOTPScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = "Kindly enter the OTP sent to $maskedPhoneNumber and\n" +
-                                "$maskedEmailAddress or enter the OTP generates on your hardware token device",
+                        text = "Enter OTP",
                         style = TextStyle(
                             fontSize = 14.sp,
                             fontFamily = FontFamily.SansSerif,

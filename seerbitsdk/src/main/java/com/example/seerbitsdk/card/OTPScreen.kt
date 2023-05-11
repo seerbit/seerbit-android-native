@@ -139,9 +139,7 @@ fun OTPScreen(
 
                 val cardOTPDTO = CardOTPDTO(transaction = Transaction(linkingRef, otp))
                 var otpHeaderText = ""
-                val alternativeOTPText: String =
-                    "Kindly enter the OTP sent to ${merchantDetailsData.payload?.userPhoneNumber?.maskedPhoneNumber()} and\n" +
-                            "${merchantDetailsData.payload?.emailAddress} or enter the OTP generates on your hardware token device"
+                val alternativeOTPText: String = "Enter OTP"
 
 
 
