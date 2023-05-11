@@ -1,5 +1,6 @@
 package com.example.seerbitsdk.helper
 
+import android.util.Log
 import com.example.seerbitsdk.models.home.MerchantDetailsResponse
 import java.math.RoundingMode
 import java.net.InetAddress
@@ -53,12 +54,12 @@ fun displayPaymentMethod(paymentMethod: String, merchantDetailsResponse: Merchan
             if (it?.code == paymentMethod) {
                 if (merchantDetailsResponse.payload.channelOptionStatus?.isNotEmpty() == true) {
                     merchantDetailsResponse.payload.channelOptionStatus.forEach { channelOptionStatus ->
-                        if (it.code == channelOptionStatus?.code && channelOptionStatus.allowOption == true) return true
+                        if (it.code == channelOptionStatus?.code && channelOptionStatus.allowOption == true && it.status == "ACTIVE") return true
                     }
                 } else {
                     //channel option status is empty
                     merchantDetailsResponse.payload.paymentConfigs.forEach { paymentConfigs ->
-                        if (paymentConfigs?.code == paymentMethod && paymentConfigs.allowOption == true) return true
+                        if (paymentConfigs?.code == paymentMethod && paymentConfigs.allowOption == true && paymentConfigs.status == "ACTIVE") return true
                     }
                 }
             }
@@ -69,11 +70,11 @@ fun displayPaymentMethod(paymentMethod: String, merchantDetailsResponse: Merchan
 
                 if (merchantDetailsResponse.payload.channelOptionStatus?.isNotEmpty() == true) {
                     merchantDetailsResponse.payload.channelOptionStatus.forEach { channelOptionStatus ->
-                        if (it.code == channelOptionStatus?.code && channelOptionStatus.allowOption == true) return true
+                        if (it.code == channelOptionStatus?.code && channelOptionStatus.allowOption == true && it.status == "ACTIVE") return true
                     }
                 } else {
                     merchantDetailsResponse.payload.country.defaultPaymentOptions.forEach { defaultPaymentOptions ->
-                        if (defaultPaymentOptions?.code == paymentMethod && defaultPaymentOptions.allowOption == true) return true
+                        if (defaultPaymentOptions?.code == paymentMethod && defaultPaymentOptions.allowOption == true && defaultPaymentOptions.status == "ACTIVE") return true
                     }
                 }
             }
@@ -289,9 +290,9 @@ fun calculateTransactionFee(
                     val isCardInternational: Boolean =
                         merchantDetailsResponse.payload.country?.nameCode?.let { it1 ->
                             cardCountry.contains(
-                                it1, true)
+                                it1, true
+                            )
                         } == false
-//                        merchantDetailsResponse.payload.country?.nameCode?.contains(cardCountry, true) == false
                     if (isCardInternational) {
                         // use international charges
                         val feeModeIsPercentage: Boolean =
@@ -358,35 +359,75 @@ fun calculateTransactionFee(
             }
 
         } else {
-
             merchantDetailsResponse?.payload?.country?.defaultPaymentOptions?.forEach {
                 if (it?.code == "CARD") {
+                    val isCardInternational: Boolean =
+                        merchantDetailsResponse.payload.country.nameCode?.let { it1 ->
+                            cardCountry.contains(
+                                it1, true
+                            )
+                        } == false
 
-                    val feeModeIsPercentage: Boolean =
-                        it.paymentOptionFeeMode == "PERCENTAGE"
-                    val isCappedSettlement: Boolean =
-                        it.paymentOptionCapStatus?.cappedSettlement == "CAPPED"
-                    val feePercentage =
-                        it.paymentOptionFee
-                    val cappedFee: String? = it.paymentOptionCapStatus?.cappedAmount
+                    if (isCardInternational) {
+                        // use international charges
+                        val feeModeIsPercentage: Boolean =
+                            it.internationalPaymentOptionMode == "PERCENTAGE"
+                        val isCappedSettlement: Boolean =
+                            it.paymentOptionCapStatus?.cappedSettlement == "CAPPED"
+                        val cappedFee: String? =
+                            it.internationalPaymentOptionCapStatus?.inCappedAmount?.toString()
 
-                    if (feeModeIsPercentage) {
-                        val fee = (feePercentage?.toDouble()?.div(100.00))?.times(amount)
-                        if (isCappedSettlement) {
-                            if (fee != null && cappedFee != null) {
-                                if (fee > cappedFee.toDouble()) {
-                                    return formatInputDouble(it.paymentOptionCapStatus.cappedAmount.toString())
+                        val feePercentage: Double? = it.internationalPaymentOptionFee?.toDouble()
+
+                        if (feeModeIsPercentage) {
+                            val fee = (feePercentage?.div(100.00))?.times(amount)
+                            if (isCappedSettlement) {
+                                if (fee != null && cappedFee != null) {
+                                    if (fee > cappedFee.toDouble()) {
+                                        return formatInputDouble(cappedFee.toString())
+                                    } else {
+                                        return formatInputDouble(fee.toString())
+                                    }
                                 } else {
-                                    return formatInputDouble(fee.toString())
+                                    return formatInputDouble("")
                                 }
                             } else {
-                                return formatInputDouble("")
+                                return formatInputDouble(fee.toString())
                             }
                         } else {
+                            val fee: Double? = it.paymentOptionFee?.toDouble()
                             return formatInputDouble(fee.toString())
                         }
+
                     } else {
-                        return it.paymentOptionFee?.let { it1 -> formatInputDouble(it1) }
+
+                        val feeModeIsPercentage: Boolean =
+                            it.paymentOptionFeeMode == "PERCENTAGE"
+                        val isCappedSettlement: Boolean =
+                            it.paymentOptionCapStatus?.cappedSettlement == "CAPPED"
+                        val feePercentage =
+                            it.paymentOptionFee
+                        val cappedFee: String? = it.paymentOptionCapStatus?.cappedAmount
+
+                        if (feeModeIsPercentage) {
+                            val fee = (feePercentage?.toDouble()?.div(100.00))?.times(amount)
+                            if (isCappedSettlement) {
+                                if (fee != null && cappedFee != null) {
+                                    if (fee > cappedFee.toDouble()) {
+                                        return formatInputDouble(it.paymentOptionCapStatus.cappedAmount.toString())
+                                    } else {
+                                        return formatInputDouble(fee.toString())
+                                    }
+                                } else {
+                                    return formatInputDouble("")
+                                }
+                            } else {
+                                return formatInputDouble(fee.toString())
+                            }
+                        } else {
+                            return it.paymentOptionFee?.let { it1 -> formatInputDouble(it1) }
+                        }
+
                     }
                 }
             }
@@ -541,6 +582,6 @@ fun calculateTransactionFee(
     return formatInputDouble("")
 }
 
-fun isMerchantFeeBearer(merchantDetailsResponse: MerchantDetailsResponse?):Boolean{
-    return merchantDetailsResponse?.payload?.setting?.chargeOption=="MERCHANT"
+fun isMerchantFeeBearer(merchantDetailsResponse: MerchantDetailsResponse?): Boolean {
+    return merchantDetailsResponse?.payload?.setting?.chargeOption == "MERCHANT"
 }

@@ -8,6 +8,7 @@ import android.content.pm.ActivityInfo
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -473,7 +474,6 @@ fun CardHomeScreen(
                     )
                 } == true) "LOCAL" else "INTERNATIONAL"
             transactionViewModel.setLocality(locality)
-
             var totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
             val defaultCurrency = merchantDetailsData.payload?.defaultCurrency ?: ""
 
@@ -506,12 +506,10 @@ fun CardHomeScreen(
                 email = merchantDetailsData.payload?.emailAddress,
                 cardNumber = cardNumber,
                 retry = transactionViewModel.retry.value,
-
                 tokenize = merchantDetailsData.payload?.tokenize,
                 pocketReference = merchantDetailsData.payload?.pocketReference,
                 productDescription = merchantDetailsData.payload?.productDescription,
                 vendorId = merchantDetailsData.payload?.vendorId,
-
                 address = "",
                 city  = "",
                 state =  "",
@@ -542,10 +540,6 @@ fun CardHomeScreen(
             ) {
                 openDialog.value = false
             }
-
-//            val cardBinState: CardBinState =
-//                transactionViewModel.cardBinState.value
-
 
             if (cardBinState.hasError) {
                 openDialog.value = false
