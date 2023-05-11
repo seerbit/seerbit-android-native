@@ -2,6 +2,7 @@ package com.example.seerbit_sdk
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -47,8 +48,8 @@ class MainActivity : ComponentActivity(), ActionListener {
         }
     }
 
-    override fun onSuccess(data: QueryData?) {
 
+    override fun onSuccess(data: QueryData?) {
         if (data!=null){
             // do something .....
             Toast.makeText(this, "Payment of ${data.payments?.amount} was successful", Toast.LENGTH_SHORT).show()
@@ -57,6 +58,8 @@ class MainActivity : ComponentActivity(), ActionListener {
 
     override fun onClose() {
         Toast.makeText(this, "Payment cancelled", Toast.LENGTH_SHORT).show()
+        Log.d("rerrt", "failure to show")
+
     }
 
 
@@ -79,7 +82,7 @@ fun GoToPaymentGateway(context: Context = LocalContext.current, actionListener: 
         var productDescription by remember { mutableStateOf("MEME") }
         var productId by remember { mutableStateOf("") }
         var vendorId by remember { mutableStateOf("") }
-        var currency by remember { mutableStateOf("NGN") }
+        var currency by remember { mutableStateOf("USD") }
         var country by remember { mutableStateOf("") }
         var pocketReference by remember { mutableStateOf("") }
         var amount by remember { mutableStateOf("43") }
