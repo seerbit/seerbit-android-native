@@ -104,7 +104,7 @@ fun BankAccountBVNScreen(
                     exitOnSuccess = false,
                     onSuccess = {}
                 ) {
-
+                    openDialog.value = false
                 }
 
 
