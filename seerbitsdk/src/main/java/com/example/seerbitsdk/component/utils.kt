@@ -2,7 +2,6 @@ package com.example.seerbitsdk.component
 
 import android.content.Context
 import android.widget.Toast
-import androidx.compose.material.Snackbar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import java.math.RoundingMode
@@ -33,7 +32,7 @@ fun String.isValidCardExpiryYear(): Boolean {
         this.length == 4
 }
 
-fun validateCardDetails(
+fun isValidCardDetails(
     isValidCvv: Boolean,
     isValidCardNumber: Boolean,
     isValidCardExpiryMonth: Boolean

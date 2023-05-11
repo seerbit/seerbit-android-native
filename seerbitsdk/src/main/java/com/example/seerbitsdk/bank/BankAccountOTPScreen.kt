@@ -31,6 +31,7 @@ import com.example.seerbitsdk.models.RequiredFields
 import com.example.seerbitsdk.navigatePopUpToOtherPaymentScreen
 import com.example.seerbitsdk.navigateSingleTopTo
 import com.example.seerbitsdk.models.bankaccount.BankAccountDTO
+import com.example.seerbitsdk.models.query.QueryData
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.screenstate.OTPState
 import com.example.seerbitsdk.screenstate.QueryTransactionState
@@ -109,6 +110,7 @@ fun BankAccountOTPScreen(
                 val currency = merchantDetailsData.payload?.defaultCurrency?:""
                 val fee =  calculateTransactionFee(merchantDetailsData, TransactionType.ACCOUNT.type, amount = amount?.toDouble()?:0.0)
                 val totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
+                var queryData : QueryData? = null
 
                 SeerbitPaymentDetailHeaderTwo(
                     charges =  fee?.toDouble()?:0.0,
@@ -122,7 +124,8 @@ fun BankAccountOTPScreen(
                     showDialog = openDialog,
                     alertDialogHeaderMessage = alertDialogHeaderMessage,
                     alertDialogMessage = alertDialogMessage,
-                    exitOnSuccess = exitOnSuccess.value
+                    exitOnSuccess = exitOnSuccess.value,
+                    onSuccess = {actionListener?.onSuccess(queryData)}
                 ) {
                     openDialog.value = false
                 }
@@ -177,8 +180,7 @@ fun BankAccountOTPScreen(
                                     alertDialogMessage =
                                         queryTransactionStateState.data.data.payments?.reason!!
                                     alertDialogHeaderMessage = "Success!!"
-                                    actionListener?.onSuccess(queryTransactionStateState.data.data)
-                                    transactionViewModel.resetTransactionState()
+                                    queryData = queryTransactionStateState.data.data
                                     return@let
                                 }
                                 PENDING_CODE -> {

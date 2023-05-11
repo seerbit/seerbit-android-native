@@ -36,6 +36,7 @@ import com.example.seerbitsdk.helper.calculateTransactionFee
 import com.example.seerbitsdk.helper.formatInputDouble
 import com.example.seerbitsdk.helper.isMerchantFeeBearer
 import com.example.seerbitsdk.interfaces.ActionListener
+import com.example.seerbitsdk.models.query.QueryData
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.screenstate.QueryTransactionState
 import com.example.seerbitsdk.ui.theme.*
@@ -65,6 +66,7 @@ fun TransferHomeScreen(
     var alertDialogHeaderMessage by remember { mutableStateOf("") }
     val exitOnSuccess = remember { mutableStateOf(false) }
     val activity = (LocalContext.current as? Activity)
+    var queryData : QueryData? = null
 
 
     // if there is an error loading the report
@@ -108,6 +110,7 @@ fun TransferHomeScreen(
             var totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
             val paymentReference = merchantDetailsData.payload?.paymentReference
 
+
             if (isMerchantFeeBearer(merchantDetailsData)) {
                 totalAmount = amount?.toDouble()
             }
@@ -129,6 +132,7 @@ fun TransferHomeScreen(
                 alertDialogHeaderMessage = alertDialogHeaderMessage,
                 alertDialogMessage = alertDialogMessage,
                 exitOnSuccess = exitOnSuccess.value,
+                onSuccess = { actionListener?.onSuccess(queryData) },
                 onDismiss = { openDialog.value = false }
             ) {
                 openDialog.value = false
@@ -154,6 +158,7 @@ fun TransferHomeScreen(
 
 
             if (queryTransactionStateState.data?.data != null) {
+
                 when (queryTransactionStateState.data.data.code) {
 
 
@@ -167,10 +172,10 @@ fun TransferHomeScreen(
                         alertDialogMessage = ""//queryTransactionStateState.data.data.payments?.reason ?:
                         alertDialogMessage =
                             queryTransactionStateState.data.data.payments?.reason ?: ""
-                        actionListener?.onSuccess(queryTransactionStateState.data.data)
                         showCircularProgressBar = false
                         exitOnSuccess.value = true
-                        transactionViewModel.resetTransactionState()
+                        queryData = queryTransactionStateState.data.data
+                        //transactionViewModel.resetTransactionState()
                     }
 
                     else -> {

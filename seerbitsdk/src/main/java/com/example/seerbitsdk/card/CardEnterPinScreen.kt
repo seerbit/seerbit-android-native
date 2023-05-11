@@ -73,7 +73,14 @@ fun CardEnterPinScreen(
     cardNumber: String,
     cardExpiryMonth: String,
     cardExpiryYear: String,
+    phoneNumber : String,
+    address : String,
+    city  : String,
+    state : String,
+    postalCode : String,
+    billingCountry : String,
     cardEnterPinViewModel: CardEnterPinViewModel,
+    transactionViewModel: TransactionViewModel
 
     ) {
     Column(modifier = modifier) {
@@ -87,6 +94,7 @@ fun CardEnterPinScreen(
         if (merchantDetailsState.isLoading) {
             showCircularProgress(showProgress = true)
         }
+
 
 
 
@@ -124,7 +132,22 @@ fun CardEnterPinScreen(
                 val openDialog = remember { mutableStateOf(false) }
                 var amount = merchantDetailsData.payload?.amount
                 val exitOnSuccess = remember { mutableStateOf(false) }
-                val activity = (LocalContext.current as? Activity)
+
+                var mPhoneNumber by remember { mutableStateOf(phoneNumber) }
+                var mAddress by remember { mutableStateOf(address) }
+                var mCity by remember { mutableStateOf(city) }
+                var mState  by remember { mutableStateOf(state) }
+                var mPostalCode by remember { mutableStateOf(postalCode) }
+                var mBillingCountry by remember { mutableStateOf(billingCountry) }
+
+
+                if (address== Dummy){ mAddress = "" }
+                if (phoneNumber== Dummy){ mPhoneNumber = "" }
+                if (city== Dummy){ mCity = "" }
+                if (state== Dummy){ mState = "" }
+                if (postalCode== Dummy){  mPostalCode = "" }
+                if (billingCountry== Dummy){ mBillingCountry = "" }
+
 
                 val fee = calculateTransactionFee(
                     merchantDetailsData,
@@ -140,8 +163,8 @@ fun CardEnterPinScreen(
 
 
                 Spacer(modifier = Modifier.height(21.dp))
-                SeerbitPaymentDetailHeader(
 
+                SeerbitPaymentDetailHeader(
                     charges = fee?.toDouble() ?: 0.0,
                     amount = amount ?: "",
                     currencyText = merchantDetailsData.payload?.defaultCurrency ?: "",
@@ -159,7 +182,8 @@ fun CardEnterPinScreen(
                     showDialog = openDialog,
                     alertDialogHeaderMessage = alertDialogHeaderMessage,
                     alertDialogMessage = alertDialogMessage,
-                    exitOnSuccess = exitOnSuccess.value
+                    exitOnSuccess = exitOnSuccess.value,
+                    onSuccess = {}
                 ) {
                     openDialog.value = false
                 }
@@ -189,7 +213,7 @@ fun CardEnterPinScreen(
                     country = merchantDetailsData.payload?.country?.countryCode ?: "",
                     amount = totalAmount ?: 0.0,
                     cvv = cvv,
-                    redirectUrl = "http://localhost:3002/#/",
+                    redirectUrl = "https://com.example.seerbit_sdk",
                     productId = merchantDetailsData.payload?.productId,
                     mobileNumber = merchantDetailsData.payload?.userPhoneNumber,
                     paymentReference = paymentRef,
@@ -204,15 +228,21 @@ fun CardEnterPinScreen(
                     sourceIP = generateSourceIp(useIPv4 = true),
                     pin = pin,
                     currency = merchantDetailsData.payload?.defaultCurrency,
-                    "LOCAL",
+                    transactionViewModel.locality.value,
                     false,
                     email = merchantDetailsData.payload?.emailAddress,
                     cardNumber = cardNumber,
-                    retry = true,
+                    retry = transactionViewModel.retry.value,
                     tokenize = merchantDetailsData.payload?.tokenize,
                     pocketReference =merchantDetailsData.payload?.pocketReference,
                     productDescription = merchantDetailsData.payload?.productDescription,
-                    vendorId = merchantDetailsData.payload?.vendorId
+                    vendorId = merchantDetailsData.payload?.vendorId,
+
+                    address = mAddress,
+                    city  = mCity,
+                    state =  mState,
+                    postalCode = mPostalCode,
+                    billingCountry = mBillingCountry
                 )
 
 
@@ -308,6 +338,15 @@ fun HeaderScreenPreview() {
             cardNumber = "",
             cardExpiryMonth = "",
             cardExpiryYear = "",
+            phoneNumber = "",
+            address = "",
+            city = "",
+            state = "",
+            postalCode = "",
+            billingCountry = "",
+            transactionViewModel = viewModel2
+
+
         )
     }
 }

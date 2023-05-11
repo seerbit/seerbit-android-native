@@ -148,6 +148,8 @@ class InitiateUseCase {
                 )
                 if (apiResponse.code() == 500)
                     emit(Resource.Error(jsonObject.getString("message")))
+                if (apiResponse.code() == 404)
+                    //emit(Resource.Error(jsonObject.getString("message")))
                 else
                     emit(Resource.Error(jsonObject.getString("message")))
             }

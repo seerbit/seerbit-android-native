@@ -1,10 +1,10 @@
-package com.example.seerbitsdk.bank
+package com.example.seerbitsdk.card
+
 
 
 import android.app.Activity
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Text
@@ -20,15 +20,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.seerbitsdk.*
-import com.example.seerbitsdk.card.AuthorizeButton
-import com.example.seerbitsdk.card.showCircularProgress
 import com.example.seerbitsdk.component.*
 import com.example.seerbitsdk.helper.TransactionType
 import com.example.seerbitsdk.helper.calculateTransactionFee
 import com.example.seerbitsdk.helper.generateSourceIp
 import com.example.seerbitsdk.helper.isMerchantFeeBearer
 import com.example.seerbitsdk.interfaces.ActionListener
-import com.example.seerbitsdk.models.bankaccount.BankAccountDTO
+import com.example.seerbitsdk.models.card.CardDTO
 import com.example.seerbitsdk.models.query.QueryData
 import com.example.seerbitsdk.screenstate.InitiateTransactionState
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
@@ -40,18 +38,25 @@ import com.example.seerbitsdk.ui.theme.SignalRed
 import com.example.seerbitsdk.viewmodels.TransactionViewModel
 
 @Composable
-fun BankRedirectUrlScreen(
+fun CardRedirectUrlScreen(
     modifier: Modifier = Modifier,
     transactionViewModel: TransactionViewModel,
     merchantDetailsState: MerchantDetailsState?,
-    bankCode: String,
-    bankName: String,
     navController:NavHostController,
+    paymentReference: String,
+    cvv: String,
+    cardNumber: String,
+    cardExpiryMonth: String,
+    cardExpiryYear: String,
+    phoneNumber : String,
+    address : String,
+    city  : String,
+    state : String,
+    postalCode : String,
+    billingCountry : String,
     actionListener: ActionListener?,
 ) {
 
-
-    var json: String = ""
     var showErrorDialog by remember { mutableStateOf(false) }
 
     var showCircularProgressBar by remember { mutableStateOf(false) }
@@ -100,6 +105,22 @@ fun BankRedirectUrlScreen(
                 var totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
                 var queryData : QueryData? = null
 
+                var mPhoneNumber by remember { mutableStateOf(phoneNumber) }
+                var mAddress by remember { mutableStateOf(address) }
+                var mCity by remember { mutableStateOf(city) }
+                var mState  by remember { mutableStateOf(state) }
+                var mPostalCode by remember { mutableStateOf(postalCode) }
+                var mBillingCountry by remember { mutableStateOf(billingCountry) }
+
+
+                if (address== Dummy){ mAddress = "" }
+                if (phoneNumber== Dummy){ mPhoneNumber = "" }
+                if (city== Dummy){ mCity = "" }
+                if (state== Dummy){ mState = "" }
+                if (postalCode== Dummy){  mPostalCode = "" }
+                if (billingCountry== Dummy){ mBillingCountry = "" }
+
+
 
                 if (isMerchantFeeBearer(merchantDetailsData)) {
                     totalAmount = amount?.toDouble()
@@ -141,33 +162,42 @@ fun BankRedirectUrlScreen(
                 )
 
 
-                val bankAccountDTO = BankAccountDTO(
+                val cardDTO = CardDTO(
                     deviceType = "Android",
                     country = merchantDetailsData.payload?.country?.countryCode ?: "",
-                    bankCode = bankCode,
-                    amount = totalAmount.toString(),
-                    redirectUrl = "http://localhost:3002/#/",
+                    amount = totalAmount,
+                    cvv = cvv,
+                    redirectUrl = "https://com.example.seerbit_sdk",
                     productId = merchantDetailsData.payload?.productId,
                     mobileNumber = merchantDetailsData.payload?.userPhoneNumber,
                     paymentReference = paymentRef,
                     fee = fee,
+                    expiryMonth = cardExpiryMonth,
                     fullName = merchantDetailsData.payload?.userFullName,
-                    channelType = bankName,
-                    dateOfBirth = "",
+                    "MASTERCARD",
                     publicKey = merchantDetailsData.payload?.publicKey,
+                    expiryYear = cardExpiryYear,
                     source = "",
-                    accountName = merchantDetailsData.payload?.userFullName,
-                    paymentType = "ACCOUNT",
-                    sourceIP = generateSourceIp(true),
+                    paymentType = "CARD",
+                    sourceIP = generateSourceIp(useIPv4 = true),
+                    pin = "",
                     currency = merchantDetailsData.payload?.defaultCurrency,
-                    bvn = "",
+                    isCardInternational =  transactionViewModel.locality.value,
+                    false,
                     email = merchantDetailsData.payload?.emailAddress,
-                    productDescription = merchantDetailsData.payload?.productDescription,
-                    scheduleId = "",
-                    accountNumber = "",
+                    cardNumber = cardNumber,
                     retry = transactionViewModel.retry.value,
-                    pocketReference =merchantDetailsData.payload?.pocketReference,
-                    vendorId = merchantDetailsData.payload?.vendorId
+
+                    tokenize = merchantDetailsData.payload?.tokenize,
+                    pocketReference = merchantDetailsData.payload?.pocketReference,
+                    productDescription = merchantDetailsData.payload?.productDescription,
+                    vendorId = merchantDetailsData.payload?.vendorId,
+
+                    address = mAddress,
+                    city  = mCity,
+                    state =  mState,
+                    postalCode = mPostalCode,
+                    billingCountry = mBillingCountry
                 )
 
                 Spacer(modifier = Modifier.height(10.dp))
@@ -181,18 +211,18 @@ fun BankRedirectUrlScreen(
                 val queryTransactionStateState: QueryTransactionState =
                     transactionViewModel.queryTransactionState.value
                 //HANDLE INITIATE TRANSACTION RESPONSE
-                val initiateBankAccountPayment: InitiateTransactionState =
+                val initiateCardPayment: InitiateTransactionState =
                     transactionViewModel.initiateTransactionState.value
                 //enter payment states
 
-                showCircularProgressBar = initiateBankAccountPayment.isLoading
+                showCircularProgressBar = initiateCardPayment.isLoading
 
                 //enter payment states
-                if (initiateBankAccountPayment.hasError) {
+                if (initiateCardPayment.hasError) {
                     showCircularProgressBar = false
                     openDialog.value = true
                     alertDialogMessage =
-                        initiateBankAccountPayment.errorMessage ?: "Something went wrong"
+                        initiateCardPayment.errorMessage ?: "Something went wrong"
                     alertDialogHeaderMessage = "Failed"
                     transactionViewModel.resetTransactionState()
                 }
@@ -239,9 +269,10 @@ fun BankRedirectUrlScreen(
 
                 }
 
-                initiateBankAccountPayment.data?.let {
+                initiateCardPayment.data?.let {
+                    transactionViewModel.setRetry(true)
                     showCircularProgressBar = true
-                    if (initiateBankAccountPayment.data.data?.code == PENDING_CODE) {
+                    if (initiateCardPayment.data.data?.code == PENDING_CODE) {
                         val paymentReferenceAfterInitiate =
                             it.data?.payments?.paymentReference ?: ""
                         redirectUrl = it.data?.payments?.redirectUrl ?: ""
@@ -259,7 +290,7 @@ fun BankRedirectUrlScreen(
                         openDialog.value = true
                         showCircularProgressBar = false
                         alertDialogMessage =
-                            initiateBankAccountPayment.data.data?.message.toString()
+                            initiateCardPayment.data.data?.message.toString()
                         alertDialogHeaderMessage = "Failed"
                         transactionViewModel.resetTransactionState()
                         return@let
@@ -274,9 +305,8 @@ fun BankRedirectUrlScreen(
                 AuthorizeButton(
                     buttonText = "Authorize Payment",
                     onClick = {
-                        if (bankCode.isNotEmpty()) {
-
-                            transactionViewModel.initiateTransaction(bankAccountDTO)
+                        if (address.isNotEmpty()) {
+                            transactionViewModel.initiateTransaction(cardDTO)
                         } else {
                             showErrorDialog = true
                         }
@@ -292,7 +322,8 @@ fun BankRedirectUrlScreen(
                 ) {
 
                     Button(
-                        onClick = { navController.navigateSingleTopNoSavedState(Debit_CreditCard.route) },
+                        onClick = { navController.navigateSingleTopNoSavedState(Debit_CreditCard.route)
+                                  transactionViewModel.resetTransactionState()},
                         colors = ButtonDefaults.buttonColors(backgroundColor = SignalRed),
                         shape = RoundedCornerShape(4.dp),
                         modifier = Modifier

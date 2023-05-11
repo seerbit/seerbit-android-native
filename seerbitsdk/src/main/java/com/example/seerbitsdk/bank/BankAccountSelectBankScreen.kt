@@ -119,7 +119,8 @@ fun BankAccountSelectBankScreen(
                     showDialog = openDialog,
                     alertDialogHeaderMessage = alertDialogHeaderMessage,
                     alertDialogMessage = alertDialogMessage,
-                    exitOnSuccess = false
+                    exitOnSuccess = false,
+                    onSuccess = {}
                 ) {
                     openDialog.value = false
                 }

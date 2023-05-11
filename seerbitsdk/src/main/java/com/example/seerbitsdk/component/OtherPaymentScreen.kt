@@ -109,7 +109,8 @@ fun OtherPaymentScreen(
                     showDialog = openDialog,
                     alertDialogHeaderMessage = "Failed",
                     alertDialogMessage =  alertDialogMessage,
-                    exitOnSuccess = false
+                    exitOnSuccess = false,
+                    onSuccess = {}
                 ) {
                     openDialog.value = false
                 }

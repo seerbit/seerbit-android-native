@@ -31,6 +31,7 @@ import com.example.seerbitsdk.helper.calculateTransactionFee
 import com.example.seerbitsdk.interfaces.ActionListener
 import com.example.seerbitsdk.models.CardOTPDTO
 import com.example.seerbitsdk.models.Transaction
+import com.example.seerbitsdk.models.query.QueryData
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.screenstate.OTPState
 import com.example.seerbitsdk.screenstate.QueryTransactionState
@@ -96,6 +97,7 @@ fun OTPScreen(
                 var amount = merchantDetailsData.payload?.amount
                 val exitOnSuccess = remember { mutableStateOf(false) }
                 val activity = (LocalContext.current as? Activity)
+                var queryData : QueryData? = null
 
                 val fee = calculateTransactionFee(
                     merchantDetailsData,
@@ -124,7 +126,8 @@ fun OTPScreen(
                     showDialog = openDialog,
                     alertDialogHeaderMessage = alertDialogHeaderMessage,
                     alertDialogMessage = alertDialogMessage,
-                    exitOnSuccess = exitOnSuccess.value
+                    exitOnSuccess = exitOnSuccess.value,
+                    onSuccess = {actionListener?.onSuccess(queryData)}
                 ) {
                     openDialog.value = false
                     showCircularProgressBar = false
@@ -220,10 +223,9 @@ fun OTPScreen(
                                 showCircularProgressBar = false
                                 openDialog.value = true
                                 alertDialogMessage = queryTransactionStateState.data.data.payments?.reason?:""
-                                actionListener?.onSuccess(queryTransactionStateState.data.data)
+                                queryData = queryTransactionStateState.data.data
                                 alertDialogHeaderMessage = "Success"
                                 exitOnSuccess.value = true
-                                cardEnterPinViewModel.resetTransactionState()
                                 return@let
                             }
                             do {
@@ -274,7 +276,7 @@ fun OTPScreen(
                 }
 
                 Spacer(modifier = Modifier.height(100.dp))
-               if (merchantDetailsData.payload?.tokenize != true){
+               if (merchantDetailsData.payload?.tokenize != true && merchantDetailsData.payload?.defaultCurrency !="USD"){
                     OtherPaymentButtonComponent(
                         onOtherPaymentButtonClicked = { navController.navigatePopUpToOtherPaymentScreen("${Route.OTHER_PAYMENT_SCREEN}/${TransactionType.CARD.type}") },
                         onCancelButtonClicked = {navController.navigateSingleTopNoSavedState(

@@ -115,7 +115,8 @@ fun BankAccountNumberScreen(
                     showDialog = openDialog,
                     alertDialogHeaderMessage = alertDialogHeaderMessage,
                     alertDialogMessage = alertDialogMessage,
-                    exitOnSuccess =false
+                    exitOnSuccess =false,
+                    onSuccess = {}
                 ) {
                     openDialog.value = false
                 }
