@@ -100,7 +100,8 @@ fun CardRedirectUrlScreen(
                 val fee = calculateTransactionFee(
                     merchantDetailsData,
                     TransactionType.ACCOUNT.type,
-                    amount = amount?.toDouble() ?: 0.0
+                    amount = amount?.toDouble() ?: 0.0,
+                    cardCountry = transactionViewModel.country.value
                 )
                 var totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
                 var queryData : QueryData? = null

@@ -102,7 +102,8 @@ fun OTPScreen(
                 val fee = calculateTransactionFee(
                     merchantDetailsData,
                     TransactionType.CARD.type,
-                    amount = amount?.toDouble() ?: 0.0
+                    amount = amount?.toDouble() ?: 0.0,
+                    cardCountry = transactionViewModel.country.value
                 )
 
                 Spacer(modifier = Modifier.height(21.dp))

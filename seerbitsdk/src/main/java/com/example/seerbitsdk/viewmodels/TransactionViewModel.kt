@@ -69,9 +69,18 @@ class TransactionViewModel : ViewModel() {
     val locality: State<String>
         get() = _locality
 
+    private var _country = mutableStateOf("")
+    val country: State<String>
+        get() = _country
+
+    fun setCountry(country: String) {
+        _country.value = country
+    }
+
     fun setLocality(locality: String) {
         _locality.value = locality
     }
+
 
     fun setRetry(setRetry: Boolean) {
         _retry.value = setRetry

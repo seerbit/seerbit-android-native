@@ -125,7 +125,8 @@ fun OnBoardingScreen(
             val fee = calculateTransactionFee(
                 merchantDetailsData,
                 TransactionType.CARD.type,
-                amount = amount?.toDouble() ?: 0.0
+                amount = amount?.toDouble() ?: 0.0,
+                cardCountry = transactionViewModel.country.value
             )
             var totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
             val defaultCurrency = merchantDetailsData.payload?.defaultCurrency ?: ""

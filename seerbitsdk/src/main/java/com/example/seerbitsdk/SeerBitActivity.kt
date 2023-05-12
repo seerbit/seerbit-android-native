@@ -474,6 +474,11 @@ fun CardHomeScreen(
                     )
                 } == true) "LOCAL" else "INTERNATIONAL"
             transactionViewModel.setLocality(locality)
+
+            cardBinState.data?.country?.let {
+                transactionViewModel.setCountry(it)
+            }
+
             var totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
             val defaultCurrency = merchantDetailsData.payload?.defaultCurrency ?: ""
 
