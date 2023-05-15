@@ -418,6 +418,7 @@ fun CardHomeScreen(
     var cardExpiryYear by remember { mutableStateOf("") }
     var redirectUrl by rememberSaveable { mutableStateOf("") }
     var canRedirectToUrl by remember { mutableStateOf(false) }
+    var cardEndpointLoaded by remember { mutableStateOf(false) }
     var trailingIcon by remember { mutableStateOf(0) }
 
 
@@ -574,13 +575,13 @@ fun CardHomeScreen(
                 onChangeCardNumber = {
                     cardNumber = it
 
-                    if ( cardNumber.isValidCardNumber()){
-                    if ((it.length >= 16 || it.length >= 6 )) {
 
+                    if ((cardNumber.length >= 6 && !cardEndpointLoaded)) {
                         transactionViewModel.clearCardBinState()
                         transactionViewModel.fetchCardBin(it)
 
                         if (cardBinState.data != null) {
+                            cardEndpointLoaded = true
                             var split: List<String?>
                             if (cardBinState.data.responseMessage?.contains("BIN not found",true) ==false ) {
                                 transactionViewModel.clearCardBinState()
@@ -605,12 +606,9 @@ fun CardHomeScreen(
                     } else if (it.length < 6) {
                         transactionViewModel.clearCardBinState()
                         trailingIcon = 0
+                        cardEndpointLoaded = false
                     }
-                    }
-                    else {
-                        transactionViewModel.clearCardBinState()
-                        trailingIcon = 0
-                    }
+
 
 
                 }, trailingIcon = trailingIcon
