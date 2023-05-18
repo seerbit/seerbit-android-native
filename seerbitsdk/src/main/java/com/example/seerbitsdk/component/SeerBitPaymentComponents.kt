@@ -70,7 +70,7 @@ fun SeerbitPaymentDetailHeader(
         Spacer(modifier = Modifier.height(35.dp))
 
         Text(
-            text = "$currencyText${formatAmount(amount.toDouble())}".capitalize(Locale.current),
+            text = "$currencyText ${formatAmount(amount.toDouble())}".capitalize(Locale.current),
             style = TextStyle(
                 fontSize = 24.sp,
                 fontFamily = Faktpro,
@@ -81,7 +81,7 @@ fun SeerbitPaymentDetailHeader(
         Spacer(modifier = Modifier.height(4.dp))
 
         Text(
-            text = "Fees $currencyText$charges",
+            text = "Fees $currencyText $charges",
             style = TextStyle(
                 fontSize = 14.sp,
                 fontFamily = Faktpro,
@@ -153,7 +153,7 @@ fun SeerbitPaymentDetailHeaderTwo(
         Spacer(modifier = Modifier.height(35.dp))
 
         Text(
-            text = "$currencyText${formatAmount(amount.toDouble())}".capitalize(Locale.current),
+            text = "$currencyText ${formatAmount(amount.toDouble())}".capitalize(Locale.current),
             style = TextStyle(
                 fontSize = 24.sp,
                 fontFamily = Faktpro,
@@ -164,7 +164,7 @@ fun SeerbitPaymentDetailHeaderTwo(
         Spacer(modifier = Modifier.height(4.dp))
 
         Text(
-            text = "Fees $currencyText$charges",
+            text = "Fees $currencyText $charges",
             style = TextStyle(
                 fontSize = 14.sp,
                 fontFamily = Faktpro,
@@ -226,7 +226,7 @@ fun SeerbitPaymentDetailHeaderNoFee(
         Spacer(modifier = Modifier.height(35.dp))
 
         Text(
-            text = "$currencyText${formatAmount(amount.toDouble())}".capitalize(Locale.current),
+            text = "$currencyText ${formatAmount(amount.toDouble())}".capitalize(Locale.current),
             style = TextStyle(
                 fontSize = 24.sp,
                 fontFamily = Faktpro,
