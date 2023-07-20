@@ -1,27 +1,23 @@
 package com.example.seerbitsdk.viewmodels
 
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.seerbitsdk.models.CardOTPDTO
 import com.example.seerbitsdk.models.OtpDTO
 import com.example.seerbitsdk.models.Resource
 import com.example.seerbitsdk.models.TransactionDTO
 import com.example.seerbitsdk.models.ussd.UssdDTO
 import com.example.seerbitsdk.screenstate.CardBinState
-import com.example.seerbitsdk.use_cases.InitiateUseCase
 import com.example.seerbitsdk.screenstate.InitiateTransactionState
 import com.example.seerbitsdk.screenstate.OTPState
 import com.example.seerbitsdk.screenstate.QueryTransactionState
 import com.example.seerbitsdk.use_cases.CardBinUseCase
+import com.example.seerbitsdk.use_cases.InitiateUseCase
 import com.example.seerbitsdk.use_cases.OtpUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import java.util.*
 
 class TransactionViewModel : ViewModel() {
@@ -86,13 +82,13 @@ class TransactionViewModel : ViewModel() {
         _retry.value = setRetry
     }
 
-    fun setCardDeepLink(cardDeepLink : String){
+    fun setCardDeepLink(cardDeepLink: String) {
         _cardDeepLink.value = cardDeepLink
     }
 
 
     init {
-        if(_paymentRef.value.isEmpty()){
+        if (_paymentRef.value.isEmpty()) {
             _paymentRef.value = generateRandomReference()
         }
         clearCardBinState()
@@ -187,10 +183,8 @@ class TransactionViewModel : ViewModel() {
                     }
                 }
             }
-
         }
     }
-
 
     fun sendOtp(otpDTO: OtpDTO) {
         _otpState.value = OTPState(isLoading = true)
@@ -215,7 +209,6 @@ class TransactionViewModel : ViewModel() {
                     }
                 }
             }
-
         }
     }
 
@@ -244,7 +237,6 @@ class TransactionViewModel : ViewModel() {
                 }
             }
         }
-
     }
 
 
@@ -255,9 +247,6 @@ class TransactionViewModel : ViewModel() {
         for (i in 1..8) {
             password += str.random()
         }
-        return "SBT-T" + UUID.randomUUID().toString().substring(0,15)
+        return "SBT-T" + UUID.randomUUID().toString().substring(0, 15)
     }
-
-
-
 }

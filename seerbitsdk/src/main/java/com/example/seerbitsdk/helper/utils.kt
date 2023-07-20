@@ -1,6 +1,5 @@
 package com.example.seerbitsdk.helper
 
-import android.util.Log
 import com.example.seerbitsdk.models.home.MerchantDetailsResponse
 import java.math.RoundingMode
 import java.net.InetAddress
@@ -20,7 +19,6 @@ fun String.isValidCardNumber() : Boolean{
     try {
         if(this.length !in 16..20)
             return false
-
         val digit = this.map(Character::getNumericValue).toIntArray()
         for (i in digit.size -2 downTo 0 step 2){
             var tempValue = digit[i]
@@ -30,24 +28,18 @@ fun String.isValidCardNumber() : Boolean{
             }
             digit[i] = tempValue
         }
-
         var total = 0
         for (num:Int in digit){
             total +=num
         }
-
         return total%10 == 0
-
     }
-
     catch (e:Exception){
         return false
     }
-
 }
 
 fun displayPaymentMethod(paymentMethod: String, merchantDetailsResponse: MerchantDetailsResponse?): Boolean {
-//    if (paymentMethod == TransactionType.USSD.type) {
     if (merchantDetailsResponse?.payload?.paymentConfigs?.isNotEmpty() == true) {
         //merchant has payment configuration
         merchantDetailsResponse.payload.paymentConfigs.forEach {
@@ -80,8 +72,6 @@ fun displayPaymentMethod(paymentMethod: String, merchantDetailsResponse: Merchan
             }
         }
     }
-//    }
-
     return false
 }
 

@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -59,24 +60,23 @@ fun MomoHomeScreen(
 ) {
     var momoNetwork by remember { mutableStateOf("") }
     var accountNumber by remember { mutableStateOf("") }
-
     var showCircularProgressBar by remember { mutableStateOf(false) }
     val openDialog = remember { mutableStateOf(false) }
     var alertDialogMessage by remember { mutableStateOf("") }
     var alertDialogHeaderMessage by remember { mutableStateOf("") }
     // if there is an error loading the report
     if (merchantDetailsState?.hasError!!) {
-        ErrorDialog(message = merchantDetailsState.errorMessage ?: "Something went wrong")
+        ErrorDialog(
+            message = merchantDetailsState.errorMessage
+                ?: stringResource(id = R.string.Something_went_wrong)
+        )
     }
 
     if (merchantDetailsState.isLoading) {
         showCircularProgress(showProgress = true)
     }
 
-
     merchantDetailsState.data?.let { merchantDetailsData ->
-
-
         Column(modifier = modifier) {
 
             Column(
@@ -90,19 +90,23 @@ fun MomoHomeScreen(
             ) {
                 Spacer(modifier = Modifier.height(25.dp))
 
-                var amount= merchantDetailsData.payload?.amount
-                val fee =   calculateTransactionFee(merchantDetailsData, TransactionType.MOMO.type, amount = amount?.toDouble()?: 0.0)
+                var amount = merchantDetailsData.payload?.amount
+                val fee = calculateTransactionFee(
+                    merchantDetailsData,
+                    TransactionType.MOMO.type,
+                    amount = amount?.toDouble() ?: 0.0
+                )
                 var totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
 
-                if(isMerchantFeeBearer(merchantDetailsData)){
-                    totalAmount =amount?.toDouble()
+                if (isMerchantFeeBearer(merchantDetailsData)) {
+                    totalAmount = amount?.toDouble()
                 }
 
                 SeerbitPaymentDetailHeader(
                     charges = fee?.toDouble() ?: 0.0,
-                    amount = amount?: "",
+                    amount = amount ?: "",
                     currencyText = merchantDetailsData.payload?.defaultCurrency ?: "",
-                    "Choose your bank to start this payment",
+                    actionDescription = stringResource(id = R.string.choose_your_bank),
                     merchantDetailsData.payload?.userFullName ?: "",
                     merchantDetailsData.payload?.emailAddress ?: ""
                 )
@@ -141,7 +145,7 @@ fun MomoHomeScreen(
                         retry = transactionViewModel.retry.value,
                         network = momoNetwork,
                         voucherCode = "",
-                        pocketReference =merchantDetailsData.payload?.pocketReference,
+                        pocketReference = merchantDetailsData.payload?.pocketReference,
                         vendorId = merchantDetailsData.payload?.vendorId
                     )
 
@@ -165,7 +169,6 @@ fun MomoHomeScreen(
                     momoNetworkList = it
                 }
 
-
                 val initiateMomoPayment: InitiateTransactionState =
                     transactionViewModel.initiateTransactionState.value
                 //enter payment states
@@ -180,8 +183,9 @@ fun MomoHomeScreen(
                     showCircularProgressBar = false
                     openDialog.value = true
                     alertDialogMessage =
-                        initiateMomoPayment.errorMessage ?: "Something went wrong"
-                    alertDialogHeaderMessage = "Failed"
+                        initiateMomoPayment.errorMessage
+                            ?: stringResource(id = R.string.Something_went_wrong)
+                    alertDialogHeaderMessage = stringResource(id = R.string.failed)
                     transactionViewModel.resetTransactionState()
                 }
 
@@ -202,7 +206,7 @@ fun MomoHomeScreen(
                                     openDialog.value = true
                                     alertDialogMessage =
                                         queryTransactionStateState.data.data.payments?.reason ?: ""
-                                    alertDialogHeaderMessage = "Success!!"
+                                    alertDialogHeaderMessage = stringResource(id = R.string.success)
                                     transactionViewModel.resetTransactionState()
                                     return@let
                                 }
@@ -214,8 +218,8 @@ fun MomoHomeScreen(
                                     openDialog.value = true
                                     alertDialogMessage =
                                         queryTransactionStateState.errorMessage
-                                            ?: "Something went wrong"
-                                    alertDialogHeaderMessage = "Failed"
+                                            ?: stringResource(id = R.string.Something_went_wrong)
+                                    alertDialogHeaderMessage = stringResource(id = R.string.failed)
                                     transactionViewModel.resetTransactionState()
                                     return@let
                                 }
@@ -233,14 +237,13 @@ fun MomoHomeScreen(
                         showCircularProgressBar = false
                         openDialog.value = true
                         alertDialogMessage =
-                            initiateMomoPayment.data.data?.message ?: "Something went wrong"
-                        alertDialogHeaderMessage = "Failed"
+                            initiateMomoPayment.data.data?.message
+                                ?: stringResource(id = R.string.Something_went_wrong)
+                        alertDialogHeaderMessage = stringResource(id = R.string.failed)
                         transactionViewModel.resetTransactionState()
                         return@let
                     }
                 }
-
-
 
                 SelectProviderButton(momoNetworkList = momoNetworkList) {
                     it?.let {
@@ -254,13 +257,10 @@ fun MomoHomeScreen(
                     accountNumber = it
                 }
 
-
-
-
                 Spacer(modifier = modifier.height(40.dp))
 
                 AuthorizeButton(
-                    buttonText = "Continue",
+                    buttonText = stringResource(id = R.string._continue),
                     onClick = {
                         if (momoNetwork.isNotEmpty() && accountNumber.isNotEmpty()) {
                             transactionViewModel.initiateTransaction(momoDTO)
@@ -278,17 +278,17 @@ fun MomoHomeScreen(
                 Spacer(modifier = Modifier.height(100.dp))
 
                 OtherPaymentButtonComponent(
-                    onOtherPaymentButtonClicked = { navController.clearBackStack(MOMO.route)
-                        navController.navigatePopUpToOtherPaymentScreen("${Route.OTHER_PAYMENT_SCREEN}/${TransactionType.TRANSFER.type}") },
-                    onCancelButtonClicked = {navController.navigateSingleTopNoSavedState(
-                        Debit_CreditCard.route)},
+                    onOtherPaymentButtonClicked = {
+                        navController.clearBackStack(MOMO.route)
+                        navController.navigatePopUpToOtherPaymentScreen("${Route.OTHER_PAYMENT_SCREEN}/${TransactionType.TRANSFER.type}")
+                    },
+                    onCancelButtonClicked = {
+                        navController.navigateSingleTopNoSavedState(
+                            Debit_CreditCard.route
+                        )
+                    },
                     enable = !showCircularProgressBar
                 )
-
-
-
-
-
             }
         }
     }
@@ -313,8 +313,10 @@ fun SelectProviderButton(
 
 
     Column {
-        Card(modifier = modifier, elevation = 1.dp,
-            border = BorderStroke(0.5.dp, Color.LightGray)) {
+        Card(
+            modifier = modifier, elevation = 1.dp,
+            border = BorderStroke(0.5.dp, Color.LightGray)
+        ) {
 
             Image(
                 painter = painterResource(id = R.drawable.filled_bg_white),
@@ -336,7 +338,7 @@ fun SelectProviderButton(
                 shape = RoundedCornerShape(8.dp),
                 placeholder = {
                     Text(
-                        text = "Select Provider",
+                        text = stringResource(id = R.string.select_provider),
                         style = TextStyle(fontSize = 14.sp),
                         color = Color.LightGray
                     )
@@ -374,14 +376,9 @@ fun SelectProviderButton(
                         Text(text = momoNetworks?.networks ?: "")
                     }
                 }
-
-
             }
         }
-
-
     }
-
 }
 
 
@@ -407,9 +404,8 @@ fun MomoInputAccountNumberField(
     onEnterBVN: (String) -> Unit
 ) {
     Column {
-
-
-        Card(modifier = modifier, elevation = 1.dp,
+        Card(
+            modifier = modifier, elevation = 1.dp,
             border = BorderStroke(0.5.dp, Color.LightGray)
         ) {
             var value by remember { mutableStateOf("") }
@@ -420,7 +416,6 @@ fun MomoInputAccountNumberField(
             OutlinedTextField(
                 value = value,
                 onValueChange = { newText ->
-
                     value = newText
                     onEnterBVN(newText)
                 },
@@ -432,7 +427,6 @@ fun MomoInputAccountNumberField(
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
                     cursorColor = Color.Gray
-
                 ),
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Number,

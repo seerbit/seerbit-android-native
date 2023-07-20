@@ -1,11 +1,9 @@
 package com.example.seerbitsdk.api
 
 import com.example.seerbitsdk.BuildConfig
-import com.example.seerbitsdk.models.CardOTPDTO
 import com.example.seerbitsdk.models.OtpDTO
 import com.example.seerbitsdk.models.card.CardResponse
-import com.example.seerbitsdk.models.home.MerchantDetailsResponse
-import com.example.seerbitsdk.models.query.QueryTransactionResponse
+import com.example.seerbitsdk.models.otp.MomoOtpDto
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -13,9 +11,7 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
-import retrofit2.http.GET
 import retrofit2.http.POST
-import retrofit2.http.Path
 import java.util.concurrent.TimeUnit
 
 interface OTPService {
@@ -29,7 +25,7 @@ interface OTPService {
             : Response<CardResponse>
 
     @POST("momo/otp")
-    suspend fun sendOtpMomo(@Body otpDTO: OtpDTO)
+    suspend fun sendOtpMomo(@Body otpDTO: MomoOtpDto)
             : Response<CardResponse>
 }
 

@@ -2,6 +2,7 @@ package com.example.seerbitsdk.momo
 
 
 import android.app.Activity
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.*
@@ -10,16 +11,16 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.seerbitsdk.*
+import com.example.seerbitsdk.R
 import com.example.seerbitsdk.card.AuthorizeButton
 import com.example.seerbitsdk.card.OTPInputField
 import com.example.seerbitsdk.card.showCircularProgress
@@ -28,12 +29,10 @@ import com.example.seerbitsdk.helper.TransactionType
 import com.example.seerbitsdk.helper.calculateTransactionFee
 import com.example.seerbitsdk.interfaces.ActionListener
 import com.example.seerbitsdk.models.otp.MomoOtpDto
-import com.example.seerbitsdk.models.otp.Transaction
 import com.example.seerbitsdk.models.query.QueryData
 import com.example.seerbitsdk.screenstate.MerchantDetailsState
 import com.example.seerbitsdk.screenstate.OTPState
 import com.example.seerbitsdk.screenstate.QueryTransactionState
-import com.example.seerbitsdk.ui.theme.SeerBitTheme
 import com.example.seerbitsdk.ussd.ModalDialog
 import com.example.seerbitsdk.viewmodels.TransactionViewModel
 
@@ -62,8 +61,11 @@ fun MOMOOTPScreen(
 
 
 // if there is an error loading the report
-    if (merchantDetailsState?.hasError!!) {
-        ErrorDialog(message = merchantDetailsState.errorMessage ?: "Something went wrong")
+    if (merchantDetailsState.hasError) {
+        ErrorDialog(
+            message = merchantDetailsState.errorMessage
+                ?: stringResource(R.string.Something_went_wrong)
+        )
     }
 
     if (merchantDetailsState.isLoading) {
@@ -71,10 +73,7 @@ fun MOMOOTPScreen(
     }
 
 
-
-
     merchantDetailsState.data?.let { merchantDetailsData ->
-
 
         Column(modifier = modifier) {
 
@@ -91,14 +90,18 @@ fun MOMOOTPScreen(
 
 
                 val amount = merchantDetailsData.payload?.amount
-                val fee =   calculateTransactionFee(merchantDetailsData, TransactionType.MOMO.type, amount = amount?.toDouble()?: 0.0)
+                val fee = calculateTransactionFee(
+                    merchantDetailsData,
+                    TransactionType.MOMO.type,
+                    amount = amount?.toDouble() ?: 0.0
+                )
                 val totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
-                var queryData : QueryData? = null
+                var queryData: QueryData? = null
                 var goHome = remember { mutableStateOf(false) }
 
                 SeerbitPaymentDetailHeaderTwo(
-                    charges = fee?.toDouble()?:0.0,
-                    amount = amount?:"",
+                    charges = fee?.toDouble() ?: 0.0,
+                    amount = amount ?: "",
                     currencyText = merchantDetailsData.payload?.defaultCurrency ?: "",
                     merchantDetailsData.payload?.userFullName ?: "",
                     merchantDetailsData.payload?.emailAddress ?: ""
@@ -109,14 +112,14 @@ fun MOMOOTPScreen(
                     alertDialogHeaderMessage = alertDialogHeaderMessage,
                     alertDialogMessage = alertDialogMessage,
                     exitOnSuccess = exitOnSuccess.value,
-                    onSuccess = {actionListener?.onSuccess(queryData)}
+                    onSuccess = { actionListener?.onSuccess(queryData) }
                 ) {
                     openDialog.value = false
-                    if(goHome.value){
+                    if (goHome.value) {
                         navController.navigateSingleTopNoSavedState(MOMO.route)
                     }
                 }
-                val momoOtpDto = MomoOtpDto(transaction = Transaction(linkingReference, otp))
+                val momoOtpDto = MomoOtpDto(linkingReference, otp)
 
                 //HANDLES initiate query response
                 val queryTransactionStateState: QueryTransactionState =
@@ -127,7 +130,6 @@ fun MOMOOTPScreen(
                     transactionViewModel.otpState.value
                 //enter payment states
 
-
                 showCircularProgressBar = otpState.isLoading
 
                 //enter payment states
@@ -135,8 +137,8 @@ fun MOMOOTPScreen(
                     showCircularProgressBar = false
                     openDialog.value = true
                     alertDialogMessage =
-                        otpState.errorMessage ?: "Something went wrong"
-                    alertDialogHeaderMessage = "Failed"
+                        otpState.errorMessage ?: stringResource(R.string.Something_went_wrong)
+                    alertDialogHeaderMessage = stringResource(R.string.failed)
                     goHome.value = true
                     transactionViewModel.resetTransactionState()
                 }
@@ -146,18 +148,21 @@ fun MOMOOTPScreen(
                     showCircularProgressBar = false
                     openDialog.value = true
                     alertDialogMessage =
-                        queryTransactionStateState.errorMessage ?: "Something went wrong"
-                    alertDialogHeaderMessage = "Failed"
+                        queryTransactionStateState.errorMessage
+                            ?: stringResource(R.string.Something_went_wrong)
+                    alertDialogHeaderMessage = stringResource(R.string.failed)
                     transactionViewModel.resetTransactionState()
                 }
 
                 otpState.data?.let {
+                    Log.w("startotp", "starting otp")
                     showCircularProgressBar = true
-                    if (otpState.data.data?.code == SUCCESS) {
+                    if (otpState.data.data?.code == PENDING_CODE) {
                         val paymentReferenceAfterInitiate =
                             it.data?.payments?.paymentReference ?: ""
 
                         if (queryTransactionStateState.data != null) {
+                            Log.w("startotp", "${queryTransactionStateState.data}")
 
                             when (queryTransactionStateState.data.data?.code) {
                                 SUCCESS -> {
@@ -165,42 +170,46 @@ fun MOMOOTPScreen(
                                     openDialog.value = true
                                     exitOnSuccess.value = true
                                     alertDialogMessage =
-                                        queryTransactionStateState.data.data.payments?.reason?:""
+                                        queryTransactionStateState.data.data.payments?.reason ?: ""
                                     queryData = queryTransactionStateState.data.data
-                                    alertDialogHeaderMessage = "Success!!"
+                                    alertDialogHeaderMessage = stringResource(R.string.success)
                                     return@let
                                 }
                                 PENDING_CODE -> {
+                                    Log.w("startotp", "starting query again")
                                     transactionViewModel.queryTransaction(
                                         paymentReferenceAfterInitiate
                                     )
                                 }
                                 else -> {
+                                    Log.w("startotp", "stop queyr")
                                     showCircularProgressBar = false
                                     openDialog.value = true
                                     alertDialogMessage =
                                         queryTransactionStateState.errorMessage
-                                            ?: "Something went wrong"
-                                    alertDialogHeaderMessage = "Failed"
+                                            ?: stringResource(R.string.Something_went_wrong)
+                                    alertDialogHeaderMessage = stringResource(R.string.failed)
                                     transactionViewModel.resetTransactionState()
                                     return@let
                                 }
                             }
 
-                        } else transactionViewModel.queryTransaction(paymentReferenceAfterInitiate)
+                        } else {
+                            Log.w("startotp", "${queryTransactionStateState.data} on null")
+
+                            transactionViewModel.queryTransaction(paymentReferenceAfterInitiate)
+                        }
                     } else if (otpState.data.data?.code == FAILED || otpState.data.data?.code == FAILED_CODE) {
                         openDialog.value = true
                         showCircularProgressBar = false
                         alertDialogMessage =
                             otpState.data.data.message.toString()
-                        alertDialogHeaderMessage = "Failed"
+                        alertDialogHeaderMessage = stringResource(R.string.failed)
                         goHome.value = true
                         transactionViewModel.resetTransactionState()
                         return@let
                     }
                 }
-
-
 
                 if (showCircularProgressBar) {
                     showCircularProgress(showProgress = true)
@@ -212,7 +221,7 @@ fun MOMOOTPScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = "Kindly enter the OTP sent to your mobile number or email",
+                        text = stringResource(id = R.string.kindly_enter_otp),
                         style = TextStyle(
                             fontSize = 14.sp,
                             fontFamily = FontFamily.SansSerif,
@@ -227,16 +236,12 @@ fun MOMOOTPScreen(
                     )
                 }
                 Spacer(modifier = Modifier.height(20.dp))
-                OTPInputField(Modifier, "Enter OTP") {
+                OTPInputField(Modifier, stringResource(id = R.string.enter_otp)) {
                     otp = it
                 }
-
-                Spacer(modifier = modifier.height(20.dp))
-
-                Spacer(modifier = modifier.height(10.dp))
-
+                Spacer(modifier = modifier.height(30.dp))
                 AuthorizeButton(
-                    buttonText = "Authorize Payment",
+                    buttonText = stringResource(id = R.string.authorize_payment),
                     onClick = {
                         keyboardController?.hide()
                         if (otp.isEmpty()) {
@@ -245,41 +250,29 @@ fun MOMOOTPScreen(
                             alertDialogHeaderMessage = "Invalid OTP"
                         } else {
                             transactionViewModel.sendOtp(momoOtpDto)
-
                         }
                     }, !showCircularProgressBar
                 )
 
                 Spacer(modifier = Modifier.height(40.dp))
                 OtherPaymentButtonComponent(
-                    onOtherPaymentButtonClicked = { navController.navigatePopUpToOtherPaymentScreen("${Route.OTHER_PAYMENT_SCREEN}/${TransactionType.MOMO.type}") },
-                    onCancelButtonClicked = {navController.navigateSingleTopNoSavedState(Debit_CreditCard.route)},
+                    onOtherPaymentButtonClicked = {
+                        navController.navigatePopUpToOtherPaymentScreen(
+                            "${Route.OTHER_PAYMENT_SCREEN}/${TransactionType.MOMO.type}"
+                        )
+                    },
+                    onCancelButtonClicked = {
+                        navController.navigateSingleTopNoSavedState(
+                            Debit_CreditCard.route
+                        )
+                    },
                     enable = true
                 )
-
                 Spacer(modifier = Modifier.height(20.dp))
                 BottomSeerBitWaterMark(modifier = Modifier.align(alignment = Alignment.CenterHorizontally))
-
                 Spacer(modifier = Modifier.height(16.dp))
-
-
             }
-
-
         }
-
-
-    }
-
-}
-
-
-@Preview(showBackground = true, widthDp = 400)
-@Composable
-fun OTPScreenPreview() {
-    val viewModel: TransactionViewModel by viewModel()
-    SeerBitTheme {
-
     }
 }
 
