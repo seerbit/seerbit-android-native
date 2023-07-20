@@ -1,6 +1,5 @@
 package com.example.seerbitsdk
 
-
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -8,7 +7,6 @@ import android.content.pm.ActivityInfo
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -78,7 +76,6 @@ class SeerBitActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-
             val cardEnterPinViewModel: CardEnterPinViewModel by viewModels()
             val transactionViewModel: TransactionViewModel by viewModels()
             val selectBankViewModel: SelectBankViewModel by viewModels()
@@ -89,7 +86,6 @@ class SeerBitActivity : ComponentActivity() {
             val fullName = intent.extras?.getString("fullName")
             val emailAddress = intent.extras?.getString("emailAddress")
             val paymentRef = intent.extras?.getString("paymentRef")
-
             val pocketReference = intent.extras?.getString("pocketReference")
             val vendorId = intent.extras?.getString("vendorId")
             val productDescription = intent.extras?.getString("productDescription")
@@ -111,19 +107,17 @@ class SeerBitActivity : ComponentActivity() {
 
             ModalDialog(
                 showDialog = openDialog,
-                alertDialogHeaderMessage = "Error",
-                alertDialogMessage = "Error occurred while loading sdk. Please check your internet or public key.",
+                alertDialogHeaderMessage = stringResource(id = R.string.an_error_occurred),
+                alertDialogMessage = stringResource(id = R.string.error_occured_while_loading_sdk),
                 exitOnSuccess = true,
                 onSuccess = {}
             ) {
                 openDialog.value = false
             }
 
-
             if (merchantDetailsState.hasError) {
                 openDialog.value = true
             }
-
 
             if (merchantDetailsState.isLoading) {
                 Column(
@@ -133,7 +127,6 @@ class SeerBitActivity : ComponentActivity() {
                 ) {
                     CircularProgressIndicator(color = Color.Black)
                 }
-
             }
 
             merchantDetailsState.data?.let { merchantDetailsData ->
@@ -150,39 +143,35 @@ class SeerBitActivity : ComponentActivity() {
                     emailAddress ?: "",
                     paymentRef ?: "",
                     pocketReference ?: "",
-                    vendorId?: "",
-                    productDescription?: "",
-                    country?: "",
-                    currency?: "",
-                    productId?: "",
-                    tokenize?:false,
+                    vendorId ?: "",
+                    productDescription ?: "",
+                    country ?: "",
+                    currency ?: "",
+                    productId ?: "",
+                    tokenize ?: false,
                     actionListener = actionListener
-
                 )
             }
-
         }
     }
-
 }
 
 
 var mActionListener: ActionListener? = null
 
 /**
- * sets te ActionListener
+ * sets the ActionListener
  */
-fun setActionListener(actionListener: ActionListener?){
+fun setActionListener(actionListener: ActionListener?) {
     mActionListener = actionListener
 }
 
 /**
- * return te ActionListener
+ * return the ActionListener
  */
 fun getActionListener(): ActionListener? {
     return mActionListener
 }
-
 
 fun startSeerBitSDK(
     context: Context,
@@ -193,11 +182,11 @@ fun startSeerBitSDK(
     emailAddress: String,
     transactionPaymentReference: String = "",
     actionListener: ActionListener,
-    pocketReference : String,
+    pocketReference: String,
     vendorId: String,
     productDescription: String,
-    country:String,
-    currency:String,
+    country: String,
+    currency: String,
     productId: String,
     tokenize: Boolean
 
@@ -213,14 +202,13 @@ fun startSeerBitSDK(
     intent.putExtra("paymentRef", transactionPaymentReference)
     //intent.putExtra("actionListener", actionListener )
 
-    intent.putExtra("pocketReference",pocketReference )
-    intent.putExtra("vendorId" , vendorId  )
-    intent.putExtra("productDescription",  productDescription )
-    intent.putExtra("country", country )
-    intent.putExtra("productId",  productId)
-    intent.putExtra("tokenize",  tokenize )
-    intent.putExtra("currency",  currency)
-
+    intent.putExtra("pocketReference", pocketReference)
+    intent.putExtra("vendorId", vendorId)
+    intent.putExtra("productDescription", productDescription)
+    intent.putExtra("country", country)
+    intent.putExtra("productId", productId)
+    intent.putExtra("tokenize", tokenize)
+    intent.putExtra("currency", currency)
 
     setActionListener(actionListener = actionListener)
 
@@ -241,11 +229,11 @@ fun SeerBitApp(
     fullName: String,
     emailAddress: String,
     paymentRef: String,
-    pocketReference : String,
+    pocketReference: String,
     vendorId: String,
     productDescription: String,
-    country:String,
-    currency:String,
+    country: String,
+    currency: String,
     productId: String,
     tokenize: Boolean,
     actionListener: ActionListener?
@@ -276,7 +264,6 @@ fun SeerBitApp(
 
             activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
-
             viewModel.merchantState.value.data?.payload?.userFullName = fullName
             viewModel.merchantState.value.data?.payload?.userPhoneNumber = phoneNumber
             viewModel.merchantState.value.data?.payload?.publicKey = publicKey
@@ -291,18 +278,18 @@ fun SeerBitApp(
             }
 
             //newly added
-            viewModel.merchantState.value.data?.payload?. pocketReference =  pocketReference
+            viewModel.merchantState.value.data?.payload?.pocketReference = pocketReference
             viewModel.merchantState.value.data?.payload?.vendorId = vendorId
             viewModel.merchantState.value.data?.payload?.currency = currency
             viewModel.merchantState.value.data?.payload?.productId = productId
-            viewModel.merchantState.value.data?.payload?.productDescription =  productDescription
+            viewModel.merchantState.value.data?.payload?.productDescription = productDescription
             viewModel.merchantState.value.data?.payload?.tokenize = tokenize
             viewModel.merchantState.value.data?.payload?.countrySetByUser = country
 
-            if (country.isNotEmpty()){
+            if (country.isNotEmpty()) {
                 viewModel.merchantState.value.data?.payload?.country?.countryCode = country
             }
-            if (currency.isNotEmpty()){
+            if (currency.isNotEmpty()) {
                 viewModel.merchantState.value.data?.payload?.defaultCurrency = currency
             }
 
@@ -318,12 +305,8 @@ fun SeerBitApp(
                 startDestination = Debit_CreditCard.route,
                 actionListener = actionListener
             )
-
-
         }
     }
-
-
 }
 
 fun NavHostController.navigatePopUpToOtherPaymentScreen(route: String) {
@@ -335,9 +318,7 @@ fun NavHostController.navigatePopUpToOtherPaymentScreen(route: String) {
             clearBackStack(Transfer.route)
         }
         this.launchSingleTop = true
-        this.
-
-        launchSingleTop = true
+        this.launchSingleTop = true
         restoreState = true
 
     }
@@ -414,7 +395,7 @@ fun CardHomeScreen(
     //card details
     var cvv by remember { mutableStateOf("") }
     var cardNumber by remember { mutableStateOf("") }
-    var cardExpiryMonth by remember{ mutableStateOf("") }
+    var cardExpiryMonth by remember { mutableStateOf("") }
     var cardExpiryYear by remember { mutableStateOf("") }
     var redirectUrl by rememberSaveable { mutableStateOf("") }
     var canRedirectToUrl by remember { mutableStateOf(false) }
@@ -431,11 +412,14 @@ fun CardHomeScreen(
     val exitOnSuccess = remember { mutableStateOf(false) }
     val activity = (LocalContext.current as? Activity)
     val openOnBoardingScreen = remember { mutableStateOf(false) }
-    var queryData : QueryData? = null
+    var queryData: QueryData? = null
     var locality: String = ""
 
     if (merchantDetailsState.hasError) {
-        ErrorDialog(message = merchantDetailsState.errorMessage ?: "Something went wrong")
+        ErrorDialog(
+            message = merchantDetailsState.errorMessage
+                ?: stringResource(id = R.string.Something_went_wrong)
+        )
     }
 
     if (merchantDetailsState.isLoading) {
@@ -446,7 +430,6 @@ fun CardHomeScreen(
         ) {
             CircularProgressIndicator(color = Color.Black)
         }
-
     }
 
     merchantDetailsState.data?.let { merchantDetailsData ->
@@ -469,7 +452,7 @@ fun CardHomeScreen(
                 amount = amount?.toDouble() ?: 0.0,
                 cardCountry = cardBinState.data?.country ?: ""
             )
-             locality = if (merchantDetailsData.payload?.country?.nameCode?.let {
+            locality = if (merchantDetailsData.payload?.country?.nameCode?.let {
                     cardBinState.data?.country?.contains(
                         it, true
                     )
@@ -507,7 +490,7 @@ fun CardHomeScreen(
                 sourceIP = generateSourceIp(useIPv4 = true),
                 pin = "",
                 currency = merchantDetailsData.payload?.defaultCurrency,
-                isCardInternational =  locality,
+                isCardInternational = locality,
                 false,
                 email = merchantDetailsData.payload?.emailAddress,
                 cardNumber = cardNumber,
@@ -517,8 +500,8 @@ fun CardHomeScreen(
                 productDescription = merchantDetailsData.payload?.productDescription,
                 vendorId = merchantDetailsData.payload?.vendorId,
                 address = "",
-                city  = "",
-                state =  "",
+                city = "",
+                state = "",
                 postalCode = "",
                 billingCountry = ""
             )
@@ -530,7 +513,7 @@ fun CardHomeScreen(
                 charges = fee?.toDouble() ?: 0.0,
                 amount = amount ?: "",
                 currencyText = merchantDetailsData.payload?.defaultCurrency ?: "",
-                "Debit/Credit Card Details",
+                actionDescription = stringResource(id = R.string.debit_creditcard_details),
                 merchantDetailsData.payload?.userFullName ?: "",
                 merchantDetailsData.payload?.emailAddress ?: ""
             )
@@ -542,21 +525,20 @@ fun CardHomeScreen(
                 alertDialogHeaderMessage = alertDialogHeaderMessage,
                 alertDialogMessage = alertDialogMessage,
                 exitOnSuccess = exitOnSuccess.value,
-                onSuccess = {actionListener?.onSuccess(queryData)}
+                onSuccess = { actionListener?.onSuccess(queryData) }
             ) {
                 openDialog.value = false
             }
 
             if (cardBinState.hasError) {
                 openDialog.value = false
-                alertDialogMessage = "Invalid Card Details"
-                alertDialogHeaderMessage = "Error Occurred"
+                alertDialogMessage = stringResource(id = R.string.invalid_card_details)
+                alertDialogHeaderMessage = stringResource(id = R.string.an_error_occurred)
                 transactionViewModel.clearCardBinState()
             }
             if (cardBinState.isLoading) {
 
             }
-
 
             val focusRequester = remember { FocusRequester() }
             //Card Details Screen
@@ -583,7 +565,11 @@ fun CardHomeScreen(
                         if (cardBinState.data != null) {
                             cardEndpointLoaded = true
                             var split: List<String?>
-                            if (cardBinState.data.responseMessage?.contains("BIN not found",true) ==false ) {
+                            if (cardBinState.data.responseMessage?.contains(
+                                    "BIN not found",
+                                    true
+                                ) == false
+                            ) {
                                 transactionViewModel.clearCardBinState()
                                 split = cardBinState.data.cardName?.split(" ")!!
 
@@ -608,9 +594,6 @@ fun CardHomeScreen(
                         trailingIcon = 0
                         cardEndpointLoaded = false
                     }
-
-
-
                 }, trailingIcon = trailingIcon
             )
 
@@ -620,7 +603,7 @@ fun CardHomeScreen(
                 showCircularProgress(showProgress = true)
             }
 
-            
+
             Spacer(modifier = Modifier.height(16.dp))
             //Payment Button Login
             Row(
@@ -637,7 +620,11 @@ fun CardHomeScreen(
 
                         if (cardBinState.data != null) {
                             var split: List<String?>
-                            if (cardBinState.data.responseMessage?.contains("BIN not found",true) ==false ) {
+                            if (cardBinState.data.responseMessage?.contains(
+                                    "BIN not found",
+                                    true
+                                ) == false
+                            ) {
                                 transactionViewModel.clearCardBinState()
                                 split = cardBinState.data.cardName?.split(" ")!!
 
@@ -670,15 +657,14 @@ fun CardHomeScreen(
                                 cardExpiryMonth.isValidCardExpiryMonth()
                             )
                         ) {
-                            if (locality == "INTERNATIONAL"){
+                            if (locality == "INTERNATIONAL") {
                                 openOnBoardingScreen.value = true
 
                                 navController.navigateSingleTopTo(
                                     "${Route.OnBoardingScreen}/$cvv/$cardNumber/$cardExpiryMonth/$cardExpiryYear"
                                 )
                                 transactionViewModel.clearCardBinState()
-                            }
-                            else {
+                            } else {
                                 onNavigateToPinScreen(cardDTO)
                                 transactionViewModel.setRetry(true)
                             }
@@ -754,8 +740,6 @@ fun CardHomeScreen(
                 }
             }
 
-
-
             transactionState.data?.let {
 
                 if (it.data?.code == SUCCESS || it.data?.code == PENDING_CODE) {
@@ -805,25 +789,26 @@ fun CardHomeScreen(
             }
             Spacer(modifier = Modifier.height(100.dp))
 
-            if (merchantDetailsData.payload?.tokenize != true && merchantDetailsData.payload?.defaultCurrency !="USD"){
-            OtherPaymentButtonComponent(
-                onOtherPaymentButtonClicked = onOtherPaymentButtonClicked,
-                onCancelButtonClicked = {
-                    activity?.finish()
-                    actionListener?.onClose() //callback
-                },
-                enable = !showCircularProgressBar
-            )}
-            else{
+            if (merchantDetailsData.payload?.tokenize != true && merchantDetailsData.payload?.defaultCurrency != "USD") {
+                OtherPaymentButtonComponent(
+                    onOtherPaymentButtonClicked = onOtherPaymentButtonClicked,
+                    onCancelButtonClicked = {
+                        activity?.finish()
+                        actionListener?.onClose() //callback
+                    },
+                    enable = !showCircularProgressBar
+                )
+            } else {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center
                 ) {
 
                     Button(
-                        onClick = {  activity?.finish()
-                                actionListener?.onClose()
-                                  },
+                        onClick = {
+                            activity?.finish()
+                            actionListener?.onClose()
+                        },
                         colors = ButtonDefaults.buttonColors(backgroundColor = SignalRed),
                         shape = RoundedCornerShape(4.dp),
                         modifier = Modifier
@@ -847,16 +832,12 @@ fun CardHomeScreen(
                     }
 
                 }
-
-
             }
 
             Spacer(modifier = Modifier.height(100.dp))
             BottomSeerBitWaterMark(modifier = Modifier.align(alignment = Alignment.CenterHorizontally))
-
         }
     }
-
 }
 
 
@@ -921,7 +902,6 @@ fun CardDetailsScreen(
             border = BorderStroke(0.5.dp, Color.LightGray)
         ) {
 
-
             OutlinedTextField(
                 value = value,
                 visualTransformation = { cardNumberFormatting(it) },
@@ -931,8 +911,6 @@ fun CardDetailsScreen(
                         onChangeCardNumber(newText)
                         modifier.focusRequester(focusRequester)
                     }
-
-
                 },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Number,
@@ -945,7 +923,6 @@ fun CardDetailsScreen(
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
                     cursorColor = Color.Gray
-
                 ),
                 trailingIcon = {
                     if (trailingIcon != 0) {
@@ -968,7 +945,6 @@ fun CardDetailsScreen(
                     .fillMaxWidth()
                     .height(54.dp)
             )
-
         }
 
         if (!value.isValidCardNumber() && value.isNotEmpty()) {
@@ -1077,12 +1053,8 @@ fun CardDetailsScreen(
                         .height(54.dp)
                 )
             }
-
-
         }
-
     }
-
 }
 
 
@@ -1297,15 +1269,19 @@ fun MyAppNavHost(
     ) {
 
         composable("${Route.OTHER_PAYMENT_SCREEN}/{cardTypeToRemove}",
-           arguments = listOf(
+            arguments = listOf(
                 //declaring argument type
                 navArgument("cardTypeToRemove") { type = NavType.StringType }
             )
 
-        ){  navBackStackEntry ->
+        ) { navBackStackEntry ->
             val cardTypeToRemove = navBackStackEntry.arguments?.getString("cardTypeToRemove")
             OtherPaymentScreen(
-                onCancelButtonClicked = { navController.navigateSingleTopNoSavedState(Debit_CreditCard.route)},
+                onCancelButtonClicked = {
+                    navController.navigateSingleTopNoSavedState(
+                        Debit_CreditCard.route
+                    )
+                },
                 navController = navController,
                 merchantDetailsState = merchantDetailsState,
                 transactionViewModel = transactionViewModel,
@@ -1383,8 +1359,8 @@ fun MyAppNavHost(
                 cardExpiryMonth = cardExpiryMonth!!,
                 cardExpiryYear = cardExpiryYear!!,
                 address = address!!,
-                city  = city!!,
-                state =  state!!,
+                city = city!!,
+                state = state!!,
                 postalCode = postalCode!!,
                 billingCountry = billingCountry!!,
                 phoneNumber = "",
@@ -1429,15 +1405,15 @@ fun MyAppNavHost(
             CardRedirectUrlScreen(
                 navController = navController,
                 merchantDetailsState = merchantDetailsState,
-                transactionViewModel =transactionViewModel,
+                transactionViewModel = transactionViewModel,
                 paymentReference = paymentReference!!,
                 cvv = cvv!!,
                 cardNumber = cardNumber!!,
                 cardExpiryMonth = cardExpiryMonth!!,
                 cardExpiryYear = cardExpiryYear!!,
                 address = address!!,
-                city  = city!!,
-                state =  state!!,
+                city = city!!,
+                state = state!!,
                 postalCode = postalCode!!,
                 billingCountry = billingCountry!!,
                 phoneNumber = "",
@@ -1488,7 +1464,7 @@ fun MyAppNavHost(
                 navArgument("cardNumber") { type = NavType.StringType },
                 navArgument("cardExpiryMonth") { type = NavType.StringType },
                 navArgument("cardExpiryYear") { type = NavType.StringType },
-                )
+            )
 
         ) { navBackStackEntry ->
             val cvv = navBackStackEntry.arguments?.getString("cvv")
@@ -1725,7 +1701,7 @@ fun MyAppNavHost(
                 accountNumber = accountNumber,
                 actionListener = actionListener
 
-                )
+            )
         }
 
         composable(route = PhoneNumber.route) {
@@ -1751,7 +1727,11 @@ fun MyAppNavHost(
                 ussdCode = "$ussdCode#",
                 paymentReference = paymentReference,
                 navController = navController,
-                onCancelButtonClicked = { navController.navigateSingleTopNoSavedState(Debit_CreditCard.route) },
+                onCancelButtonClicked = {
+                    navController.navigateSingleTopNoSavedState(
+                        Debit_CreditCard.route
+                    )
+                },
                 onOtherPaymentButtonClicked = { navController.navigate("${Route.OTHER_PAYMENT_SCREEN}/dummy") },
                 actionListener = actionListener
             )
@@ -1793,9 +1773,7 @@ fun MyAppNavHost(
                 linkingReference = linkingReference,
                 actionListener = actionListener
             )
-
         }
-
     }
 }
 
@@ -1813,9 +1791,8 @@ fun ErrorDialog(message: String) {
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    Text(text = stringResource(R.string.problem_occurred))
+                    Text(text = stringResource(R.string.an_error_occurred))
                 }
-
             },
             text = {
                 Row(
@@ -1832,53 +1809,6 @@ fun ErrorDialog(message: String) {
                     )
                 ) {
                     Text(text = "Close")
-
-                }
-            },
-        )
-    }
-}
-
-@Composable
-fun ErrorExitDialog(context: Context = LocalContext.current, message: String) {
-    val activity = context as? Activity
-    val openDialog = remember { mutableStateOf(true) }
-    if (openDialog.value) {
-        AlertDialog(
-            onDismissRequest = {
-                openDialog.value = false
-            },
-            title = {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Text(text = "Error")
-                }
-
-            },
-            text = {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Text(message)
-                }
-            },
-            confirmButton = {
-                Button(
-
-                    onClick = {
-                        openDialog.value = false
-                        activity?.finish()
-
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        backgroundColor = SignalRed
-                    )
-                ) {
-                    Text(text = "Close")
-
                 }
             },
         )

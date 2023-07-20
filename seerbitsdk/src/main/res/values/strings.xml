@@ -1,6 +1,19 @@
 <resources>
     <string name="app_name">seerbitsdk_test</string>
     <string name="no_data_available">No data is available</string>
-    <string name="problem_occurred">An error occured</string>
+    <string name="an_error_occurred">An error occurred</string>
     <string name="publicKey">dk</string>
+    <string name="Something_went_wrong">Something went wrong</string>
+    <string name="failed">Failed</string>
+    <string name="success">"Success!!"</string>
+    <string name="kindly_enter_otp">Kindly enter the OTP sent to your mobile number or email</string>
+    <string name="enter_otp">Enter OTP</string>
+    <string name="authorize_payment">Authorize Payment</string>
+    <string name="invalid_otp">Invalid OTP</string>
+    <string name="_continue">Continue</string>
+    <string name="select_provider">Select Provider</string>
+    <string name="choose_your_bank">Choose your bank to start this payment</string>
+    <string name="error_occured_while_loading_sdk">Error occurred while loading sdk. Please check your internet or public key.</string>
+    <string name="debit_creditcard_details">Debit/Credit Card Details</string>
+    <string name="invalid_card_details">Invalid Card Details</string>
 </resources>

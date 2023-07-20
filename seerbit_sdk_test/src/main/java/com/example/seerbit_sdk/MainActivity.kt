@@ -89,7 +89,6 @@ fun GoToPaymentGateway(context: Context = LocalContext.current, actionListener: 
         var tokenize by remember { mutableStateOf(false) }
 
 
-
         MyTextField(placeholder = "Enter Use Name") {
             fullName = it
         }
@@ -148,7 +147,7 @@ fun GoToPaymentGateway(context: Context = LocalContext.current, actionListener: 
                     context,
                     amount,
                     phoneNumber,
-                    "SBPUBK_WWEQK6UVR1PNZEVVUOBNIQHEIEIM1HJC",
+                    "SMPPBK_SCAD2TXCYUUYYYTT17OTLECBGUAI",
                     fullName,
                     email,
                     actionListener = actionListener,
@@ -182,8 +181,6 @@ fun MyTextField(
     onEnterBVN: (String) -> Unit
 ) {
     Column {
-
-
         Card(modifier = modifier, elevation = 1.dp) {
             var value by remember { mutableStateOf("") }
             Image(
@@ -226,17 +223,12 @@ fun MyTextField(
         }
     }
 }
-
-
-
 @Composable
 fun PhoneNumberField(
     modifier: Modifier = Modifier, placeholder: String,
     onEnterPhoneNumber: (String) -> Unit
 ) {
     Column {
-
-
         Card(modifier = modifier, elevation = 1.dp,
             border = BorderStroke(0.5.dp, Color.LightGray)
         ) {

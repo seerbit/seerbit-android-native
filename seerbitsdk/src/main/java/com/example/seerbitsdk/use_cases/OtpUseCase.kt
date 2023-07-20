@@ -1,5 +1,6 @@
 package com.example.seerbitsdk.use_cases
 
+import android.util.Log
 import com.example.seerbitsdk.models.otp.BankAccountOtpDto
 import com.example.seerbitsdk.models.CardOTPDTO
 import com.example.seerbitsdk.models.OtpDTO
@@ -59,6 +60,7 @@ class OtpUseCase {
                     }
                 }
                 is MomoOtpDto ->{
+                    Log.w("iswrol","$otpDTO")
                     val apiResponse = otpRepository.sendOtpMomo(otpDTO)
 
                     if (apiResponse.isSuccessful) {
