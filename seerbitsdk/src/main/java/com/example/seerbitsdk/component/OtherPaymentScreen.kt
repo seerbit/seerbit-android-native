@@ -1,5 +1,6 @@
 package com.example.seerbitsdk.component
 
+import android.util.Log
 import android.view.SurfaceControl.Transaction
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -45,7 +46,7 @@ fun OtherPaymentScreen(
     transactionViewModel: TransactionViewModel,
     navController: NavHostController,
     merchantDetailsState: MerchantDetailsState?,
-    removeCardType : String
+    removeCardType: String
 ) {
     var walletName by remember { mutableStateOf("") }
     var paymentRef by remember { mutableStateOf("") }
@@ -75,13 +76,17 @@ fun OtherPaymentScreen(
 
             ) {
                 Spacer(modifier = Modifier.height(25.dp))
-                var amount= merchantDetailsData.payload?.amount
-                val fee =   calculateTransactionFee(merchantDetailsData, TransactionType.TRANSFER.type, amount = amount?.toDouble()?: 0.0)
+                var amount = merchantDetailsData.payload?.amount
+                val fee = calculateTransactionFee(
+                    merchantDetailsData,
+                    TransactionType.TRANSFER.type,
+                    amount = amount?.toDouble() ?: 0.0
+                )
 
                 SeerbitPaymentDetailHeaderNoFee(
                     charges = "",
                     amount = amount.toString(),
-                    currencyText = merchantDetailsData.payload?.defaultCurrency?:"",
+                    currencyText = merchantDetailsData.payload?.defaultCurrency ?: "",
                     "Other Payment Channels",
                     merchantDetailsData.payload?.userFullName ?: "",
                     merchantDetailsData.payload?.emailAddress ?: ""
@@ -89,14 +94,34 @@ fun OtherPaymentScreen(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 val addedButtons: ArrayList<SeerBitDestination> = arrayListOf()
-                if(displayPaymentMethod(TransactionType.CARD.type, merchantDetailsData)) addedButtons.add(Debit_CreditCard)
-                if(displayPaymentMethod(TransactionType.USSD.type, merchantDetailsData))addedButtons.add(UssdSelectBank)
-                if(displayPaymentMethod(TransactionType.MOMO.type, merchantDetailsData))addedButtons.add(MOMO)
-                if(displayPaymentMethod(TransactionType.TRANSFER.type, merchantDetailsData))addedButtons.add(Transfer)
-                if(displayPaymentMethod(TransactionType.ACCOUNT.type, merchantDetailsData))addedButtons.add(BankAccount)
+                if (displayPaymentMethod(
+                        TransactionType.CARD.type,
+                        merchantDetailsData
+                    )
+                ) addedButtons.add(Debit_CreditCard)
+                if (displayPaymentMethod(
+                        TransactionType.USSD.type,
+                        merchantDetailsData
+                    )
+                ) addedButtons.add(UssdSelectBank)
+                if (displayPaymentMethod(
+                        TransactionType.MOMO.type,
+                        merchantDetailsData
+                    )
+                ) addedButtons.add(MOMO)
+                if (displayPaymentMethod(
+                        TransactionType.TRANSFER.type,
+                        merchantDetailsData
+                    )
+                ) addedButtons.add(Transfer)
+                if (displayPaymentMethod(
+                        TransactionType.ACCOUNT.type,
+                        merchantDetailsData
+                    )
+                ) addedButtons.add(BankAccount)
 
 
-                if(showCircularProgressBar){
+                if (showCircularProgressBar) {
                     showCircularProgress(showProgress = true)
                 }
 
@@ -108,7 +133,7 @@ fun OtherPaymentScreen(
                 ModalDialog(
                     showDialog = openDialog,
                     alertDialogHeaderMessage = "Failed",
-                    alertDialogMessage =  alertDialogMessage,
+                    alertDialogMessage = alertDialogMessage,
                     exitOnSuccess = false,
                     onSuccess = {}
                 ) {
@@ -117,22 +142,23 @@ fun OtherPaymentScreen(
                 if (initiateTransferPayment.hasError) {
                     showCircularProgressBar = false
                     openDialog.value = true
-                    alertDialogMessage = initiateTransferPayment.errorMessage?:"This action could not be completed"
+                    alertDialogMessage =
+                        initiateTransferPayment.errorMessage ?: "This action could not be completed"
                     transactionViewModel.resetTransactionState()
                 }
 
-                if(initiateTransferPayment.isLoading){
+                if (initiateTransferPayment.isLoading) {
                     showCircularProgressBar = true
                 }
 
                 initiateTransferPayment.data?.let {
-                    paymentRef = it.data?.payments?.paymentReference?:""
+                    paymentRef = it.data?.payments?.paymentReference ?: ""
                     transactionViewModel.setRetry(true)
                     showCircularProgressBar = false
-                    wallet = it.data?.payments?.wallet?:""
-                        walletName = it.data?.payments?.walletName?:""
-                        bankName = it.data?.payments?.bankName?:""
-                        accountNumber = it.data?.payments?.accountNumber?:""
+                    wallet = it.data?.payments?.wallet ?: ""
+                    walletName = it.data?.payments?.walletName ?: ""
+                    bankName = it.data?.payments?.bankName ?: ""
+                    accountNumber = it.data?.payments?.accountNumber ?: ""
 
                     navController.navigateSingleTopNoSavedState("${Transfer.route}/$paymentRef/$wallet/$walletName/$bankName/$accountNumber")
 
@@ -142,11 +168,15 @@ fun OtherPaymentScreen(
                 SeerBitNavButtonsColumn(
                     allButtons = addedButtons,
                     onButtonSelected = { newScreen ->
-                        if(newScreen.route == Transfer.route){
-                            transactionViewModel.initiateTransaction(generateTransferDTO(merchantDetailsData, transactionViewModel))
+                        if (newScreen.route == Transfer.route) {
+                            transactionViewModel.initiateTransaction(
+                                generateTransferDTO(
+                                    merchantDetailsData,
+                                    transactionViewModel
+                                )
+                            )
 
-                        }
-                        else
+                        } else
                             navController.navigateSingleTopNoSavedState(newScreen.route)
 
                     },
@@ -195,16 +225,22 @@ fun OtherPaymentScreen(
     }
 }
 
-fun generateTransferDTO(merchantDetailsData: MerchantDetailsResponse, transactionViewModel: TransactionViewModel) : TransferDTO {
+fun generateTransferDTO(
+    merchantDetailsData: MerchantDetailsResponse,
+    transactionViewModel: TransactionViewModel
+): TransferDTO {
 
-    var amount= merchantDetailsData.payload?.amount
-    val fee =   calculateTransactionFee(merchantDetailsData, TransactionType.TRANSFER.type, amount = amount?.toDouble()?: 0.0)
+    var amount = merchantDetailsData.payload?.amount
+    val fee = calculateTransactionFee(
+        merchantDetailsData,
+        TransactionType.TRANSFER.type,
+        amount = amount?.toDouble() ?: 0.0
+    )
     var totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
 
-    if(isMerchantFeeBearer(merchantDetailsData)){
-        totalAmount =amount?.toDouble()
+    if (isMerchantFeeBearer(merchantDetailsData)) {
+        totalAmount = amount?.toDouble()
     }
-
     return TransferDTO(
         country = merchantDetailsData.payload?.country?.countryCode ?: "",
         bankCode = "044",
@@ -226,7 +262,7 @@ fun generateTransferDTO(merchantDetailsData: MerchantDetailsResponse, transactio
         deviceType = "Android",
         amountControl = "FIXEDAMOUNT",
         walletDaysActive = "1",
-        pocketReference =merchantDetailsData.payload?.pocketReference,
+        pocketReference = merchantDetailsData.payload?.pocketReference,
         vendorId = merchantDetailsData.payload?.vendorId
     )
 }

@@ -61,8 +61,6 @@ class MainActivity : ComponentActivity(), ActionListener {
         Log.d("rerrt", "failure to show")
 
     }
-
-
 }
 
 
@@ -75,14 +73,14 @@ fun GoToPaymentGateway(context: Context = LocalContext.current, actionListener: 
         modifier = Modifier.fillMaxSize().padding(20.dp)
     ) {
 
-        var fullName by remember { mutableStateOf("SeerBit SeerBit") }
+        var fullName by remember { mutableStateOf("Temi SeerBit") }
         var email by remember { mutableStateOf("seerbit@gmail.com") }
         var publicKey by remember { mutableStateOf("") }
         var phoneNumber by remember { mutableStateOf("09098987676") }
         var productDescription by remember { mutableStateOf("MEME") }
         var productId by remember { mutableStateOf("") }
         var vendorId by remember { mutableStateOf("") }
-        var currency by remember { mutableStateOf("USD") }
+        var currency by remember { mutableStateOf("NGN") }
         var country by remember { mutableStateOf("") }
         var pocketReference by remember { mutableStateOf("") }
         var amount by remember { mutableStateOf("43") }
@@ -147,7 +145,7 @@ fun GoToPaymentGateway(context: Context = LocalContext.current, actionListener: 
                     context,
                     amount,
                     phoneNumber,
-                    "SMPPBK_SCAD2TXCYUUYYYTT17OTLECBGUAI",
+                    "SBPUBK_SCAD2TXCTYVZOORZEGXR17OTLECBGUAI",
                     fullName,
                     email,
                     actionListener = actionListener,

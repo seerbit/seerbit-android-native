@@ -88,18 +88,22 @@ fun USSDSelectBanksScreen(
                 var paymentReference = merchantDetailsData.payload?.paymentReference ?: ""
                 defaultCurrency = merchantDetailsData.payload?.defaultCurrency ?: ""
 
-                var amount= merchantDetailsData.payload?.amount
-                val fee =   calculateTransactionFee(merchantDetailsData, TransactionType.USSD.type, amount = amount?.toDouble()?: 0.0)
+                var amount = merchantDetailsData.payload?.amount
+                val fee = calculateTransactionFee(
+                    merchantDetailsData,
+                    TransactionType.USSD.type,
+                    amount = amount?.toDouble() ?: 0.0
+                )
                 var totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
 
-                if(isMerchantFeeBearer(merchantDetailsData)){
-                    totalAmount =amount?.toDouble()
+                if (isMerchantFeeBearer(merchantDetailsData)) {
+                    totalAmount = amount?.toDouble()
                 }
 
 
                 SeerbitPaymentDetailHeader(
                     charges = fee?.toDouble() ?: 0.00,
-                    amount = amount?:"",
+                    amount = amount ?: "",
                     currencyText = defaultCurrency,
                     "Choose your bank to start this payment",
                     merchantDetailsData.payload?.userFullName ?: "",
@@ -108,15 +112,15 @@ fun USSDSelectBanksScreen(
                 Spacer(modifier = Modifier.height(41.dp))
 
 
-                    ModalDialog(
-                        showDialog = openDialog,
-                        alertDialogHeaderMessage = "Failed",
-                        alertDialogMessage = alertDialogMessage,
-                        exitOnSuccess = false,
-                        onSuccess = {}
-                    ) {
-                        openDialog.value = false
-                    }
+                ModalDialog(
+                    showDialog = openDialog,
+                    alertDialogHeaderMessage = "Failed",
+                    alertDialogMessage = alertDialogMessage,
+                    exitOnSuccess = false,
+                    onSuccess = {}
+                ) {
+                    openDialog.value = false
+                }
 
 
                 if (showCircularProgressBar) {
@@ -136,7 +140,7 @@ fun USSDSelectBanksScreen(
                     productId = merchantDetailsData.payload?.productId,
                     mobileNumber = merchantDetailsData.payload?.userPhoneNumber,
                     paymentReference = paymentReference,
-                    fee = merchantDetailsData.payload?.vatFee,
+                    fee = fee?.toString() ?: "0.0",
                     fullName = merchantDetailsData.payload?.userFullName,
                     channelType = "ussd",
                     publicKey = merchantDetailsData.payload?.publicKey,
@@ -148,7 +152,7 @@ fun USSDSelectBanksScreen(
                     email = merchantDetailsData.payload?.emailAddress,
                     retry = transactionViewModel.retry.value,
                     ddeviceType = "Android",
-                    pocketReference =merchantDetailsData.payload?.pocketReference,
+                    pocketReference = merchantDetailsData.payload?.pocketReference,
                     vendorId = merchantDetailsData.payload?.vendorId
                 )
 
@@ -161,7 +165,7 @@ fun USSDSelectBanksScreen(
                 if (initiateUssdPayment.hasError) {
                     showCircularProgressBar = false
                     openDialog.value = true
-                    alertDialogMessage  = initiateUssdPayment.errorMessage?: ""
+                    alertDialogMessage = initiateUssdPayment.errorMessage ?: ""
                     transactionViewModel.resetTransactionState()
                 }
 
@@ -193,7 +197,7 @@ fun USSDSelectBanksScreen(
                             transactionViewModel.initiateUssdTransaction(ussdDTO)
                         } else {
                             openDialog.value = true
-                            alertDialogMessage  = "Kindly select a bank"
+                            alertDialogMessage = "Kindly select a bank"
                         }
                     }, !showCircularProgressBar
                 )
@@ -202,10 +206,15 @@ fun USSDSelectBanksScreen(
 
 
                 OtherPaymentButtonComponent(
-                    onOtherPaymentButtonClicked = { navController.clearBackStack(UssdSelectBank.route)
-                        navController.navigatePopUpToOtherPaymentScreen("${Route.OTHER_PAYMENT_SCREEN}/${TransactionType.TRANSFER.type}") },
-                    onCancelButtonClicked = {navController.navigateSingleTopNoSavedState(
-                        Debit_CreditCard.route)},
+                    onOtherPaymentButtonClicked = {
+                        navController.clearBackStack(UssdSelectBank.route)
+                        navController.navigatePopUpToOtherPaymentScreen("${Route.OTHER_PAYMENT_SCREEN}/${TransactionType.TRANSFER.type}")
+                    },
+                    onCancelButtonClicked = {
+                        navController.navigateSingleTopNoSavedState(
+                            Debit_CreditCard.route
+                        )
+                    },
                     enable = !showCircularProgressBar
                 )
 
@@ -269,7 +278,8 @@ fun UssdSelectBankButton(modifier: Modifier = Modifier, onBankCodeSelected: (Str
                     .onGloballyPositioned { layoutCoordinates ->
                         textFieldSize = layoutCoordinates.size.toSize()
                     }
-                    .fillMaxHeight().clickable { expanded = !expanded  },
+                    .fillMaxHeight()
+                    .clickable { expanded = !expanded },
                 trailingIcon = {
                     Icon(imageVector = icon, contentDescription = null,
                         Modifier.clickable { expanded = !expanded })
@@ -296,7 +306,6 @@ fun UssdSelectBankButton(modifier: Modifier = Modifier, onBankCodeSelected: (Str
             }
 
         }
-
 
 
     }

@@ -1,5 +1,6 @@
 package com.example.seerbitsdk.helper
 
+import android.util.Log
 import com.example.seerbitsdk.models.home.MerchantDetailsResponse
 import java.math.RoundingMode
 import java.net.InetAddress
@@ -151,7 +152,7 @@ fun calculateTransactionFee(
                                     return formatInputDouble(fee.toString())
                                 }
                             } else {
-                                return formatInputDouble("")
+                                return formatInputDouble(fee.toString())
                             }
                         } else {
                             return formatInputDouble(fee.toString())
@@ -186,7 +187,7 @@ fun calculateTransactionFee(
                                     return formatInputDouble(fee.toString())
                                 }
                             } else {
-                                return formatInputDouble("")
+                                return formatInputDouble(fee.toString())
                             }
                         } else {
                             return formatInputDouble(fee.toString())
@@ -223,7 +224,7 @@ fun calculateTransactionFee(
                                     return formatInputDouble(fee.toString())
                                 }
                             } else {
-                                return formatInputDouble("")
+                                return formatInputDouble(fee.toString())
                             }
                         } else {
                             return formatInputDouble(fee.toString())
@@ -258,7 +259,7 @@ fun calculateTransactionFee(
                                     return formatInputDouble(fee.toString())
                                 }
                             } else {
-                                return formatInputDouble("")
+                                return formatInputDouble(fee.toString())
                             }
                         } else {
                             return formatInputDouble(fee.toString())
@@ -283,6 +284,7 @@ fun calculateTransactionFee(
                                 it1, true
                             )
                         } == false
+                    Log.d("sdad", "${it.internationalPaymentOptionCapStatus} xzxx")
                     if (isCardInternational) {
                         // use international charges
                         val feeModeIsPercentage: Boolean =
@@ -304,7 +306,8 @@ fun calculateTransactionFee(
                                         return formatInputDouble(fee.toString())
                                     }
                                 } else {
-                                    return formatInputDouble("")
+                                    Log.d("sdad", "$fee $cappedFee  qwer")
+                                    return formatInputDouble(fee.toString())
                                 }
                             } else {
                                 return formatInputDouble(fee.toString())
@@ -333,7 +336,7 @@ fun calculateTransactionFee(
                                         return formatInputDouble(fee.toString())
                                     }
                                 } else {
-                                    return formatInputDouble("")
+                                    return formatInputDouble(fee.toString())
                                 }
                             } else {
                                 return formatInputDouble(fee.toString())
@@ -379,7 +382,7 @@ fun calculateTransactionFee(
                                         return formatInputDouble(fee.toString())
                                     }
                                 } else {
-                                    return formatInputDouble("")
+                                    return formatInputDouble(fee.toString())
                                 }
                             } else {
                                 return formatInputDouble(fee.toString())
@@ -409,7 +412,7 @@ fun calculateTransactionFee(
                                         return formatInputDouble(fee.toString())
                                     }
                                 } else {
-                                    return formatInputDouble("")
+                                    return formatInputDouble(fee.toString())
                                 }
                             } else {
                                 return formatInputDouble(fee.toString())
