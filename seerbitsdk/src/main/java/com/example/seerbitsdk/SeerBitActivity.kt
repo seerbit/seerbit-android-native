@@ -7,6 +7,7 @@ import android.content.pm.ActivityInfo
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -213,7 +214,6 @@ fun startSeerBitSDK(
     setActionListener(actionListener = actionListener)
 
     context.startActivity(intent)
-
 }
 
 
@@ -444,7 +444,7 @@ fun CardHomeScreen(
             ) {
 
             var paymentReference = merchantDetailsData.payload?.paymentReference ?: ""
-
+            Log.d("sdad", "${merchantDetailsData.payload?.amount}")
             val amount = merchantDetailsData.payload?.amount
             val fee = calculateTransactionFee(
                 merchantDetailsData,
@@ -462,7 +462,7 @@ fun CardHomeScreen(
             cardBinState.data?.country?.let {
                 transactionViewModel.setCountry(it)
             }
-
+            Log.d("sdad", "$fee")
             var totalAmount = fee?.toDouble()?.let { amount?.toDouble()?.plus(it) }
             val defaultCurrency = merchantDetailsData.payload?.defaultCurrency ?: ""
 
