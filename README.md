@@ -26,24 +26,46 @@ allprojects {
 	}  
 ```
 
+For newer projects, add to the settings.gradle file instead
+
+```
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        ...
+        maven { url 'https://jitpack.io' }
+    }
+}
+
+```
+
 - Add the dependency to your app level build.gradle file
 
 ```
 dependencies {
-	        implementation 'com.github.seerbit:seerbit-android-native:1.0.2'
+	        implementation 'com.github.seerbit:seerbit-android-native:1.0.4'
 	}
   
  ```
  
  ## Usage: These parameters must be supplied to the starting method;
  
- - Context
- - Merchant's live public key
- - Amount
- - Customer's full name
- - Customer's email
- - Customer's phone number
- 
+ - Context //required
+ - Merchant's live public key  //required
+ - Amount  //required
+ - Customer's full name  //required
+ - Customer's email  //required
+ - Customer's phone number  //required
+ - productId // defaults to empty string
+ - vendorId //defaults to empty string
+ - currency //defaults to merchant's country currency
+ - country //defaults to merchant's country
+ - pocketReference // used when money is to be moved to pocket
+ - transactionPaymentReference //we generate payment reference for each transaction, but if you supply yours, we will use it.
+ - tokenize // used only when card is to be tokenized -  defaults to false
+ - productDescription //defaults to empty string
+
+
  Supply these parameters to the starting method, `startSeerBitSDK()`. For example,
  
  ```
